@@ -1,7 +1,6 @@
 // Página de um lugar: concelho / distrito (PT), região / zona (estrangeiro)
 // ou país. Lê regioes/<key>.json + regioes_index.json + events.json da branch
-// `data`. Um renderer para os cinco níveis (a antiga pais.js fundiu-se aqui
-// na Fase 3). nav.js à parte.
+// `data`. Um renderer para os cinco níveis.
 (function () {
   'use strict';
 

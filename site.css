@@ -1,10 +1,5 @@
 /* Squadrats Club, "folha do clube". Tokens de cor, grelha de fundo e as
-   primitivas partilhadas por todas as páginas. Ligado por <link href> em cada
-   página (nas geradas, via templates dos stubs).
-
-   Aliasa os nomes de token antigos (--fundo, --suave, ...) para o CSS
-   espalhado por 100+ ficheiros continuar a funcionar enquanto o rollout anda
-   página a página.
+   primitivas partilhadas por todas as páginas.
 
    Fontes auto-alojadas em fonts/ (ver fonts/README.txt). Prosa em IBM Plex
    Sans, números/labels/datas em IBM Plex Mono, títulos em Bricolage Grotesque.
@@ -53,7 +48,7 @@
   --vazio: #211f2c;  /* célula não capturada */
   --ouro:  #e6bd63;  /* usado só na marca de região disputada */
 
-  /* aliases dos nomes antigos, para não partir o que ainda não foi mexido */
+  /* aliases dos nomes antigos */
   --fundo: var(--ch-0);
   --cartao: var(--ch-1);
   --cartao-alto: var(--ch-2);

@@ -1,20 +1,6 @@
-// Vocabulário comum ao index.html (vista pessoal) e ao club.html (vista do
-// clube). SÓ constantes e matemática pura: zero DOM, zero estado, zero Leaflet.
-//
-// Porquê existir (2026-08-18): as duas páginas partilham o vocabulário, os
-// mesmos 5 países, as mesmas bandeiras, os mesmos nomes de nível, a mesma
-// grelha XYZ, mas nada do resto. Enquanto isto estava duplicado, cada mudança
-// de vocabulário tinha de ser feita duas vezes e uma delas esquecia-se: já
-// aconteceu com o renomear de "Nível 1/2/3" para "País/Região/Zona" e com o
-// círculo amarelo da bandeira portuguesa.
-//
-// O que NÃO deve entrar aqui: render, estado, handlers, nada de Leaflet. As
-// duas páginas divergem em tudo isso de propósito, o club.html desenha em
-// canvas (L.GridLayer, bitmask de vários atletas), o index.html desenha
-// rectângulo a rectângulo com choropleth, troféus e sugestões. Fundir as
-// páginas foi considerado e recusado: zero reutilização no render, modelos de
-// estado incompatíveis, e passava a acoplar duas vistas que se querem
-// independentes.
+// Código comum a todas as páginas: vocabulário (países, bandeiras, níveis),
+// grelha XYZ, URLs dos dados, formatação e avisos. Nada de Leaflet nem de
+// estado de página.
 
 // Códigos de país por ordem de apresentação. Acrescentar um país é acrescentar
 // aqui + a bandeira em BANDEIRA_PATHS; o resto (toggles, tabelas, pills) lê
@@ -71,10 +57,7 @@ function bandeiras(largura, altura) {
   return t;
 }
 
-// Nomes dos três níveis geográficos. Antes eram "Nível 1/2/3" (renomeado
-// 2026-08-16): "distrito/concelho" só está certo em Portugal, Espanha tem
-// província/município, a Alemanha Land/Gemeinde, Marrocos região/cercle.
-// "País/Região/Zona" é neutro e funciona nos cinco.
+// Nomes neutros dos três níveis: "distrito/concelho" só serve em Portugal.
 const NIVEL_LABEL = { pais: 'País', regiao: 'Região', zona: 'Zona' };
 
 // Slug de uma região, igual ao pipeline/slugs.py::slugify (NFKD, sem acentos,
@@ -90,8 +73,7 @@ function slugify(s) {
 //                bookmarks e os links antigos já assim, não mudam)
 //   país         pais-<ccl>
 //   estrangeiro  <ccl>-r-<slug> (nível 2) / <ccl>-z-<slug> (nível 3)
-// `cc` é opcional: sem ele assume PT, por isso as chamadas antigas de 2
-// argumentos continuam a devolver exactamente o mesmo.
+// `cc` é opcional: sem ele assume PT.
 function regiaoHref(nivel, nome, cc) {
   cc = (cc || 'PT').toUpperCase();
   if (nivel === 'pais') return `lugares/pais-${cc.toLowerCase()}.html`;
@@ -101,9 +83,6 @@ function regiaoHref(nivel, nome, cc) {
 }
 
 // --- primitivas de render partilhadas ---
-// Estiveram copiadas em historico.html, index.html, atletas/perfil.js e
-// lugares/comum.js (quatro cópias de esc/nfmt/cor/dot). shared.js é carregado
-// em todas as páginas, por isso a fonte única é aqui.
 
 // Cores de identidade dos atletas. Fonte em runtime: data/membros_cores.json,
 // que carregarCores() funde em CORES. Este objecto é o fallback offline E a
@@ -131,8 +110,7 @@ const esc = s => String(s).replace(/[&<>"]/g,
 // número em pt-PT; null/undefined -> "·", não "0".
 const nfmt = n => (n == null ? '·' : n.toLocaleString('pt-PT'));
 
-// quadrado de cor do atleta (.tile do site.css). Era dot() no comum.js e
-// tile() no index.html.
+// quadrado de cor do atleta (.tile do site.css)
 const tile = n => `<span class="tile" style="background:${cor(n)}"></span>`;
 
 // link para o perfil do atleta. O ../ entra sozinho a partir de atletas/ ou
@@ -152,9 +130,7 @@ function tira(corHex, frac, n) {
 // --- datas ---
 // Formato único do site: "6 set 2026" (dia sem zero, mês abreviado em
 // minúsculas, ano). A linha "Actualizado" mantém a hora: "8 set 2026, 00:11 UTC"
-// (sem segundos, não acrescentam nada). Tudo UTC, como os campos `gerado`/
-// `atualizado` dos JSON. Fonte única, antes havia `dataLonga` no historico.html
-// e `dLonga`/`dCurta` no regiao.js, cada um com o seu array de meses.
+// (sem segundos). Tudo UTC, como os campos `gerado`/`atualizado` dos JSON.
 const MESES = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
 function fmtData(iso) {
@@ -196,8 +172,7 @@ function tileNoroeste(x, y, z) {
 // raw.githubusercontent (sem rebuild do Pages, ver fetch-map-data.yml); em
 // localhost/ficheiro lêem-se da cópia local em data/ (feita com
 // `git checkout origin/data -- data/`), para dar para testar sem publicar.
-// O membros_cores.json e o adjacency.json são a exceção: vivem no `main`,
-// não na branch `data`. Antes este bloco estava copiado em 8 sítios.
+// O membros_cores.json e o adjacency.json vivem no `main`.
 const _RAW = 'https://raw.githubusercontent.com/JustAnotherDud/squadrats-club/';
 const _LOCAL = ['localhost', '127.0.0.1', ''].includes(location.hostname);
 const _DATA_LOCAL = (/\/(atletas|lugares)\//.test(location.pathname) ? '../' : '') + 'data/';
@@ -212,9 +187,8 @@ const dadosUrl = nome => _LOCAL ? _DATA_LOCAL + nome : _RAW + 'data/data/' + nom
 const mainUrl = nome => _LOCAL ? _DATA_LOCAL + nome : _RAW + 'main/data/' + nome;
 
 // --- carregamento de dados com erro sempre visível ---
-// fetch + .json() com falha sempre lançada: rede em baixo OU status != 2xx.
-// Quem chama apanha e mostra com mostrarErroDados(). Nunca devolve null nem
-// {} em silêncio (era o que o index.html fazia com .catch(() => {})).
+// fetch + .json() que lança sempre em falha (rede ou status != 2xx). Quem
+// chama mostra o erro com mostrarErroDados().
 async function carregarJson(url, opts) {
   const nome = url.split('/').pop();
   let r;
@@ -254,8 +228,7 @@ function _barraTopo(el) {
 }
 
 // Se o snapshot tem mais de DADOS_VELHOS_H horas, o cron pode ter falhado e
-// os números estão a mostrar o dia anterior com ar de frescos. Era só no
-// historico.html.
+// os números estão a mostrar o dia anterior com ar de frescos.
 const DADOS_VELHOS_H = 6;
 function avisoDadosVelhos(iso) {
   const antigo = document.getElementById('aviso-stale');

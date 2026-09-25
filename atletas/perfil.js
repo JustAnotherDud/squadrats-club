@@ -128,9 +128,7 @@
   function linhaGeo(r, nivel) {
     const ehPais = r.cc === r.nome;
     const txt = ehPais ? paisNome(r.cc) : esc(r.nome);
-    // todos os níveis têm página desde a Fase 3. Em PT o nível chama-se
-    // distrito/concelho, no estrangeiro regiao/zona; o regiaoHref trata disso
-    // pelo cc.
+    // em PT o nível chama-se distrito/concelho, no estrangeiro regiao/zona
     const hrefNivel = r.cc === 'PT'
       ? (nivel === 'regiao' ? 'distrito' : 'concelho')
       : nivel;

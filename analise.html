@@ -18,11 +18,8 @@
 <style>
   html, body { margin:0; padding:0; height:100%; font-family: -apple-system, Segoe UI, Roboto, sans-serif; background:#0f1115; color:#e7e9ee; overflow:hidden; }
   #map { position:absolute; inset:0; }
-  /* O basemap Esri "Dark Gray" tem pouco contraste, os cinzentos ficam todos
-     juntos e os dados (squares, choropleth, troféus) desenhados por cima com
-     fill leve mal se distinguem. Escurecer + puxar o contraste só das tiles
-     raster (não dos overlays SVG/canvas) faz os dados saltar sem os ter de
-     pintar mais opacos e tapar o mapa. (2026-09-04) */
+  /* o basemap Esri tem pouco contraste: escurecer só as tiles raster faz os
+     dados saltar sem os pintar mais opacos */
   img.leaflet-tile { filter: brightness(.82) contrast(1.22) saturate(.9); }
 
   #topbar { position:absolute; top:0; left:0; right:0; z-index:1000; padding:8px 10px; display:flex; flex-direction:column; gap:6px; pointer-events:none; }
@@ -75,13 +72,8 @@
   .zero-toggle:active { opacity:.7; }
   .zero-group { display:flex; align-items:center; gap:7px; flex-wrap:wrap; font-size:11px; color:#8b93a6; padding:5px 4px; }
   .zero-group select { background:#1b1f2a; color:#e7e9ee; border:1px solid #2c3242; border-radius:6px; font-size:11px; padding:3px 5px; }
-  /* número do ganho ("+N") sempre visível dentro do square de "Crescer
-     yard", não só no hover (2026-08-15). leaflet-div-icon por defeito tem
-     fundo/borda brancos (anulados aqui) E o Leaflet usa `transform` inline
-     no próprio div para o posicionar, não dá para também usar `transform`
-     nesse div para centrar o texto (o inline ganha sempre à CSS externa).
-     Por isso a centragem (-50%,-50%) vai num <span> interno, não afectado
-     pelo posicionamento do Leaflet. */
+  /* número do ganho dentro do square. O Leaflet posiciona o div com
+     `transform` inline, por isso a centragem vai num <span> interno. */
   .ganho-label-wrap { background:none; border:none; pointer-events:none; }
   .ganho-label { display:inline-block; transform:translate(-50%, -50%); color:#fff;
     font-size:11px; font-weight:700; text-shadow:0 0 3px #000, 0 0 3px #000; white-space:nowrap; }
@@ -164,8 +156,7 @@
   <div id="sheet-handle"><div class="bar"></div></div>
   <div id="sheet-summary"><span id="summary-text"></span><span style="color:#7d8598">▲</span></div>
   <div id="sheet-body">
-    <!-- duplicados do topbar (2026-08-16, pedido directo), mesma classe,
-         mesmo wiring de clique lá em baixo, sincronizados sempre os dois -->
+    <!-- cópia dos controlos do topbar, sincronizados pelo mesmo handler -->
     <div class="seg seg-grelha" style="margin-bottom:6px">
       <button data-val="squadrats">Squadrats (1609 m)</button>
       <button data-val="squadratinhos" class="active">Squadratinhos (201 m)</button>
@@ -182,11 +173,8 @@
 </div>
 
 <script>
-// Ficheiros DINÂMICOS (o cron regenera 6x/dia): vivem na branch `data`, não
-// no main (2026-08-14), servidos via raw.githubusercontent sem passar pelo
-// rebuild do Pages. dadosUrl (shared.js) trata do prefixo. Os geojsons de
-// fronteiras e o adjacency.json são estáticos, ficam no main, caminho
-// relativo normal.
+// dinâmicos via dadosUrl (branch `data`); fronteiras e adjacency.json são
+// estáticos, caminho relativo
 // dadosUrl / NC / carregarJson / mostrarErroDados: shared.js
 const DATA_URLS = {
   squadrats: dadosUrl('tile_info_squadrats.json'),
@@ -216,18 +204,12 @@ let state = {
   grelha: 'squadratinhos', visao: 'paises', sheetExpanded: false, selected: null,
   sortKey: 'captured', sortDir: 'desc',           // tabela principal (distritos/concelhos)
   showZero: false,     // regiões sem capturas juntam-se à tabela principal?
-  // países "grandes" (ES/DE, milhares de concelhos) não despejam as regiões
-  // sem captura de repente, mostra-se antes um resumo por distrito/Land, e
-  // só se expande esse distrito/Land específico a pedido. chave: país -> nome
-  // do distrito/Land escolhido (2026-08-15).
+  // países com milhares de zonas (ES/DE) mostram as sem captura por
+  // região-mãe, escolhida a pedido. chave: país -> nome da região-mãe
   zeroParentByCountry: {},
   colorMode: 'region', // 'uniform' | 'region', cor dos squares capturados
-  // países activos na tabela de Região/Zona, populado a seguir a BANDEIRA
-  // (declarada depois de state, não dá para referenciar aqui). Por defeito
-  // TODOS os países conhecidos (2026-08-15): já mostra logo o que houver
-  // fora de PT sem precisar de tocar no toggle "Todos" primeiro, "mostrar
-  // zero" continua a esconder as regiões sem captura, por isso ligar todos
-  // não enche a tabela de ruído.
+  // países activos na tabela de Região/Zona; todos por defeito, preenchido
+  // a seguir a BANDEIRA
   paises: new Set(),
 };
 
@@ -236,12 +218,8 @@ let state = {
 const BANDEIRA = bandeiras(15, 11);
 state.paises = new Set(Object.keys(BANDEIRA));
 
-// nível país (vista "Países"), um país novo no futuro é só uma entrada
-// aqui + bandeira em BANDEIRA + a fonte de contorno/stats no backend
-// (compute_grid_totals.py). O resto (drawBoundaries, renderStats) já lê
-// esta tabela em vez de ter PT/ES escritos à mão.
-// `label` vem do PAIS_NOME (shared.js), aqui só o que é próprio desta vista:
-// cor do contorno, de onde sai a geometria e a chave no stats.json.
+// nível país: cor do contorno, geometria e chave no stats.json. Um país novo
+// é uma entrada aqui + bandeira no shared.js + totais no backend.
 const PAIS_INFO = {
   PT: { label: PAIS_NOME.PT, cor: '#39d97a', geo: () => cache.portugal, statsKey: 'country_pt' },
   ES: { label: PAIS_NOME.ES, cor: '#c9743d', geo: () => cache.spain, statsKey: 'country_es' },
@@ -250,13 +228,8 @@ const PAIS_INFO = {
   MA: { label: PAIS_NOME.MA, cor: '#c1272d', geo: () => cache.morocco, statsKey: 'country_ma' },
 };
 
-// por nível (distritos/concelhos) e país: onde está a geometria da fronteira
-// (para desenhar no mapa), o nome da propriedade que identifica cada região,
-// e o bucket de stats.json com os totais/capturados/% dessa região. Um país
-// sem entrada num nível (ex: ES em concelhos, falta a fonte de município,
-// ~8000 unidades) fica de fora dessa vista, sem rebentar nada. Andorra só
-// tem paróquias (7, sem subdivisão mais fina), entram em "distritos", que
-// é o nível equivalente em escala/papel, não "concelhos".
+// por nível e país: geometria da fronteira, propriedade com o nome e bucket
+// de stats.json. Um país sem entrada num nível fica de fora dessa vista.
 const NIVEL_INFO = {
   distritos: {
     PT: { geo: () => cache.distritos, nameProp: 'district', bucket: 'by_distrito' },
@@ -268,20 +241,15 @@ const NIVEL_INFO = {
   concelhos: {
     PT: { geo: () => cache.concelhos, nameProp: 'NAME_2', bucket: 'by_concelho' },
     ES: { geo: () => cache.municipiosEs, nameProp: 'region', bucket: 'by_municipio_es' },
-    // Andorra não tem subdivisão mais fina que as 7 paróquias, nível
-    // "concelhos" reaproveita a mesma geometria/bucket do nível "distritos"
-    // (2026-08-15), em vez de duplicar o cálculo para o mesmo resultado.
+    // Andorra só tem paróquias: as mesmas nos dois níveis
     AD: { geo: () => cache.paroquiasAd, nameProp: 'region', bucket: 'by_region_ad' },
     DE: { geo: () => cache.municipiosDe, nameProp: 'region', bucket: 'by_municipio_de' },
-    // "cercle" (426, ver refdata/foreign_muni/MA.geojson), nível real,
-    // já não é alias das regiões (2026-08-15).
+    // "cercle" (refdata/foreign_muni/MA.geojson)
     MA: { geo: () => cache.cerclesMa, nameProp: 'region', bucket: 'by_municipio_ma' },
   },
 };
 
-// chave única por região quando há mais que um país na mesma tabela, PT
-// fica sem prefixo (compatibilidade com o estado anterior, só um país),
-// os outros levam "PAIS:nome" para nunca colidir com um nome PT igual.
+// chave única por região: PT sem prefixo, os outros "PAIS:nome"
 function chaveRegiao(country, name) {
   return country === 'PT' ? name : `${country}:${name}`;
 }
@@ -290,17 +258,11 @@ function partirChave(key) {
   return i === -1 ? { country: 'PT', name: key } : { country: key.slice(0, i), name: key.slice(i + 1) };
 }
 
-// países "grandes" a este nível (concelhos): acima disto, "mostrar zero" não
-// despeja tudo, agrupa por distrito/Land primeiro (ver renderStats). PT/AD/MA
-// nunca passam disto (max 308), por isso nem entram nesta lógica.
+// acima disto, "mostrar zero" agrupa por região-mãe (ver renderStats)
 const ZERO_GROUP_THRESHOLD = 500;
 
-// nome do concelho/município -> nome do distrito/província/Land que o
-// contém, vem de properties.parent, já calculado do lado do Python
-// (containment geométrico contra o nível região, ver refdata/foreign_muni/
-// ES.geojson e DE.geojson, 2026-08-15). Cache por país, construído só
-// quando pedido pela primeira vez (municipiosDe/municipiosEs têm milhares
-// de features, não vale a pena percorrer isto em cada render).
+// zona -> região que a contém (properties.parent, calculado no Python).
+// Índice por país, construído na primeira vez.
 let parentIndexCache = {};
 function regionParent(country, name) {
   if (!parentIndexCache[country]) {
@@ -321,12 +283,10 @@ let cache = {};
 let squaresLayer = L.layerGroup();
 let boundaryLayer = L.layerGroup();
 let trophyLayer = L.layerGroup();
-let squareHighlightLayer = L.layerGroup(); // destaque do square clicado (2026-08-16)
+let squareHighlightLayer = L.layerGroup(); // destaque do square clicado
 let boundaryLayersByName = {}; // nome -> layer Leaflet, reconstruído a cada drawBoundaries()
 
-// zoom em baixo à direita: o topbar ocupa a largura toda (os segmentos vão de
-// margem a margem), por isso tanto o canto superior esquerdo como o direito
-// ficavam por baixo dele. Em baixo também fica mais à mão no telemóvel.
+// zoom em baixo à direita: o topbar ocupa a largura toda
 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([39.6, -8.5], 7);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
@@ -338,9 +298,7 @@ boundaryLayer.addTo(map);
 trophyLayer.addTo(map); // por cima dos squares, por baixo das fronteiras
 squareHighlightLayer.addTo(map); // por cima de tudo, o destaque nunca pode ficar tapado
 
-// os números "+N" das sugestões (ver LIMIAR_GANHO_LABEL) têm de aparecer/
-// desaparecer ao aproximar/afastar, drawTrophies() já desenha tudo de
-// novo a cada chamada, só falta chamá-lo quando o zoom muda (2026-08-16).
+// os "+N" das sugestões dependem do zoom (ver LIMIAR_GANHO_LABEL)
 map.on('zoomend', () => drawTrophies());
 
 // --- slippy-tile math (mesma convenção do pipeline: kml_parse.py) ---
@@ -469,10 +427,7 @@ function squareColor(sq) {
         // Andorra: nível 3 é o mesmo que o nível 2 (só há paróquias, ver
         // NIVEL_INFO), colore direto pela paróquia.
         if (sq.country === 'AD' && sq.region && bucket) return regionColor(bucket, sq.region);
-        // ES/DE/MA: cor da província/Land/região que contém o município,
-        // reaproveita regionParent() (já existia para o agrupamento do
-        // "mostrar zero"), em vez de recalcular adjacência de grafo ao
-        // nível do concelho/município (2026-08-15).
+        // ES/DE/MA: cor da região que contém o município
         if (sq.municipio && bucket) {
           const parent = regionParent(sq.country, sq.municipio);
           if (parent) return regionColor(bucket, parent);
@@ -522,23 +477,15 @@ function baseStyleFor(name, statsBucket, zkey, country) {
   };
 }
 
-// `key` (composta, "PAIS:nome") é o que fica em state.selected.name, `name`
-// sozinho só coincide com ela para PT (chaveRegiao não lhe põe prefixo, ver
-// definição). Comparar contra `name` cru fazia a selecção nunca bater certo
-// fora de Portugal, o mapa navegava lá (isso usa boundaryLayersByName pela
-// key, sempre correcto) mas o contorno verde nunca acendia. Bug apanhado
-// 2026-08-16, mascarado precisamente pelo caso que mais se testa (PT).
+// state.selected.name guarda a `key` ("PAIS:nome"), não o `name`
 function styleFor(name, key, statsBucket, zkey, country) {
   const base = baseStyleFor(name, statsBucket, zkey, country);
   const isSelected = state.selected && state.selected.name === key;
   return isSelected ? { ...base, ...SELECTED_STYLE } : base;
 }
 
-// Só regista (para refreshBoundaryStyles + fitBounds via nome/key), sem
-// clique próprio (2026-08-16, pedido directo: "há 2 coisas a competir pelo
-// clique, fica confuso"). Clicar numa fronteira no mapa faz parte do mesmo
-// clique do mapa em geral, que agora só selecciona o square por baixo; para
-// seleccionar a região é preciso ir à lista/link, nunca ao mapa directamente.
+// só regista (para refreshBoundaryStyles e fitBounds); o clique no mapa
+// selecciona o square, a região escolhe-se na lista
 function addBoundaryFeature(name, layer, styleFn) {
   boundaryLayersByName[name] = { layer, styleFn };
 }
@@ -592,11 +539,8 @@ function drawBoundaries() {
   drawParentContext(nivel);
 }
 
-// Fronteiras dos níveis ACIMA do actual, como referência: ao descer para
-// Região mantém-se a fronteira do país; ao descer para Zona, país + região.
-// Traço fino, sem fill, sem tooltip nem clique (não entram em
-// boundaryLayersByName, a selecção e o refreshBoundaryStyles ignoram-nas).
-// Desenhadas no fim, por cima do choropleth, para se lerem. (2026-09-04)
+// fronteiras dos níveis acima do actual, como referência: traço fino, sem
+// interacção, por cima do choropleth
 const VISAO_ORDEM = ['paises', 'distritos', 'concelhos'];
 
 function drawParentContext(nivelActual) {
@@ -657,10 +601,7 @@ function rankingFor(info) {
   return { rank: entries.findIndex(([n]) => n === info.name) + 1, outOf: entries.length };
 }
 
-// Muda de vista (Região/Zona) e já selecciona uma região directamente,
-// reaproveitado pelo link "Nível 2" do cartão de região e pelos links de
-// distrito/concelho do cartão de square (2026-08-16, pedido directo:
-// "também quero que funcione o click para abrir aqui").
+// muda de vista (Região/Zona) e selecciona uma região (links dos cartões)
 function irParaRegiao(visao, key) {
   document.querySelectorAll('.seg-visao button').forEach(b => b.classList.toggle('active', b.dataset.val === visao));
   state.visao = visao;
@@ -698,10 +639,7 @@ function renderDetailCard(name) {
   }
   grid += `<div class="detail-item"><div class="label">Posição no ranking</div><div class="value">${rank.rank}/${rank.outOf}</div></div>`;
 
-  // Região que contém esta zona (distrito/província/Land/região),
-  // reaproveita regionParent() (já existia para o "mostrar zero" e para as
-  // cores por região). Clicável: muda de vista e selecciona o pai
-  // directamente, em vez de obrigar a voltar à lista e procurar (2026-08-15).
+  // região que contém esta zona, clicável
   let parentHtml = '';
   if (state.visao === 'concelhos') {
     const parent = regionParent(info.country, info.name);
@@ -724,7 +662,7 @@ function selectItem(name) {
     return;
   }
   state.selected = { name };
-  squareSelecionado = null; // exclusivo com a selecção de square/país (2026-08-16)
+  squareSelecionado = null; // exclusivo com a selecção de square/país
   paisSelecionado = null;
   squareHighlightLayer.clearLayers();
   refreshBoundaryStyles();
@@ -754,10 +692,8 @@ function clearSelection() {
   renderStats();
 }
 
-// --- clique num país da lista Nível 1 (2026-08-16), mesma ideia da Região/
-// Zona, mas país não vive em NIVEL_INFO (é PAIS_INFO, tabela à parte), por
-// isso tem o seu próprio par seleccionar/limpar em vez de reaproveitar
-// selectItem(). Mútuamente exclusivo com região/square seleccionados.
+// --- clique num país da lista: par seleccionar/limpar próprio, porque o
+// país vive em PAIS_INFO e não em NIVEL_INFO
 let paisSelecionado = null; // código do país | null
 
 function paisStyleFor(cc, cor) {
@@ -815,11 +751,7 @@ function renderPaisDetailCard(cc) {
   document.getElementById('detail-back-btn').onclick = clearPaisSelection;
 }
 
-// --- clique num square qualquer, capturado ou não (2026-08-16) ---
-// pedido directo: já dava para clicar numa REGIÃO e ver detalhe na sheet,
-// mas não num square individual. Squares capturados já tinham um popup do
-// Leaflet (bindPopup), substituído por isto, para ficar tudo no mesmo
-// sítio (a sheet), com mais informação (Google Maps incluído).
+// --- clique num square qualquer, capturado ou não: detalhe na sheet ---
 let squareSelecionado = null; // {x, y, zoom} | null
 
 // inverso de tileNW: lat/lng -> tile x/y num dado zoom (shared.js, mesma
@@ -833,13 +765,8 @@ function squareCapturadoEm(x, y, zoom) {
   return squares && squares.find(sq => sq.x === x && sq.y === y && sq.zoom === zoom);
 }
 
-// point-in-polygon (ray casting) sobre um GeoJSON Polygon/MultiPolygon cru,
-// os squares por capturar não têm país/distrito/concelho já resolvido (isso
-// só existe para os capturados, calculado no pipeline); para esses, faz-se
-// aqui a mesma pergunta contra as fronteiras já carregadas no browser
-// (2026-08-16, pedido directo: "clicar num não obtido não mostra info de
-// país/distrito/concelho"). Não é rápido (percorre todas as features de um
-// nível até encontrar), mas só corre uma vez por clique, não em loop.
+// point-in-polygon (ray casting): os squares por capturar não trazem região
+// do pipeline, por isso classificam-se aqui, uma vez por clique
 function pontoDentroDeAnel(lat, lon, anel) {
   let dentro = false;
   for (let i = 0, j = anel.length - 1; i < anel.length; j = i++) {
@@ -890,10 +817,7 @@ function selecionarSquare(x, y, zoom) {
   L.rectangle(tileBounds(x, y, zoom), {
     color: '#39d97a', weight: 3, fill: false,
   }).addTo(squareHighlightLayer);
-  // já não aproxima sozinho ao seleccionar (2026-08-16, revisto no mesmo
-  // dia), saltar o mapa a cada clique tornava a navegação chata. Fica um
-  // botão no cartão (ver renderSquareDetailCard) para quem quiser mesmo
-  // aproximar, só quando pedido.
+  // não aproxima sozinho; há um botão no cartão para isso
   sheet.classList.remove('collapsed', 'expanded');
   sheet.classList.add('detail');
   document.querySelector('#sheet-summary span:last-child').textContent = '▼';
@@ -939,9 +863,7 @@ function renderSquareDetailCard() {
   grid += `<div class="detail-item"><div class="label">Coordenadas (centro)</div><div class="value">${latC.toFixed(5)}, ${lonC.toFixed(5)}</div></div>`;
   grid += `<div class="detail-item"><div class="label">Tile</div><div class="value">${x}/${y} (z${zoom})</div></div>`;
 
-  // info das sugestões activas para este square, se houver, mesmo texto do
-  // tooltip do mapa, para não obrigar a passar o rato em cima para saber
-  // (2026-08-16, pedido directo).
+  // sugestões activas para este square, mesmo texto do tooltip
   let sugestaoHtml = '';
   const s = (cache.suggestions || {})[state.grelha];
   if (s && sugestoesActivas.size) {
@@ -963,17 +885,13 @@ function renderSquareDetailCard() {
     </p>
   `;
   document.getElementById('detail-back-btn').onclick = clearSquareSelection;
-  // aproximar só quando pedido, não automaticamente ao seleccionar
-  // (2026-08-16, revisto no mesmo dia, saltar o mapa a cada clique
-  // tornava a navegação chata).
+  // aproximar só quando pedido
   document.getElementById('btn-aproximar-square').onclick = () => {
     map.flyTo(tileCenter(x, y, zoom), Math.max(map.getZoom(), zoom + 1), { duration: 0.6 });
   };
 }
 
-// sempre 2 casas decimais, mesmo quando são .00, antes cortava os zeros à
-// direita (10.6% em vez de 10.60%, 5% em vez de 5.00%), inconsistente com
-// as linhas ao lado que calham ter 2 casas "a sério"
+// sempre 2 casas decimais, para as linhas alinharem
 function fmtPct(pct) { return pct === null || pct === undefined ? '·' : `${pct.toFixed(2)}%`; }
 
 function sortRows(rows, key, dir) {
@@ -1014,9 +932,7 @@ function renderStats() {
   const zkey = ZKEY[state.grelha];
   const stats = cache.stats;
 
-  // total capturado em todos os países com dados, não só PT, fazia sentido
-  // quando só havia um país, agora com 5 na lista "País" ficava a destacar
-  // só um deles sem motivo (2026-08-15).
+  // total capturado em todos os países
   let totalCaptured = 0;
   for (const cc of Object.keys(PAIS_INFO)) {
     const s = (stats[PAIS_INFO[cc].statsKey] || {})[zkey];
@@ -1037,8 +953,7 @@ function renderStats() {
       if (!s) continue;
       paisRows.push({ cc, info, s });
     }
-    // mesmo padrão de "mostrar zero" da Região/Zona, sem isto, países sem
-    // nenhuma captura (ex: Andorra) apareciam sempre, mesmo por defeito.
+    // "mostrar zero", como na Região/Zona
     const zeroCount = paisRows.filter(r => r.s.captured === 0).length;
     const visibleRows = state.showZero ? paisRows : paisRows.filter(r => r.s.captured > 0);
     visibleRows.forEach(({ cc, info, s }) => {
@@ -1063,11 +978,7 @@ function renderStats() {
     const nivel = NIVEL_INFO[state.visao];
     const paisesNesteNivel = [...state.paises].filter(p => nivel[p]);
 
-    // toggle de países dentro da folha (não no topo, é aqui que se está a
-    // olhar para a tabela que ele controla, faz mais sentido junto dela).
-    // "Todos" activa qualquer país que exista em BANDEIRA, hoje são só
-    // PT+ES, mas não fica hardcoded a esses dois, cresce sozinho se um dia
-    // houver mais (2026-08-15).
+    // toggle de países junto à tabela que controla; "Todos" = BANDEIRA
     const todosPaises = Object.keys(BANDEIRA);
     const todosActivos = todosPaises.every(p => state.paises.has(p));
     html += '<div class="pais-pills">'
@@ -1080,9 +991,7 @@ function renderStats() {
     const title = state.visao === 'distritos' ? NIVEL_LABEL.regiao : NIVEL_LABEL.zona;
     html += `<div class="section-title">${title}</div>`;
 
-    // uma tabela só, países activos misturados e ordenados em conjunto,
-    // antes eram duas tabelas separadas (PT sempre visível, ES à parte,
-    // sem entrar na mesma ordenação)
+    // uma tabela só, com os países activos ordenados em conjunto
     let allRows = [];
     for (const country of paisesNesteNivel) {
       const bucket = stats[nivel[country].bucket] || {};
@@ -1105,11 +1014,8 @@ function renderStats() {
     const zeroRows = allRows.filter(r => r.captured === 0);
     const zeroCount = zeroRows.length;
 
-    // países "grandes" a este nível (ES/DE, milhares de concelhos): "mostrar
-    // zero" não despeja tudo de repente, agrupa por distrito/província/Land
-    // e só junta à tabela o grupo escolhido no dropdown. Países pequenos
-    // (PT/AD/MA, nunca passam de ~308) continuam a aparecer soltos, como
-    // sempre (2026-08-15).
+    // países com milhares de zonas: "mostrar zero" agrupa por região-mãe e
+    // só junta o grupo escolhido no dropdown
     let visibleRows = capturedRows.slice();
     let gruposHtml = '';
     if (state.showZero) {
@@ -1244,18 +1150,10 @@ const COR_SUGESTAO = '#00d4ff';  // próximo über
 const COR_LIGACAO = '#b04fff';   // squares que fazem o yard crescer sozinhos
 const COR_CORREDOR = '#ff4fa3';  // squares que ligam um cluster inteiro ao yard
 const sugestoesActivas = new Set(); // 'uber' | 'ligacao' | 'corredores'
-let sugestoesPainelAberto = false;  // sub-painel colapsável (2026-08-16), ver renderSugestoes()
+let sugestoesPainelAberto = false;  // sub-painel colapsável, ver renderSugestoes()
 
-// Junta as sugestões activas por coordenada, um square pode servir para
-// mais que uma ao mesmo tempo (ex: "Crescer yard" e "Corredores" a apontar
-// para o mesmo sítio). Antes cada tipo desenhava o seu próprio rectângulo
-// com o seu próprio tooltip, empilhados, hover só apanhava um dos dois (ou
-// nenhum, no caso dos corredores: o tooltip estava preso ao LayerGroup, sem
-// geometria própria, nunca disparava por cima de um square individual).
-// Agora é sempre UM rectângulo por square, com o texto de todas as
-// sugestões activas fundido no mesmo tooltip (2026-08-16, pedido directo:
-// "funde as tooltips, não aplicar 2 diferentes"). Reaproveitado também pelo
-// cartão de detalhe ao clicar num square (renderSquareDetailCard).
+// Junta as sugestões activas por coordenada: um rectângulo por square, com
+// o texto de todas no mesmo tooltip. Também usado pelo cartão do square.
 function construirSugestoesPorCoord(s) {
   const porCoord = new Map(); // "x,y" -> {x, y, entradas: [{cor, texto, peso}]}
   function registar(x, y, cor, texto, peso) {
@@ -1313,10 +1211,7 @@ function drawSugestao() {
       fillColor: entradas[0].cor, fillOpacity: 0.2 + 0.5 * (melhorPeso / maxPeso),
     }).bindTooltip(entradas.map(e => e.texto).join('<br>'), { sticky: true }).addTo(trophyLayer);
 
-    // número do ganho sempre visível dentro do square, não só no hover,
-    // pedido directo (2026-08-15). Escondido a zoom afastado (2026-08-16):
-    // a essa distância o texto não cabe/não lê, é só ruído, mesma lógica
-    // do MIN_PX da grelha de linhas. Redesenha em cada zoomend.
+    // número do ganho dentro do square, escondido quando não cabe
     if (mostrarLabel) {
       L.marker(tileCenter(x, y, s.zoom), {
         icon: L.divIcon({
@@ -1393,9 +1288,7 @@ function renderTrofeus() {
   });
 }
 
-// Sugestões (o que falta, não o que já se tem), separadas dos troféus num
-// sub-painel colapsável (2026-08-16): eram 3-4 pills sempre visíveis ao lado
-// dos troféus, empilhando o topbar. Fechado por defeito.
+// Sugestões (o que falta), num sub-painel colapsável, fechado por defeito
 function renderSugestoes() {
   const box = document.getElementById('sugestoes-area');
   const sug = (cache.suggestions || {})[state.grelha];
@@ -1482,14 +1375,8 @@ document.getElementById('btn-color-mode').onclick = () => {
 
 document.getElementById('btn-grelha-linhas').onclick = toggleGrelhaLinhas;
 
-// chamado ao trocar grelha/visão, sai de qualquer cartão de detalhe aberto
-// (região, país OU square). Antes só limpava state.selected: trocar de
-// grelha com um square/país seleccionado deixava squareSelecionado/
-// paisSelecionado por limpar e o highlight verde preso no mapa (nunca mais
-// desaparecia sozinho), o toque seguinte na barra ia rebentar em
-// clearSquareSelection()/clearPaisSelection() em vez de expandir a folha,
-// como já tinha acontecido uma vez com fecharQualquerDetalheOuAlternar()
-// (bug irmão deste, mesma causa: um tipo de selecção novo por cobrir).
+// ao trocar grelha/visão: sai de qualquer cartão aberto (região, país ou
+// square). Um tipo de selecção novo tem de ser limpo aqui também.
 function resetSelectionUI() {
   squareSelecionado = null;
   paisSelecionado = null;
@@ -1500,10 +1387,8 @@ function resetSelectionUI() {
   }
 }
 
-// .seg-grelha/.seg-visao existem duplicados (topbar + dentro da sheet,
-// 2026-08-16), selector de classe apanha os dois de propósito, e o toggle
-// de active compara por data-val (não pelo botão clicado directamente) para
-// sincronizar sempre as duas cópias, seja qual for a que foi tocada.
+// .seg-grelha/.seg-visao existem em duplicado (topbar e sheet); o active
+// compara por data-val para as duas cópias ficarem sincronizadas
 document.querySelectorAll('.seg-grelha button').forEach(btn => {
   btn.onclick = () => {
     document.querySelectorAll('.seg-grelha button').forEach(b => b.classList.toggle('active', b.dataset.val === btn.dataset.val));
@@ -1533,10 +1418,8 @@ function setSheet(expanded) {
   sheet.classList.toggle('collapsed', !expanded);
   document.querySelector('#sheet-summary span:last-child').textContent = expanded ? '▼' : '▲';
 }
-// qualquer selecção activa (região, país ou square) fecha para a lista;
-// sem nenhuma, alterna colapsado/expandido, faltava tratar square/país
-// aqui (só state.selected estava coberto, ficou esquecido ao acrescentar
-// os outros dois tipos de selecção nesta mesma sessão).
+// com selecção activa (região, país ou square) volta à lista; sem nenhuma,
+// alterna colapsado/expandido
 function fecharQualquerDetalheOuAlternar() {
   if (state.selected) { clearSelection(); return; }
   if (squareSelecionado) { clearSquareSelection(); return; }
@@ -1545,10 +1428,7 @@ function fecharQualquerDetalheOuAlternar() {
 }
 document.getElementById('sheet-summary').onclick = fecharQualquerDetalheOuAlternar;
 
-// arrastar a pega para esticar/encolher a sheet livremente (2026-08-16,
-// pedido directo), antes só dava para largar e ela saltava para um de 3
-// tamanhos fixos (colapsada/expandida/detalhe). Um toque simples (sem
-// arrastar de facto) continua a alternar/fechar como sempre.
+// arrastar a pega estica/encolhe a sheet; um toque simples alterna/fecha
 const SHEET_MIN_H = 54;
 function sheetMaxH() { return window.innerHeight * 0.92; }
 let sheetDrag = null; // { startY, startHeight, moved } | null
@@ -1557,8 +1437,7 @@ const handle = document.getElementById('sheet-handle');
 handle.addEventListener('pointerdown', e => {
   sheetDrag = { startY: e.clientY, startHeight: sheet.getBoundingClientRect().height, moved: false };
   sheet.style.transition = 'none'; // segue o dedo/rato sem atraso durante o arrasto
-  // sem try/catch, um dispositivo que recuse pointer capture (raro, mas
-  // acontece) partia o arrasto todo por uma chamada que só é optimização
+  // alguns dispositivos recusam pointer capture; o arrasto segue sem ele
   try { handle.setPointerCapture(e.pointerId); } catch (err) { /* segue sem capture */ }
 });
 handle.addEventListener('pointermove', e => {
@@ -1597,19 +1476,15 @@ handle.addEventListener('pointerup', e => {
 });
 handle.addEventListener('pointercancel', () => { sheetDrag = null; sheet.style.transition = ''; });
 
-// limpar seleção: Escape ou clique no mapa fora de qualquer polígono
-// (addBoundaryFeature já para a propagação do click do polígono para o mapa
-// via L.DomEvent.stopPropagation, sem isso este handler disparava a seguir
-// e desfazia a seleção no mesmo click)
+// Escape limpa a selecção
 document.addEventListener('keydown', e => {
   if (e.key !== 'Escape') return;
   if (state.selected) clearSelection();
   else if (squareSelecionado) clearSquareSelection();
   else if (paisSelecionado) clearPaisSelection();
 });
-// clique no mapa que não caiu em cima de nenhum square/fronteira (esses
-// param a propagação nos seus próprios handlers), trata-se como clique
-// num square por capturar, na grelha do zoom activo.
+// clique no mapa fora de um square capturado (esses param a propagação):
+// selecciona o square por capturar nesse ponto
 map.on('click', (e) => {
   if (state.selected) clearSelection();
   const zoom = ZOOM_GRELHA[state.grelha];

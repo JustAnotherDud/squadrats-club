@@ -11,8 +11,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
-<!-- shared.js: vocabulário comum ao analise.html e às páginas de atleta (países,
-     XYZ), síncrono de propósito, o script inline abaixo usa-o logo -->
+<!-- síncrono: o script inline abaixo usa o shared.js logo -->
 <script src="shared.js"></script>
 <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/bricolage-grotesque.woff2">
 <link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/ibm-plex-sans-400.woff2">
@@ -21,9 +20,7 @@
   html, body { height:100%; overflow:hidden; }
   /* a barra de navegação (nav.js, position:fixed) ocupa 46px no topo */
   #map { position:absolute; inset:46px 0 0 0; }
-  /* O basemap Esri "Dark Gray" tem pouco contraste, escurecer + puxar o
-     contraste só das tiles raster (o `img`; a camada de squares é um
-     <canvas>, não é afectada) para os squares saltarem. (2026-09-04) */
+  /* o basemap Esri tem pouco contraste: escurecer só as tiles raster */
   img.leaflet-tile { filter: brightness(.82) contrast(1.22) saturate(.9); }
 
   #topbar { position:absolute; top:46px; left:0; right:0; z-index:1000; padding:9px 12px; display:flex; flex-direction:column; gap:7px; pointer-events:none; }
@@ -52,17 +49,8 @@
   .detalhe-toggle .seta { color:var(--tinta-2); font-size:11px; font-family:var(--f-mono); }
   .detalhe-toggle:active { opacity:.7; }
   .fraco { color:var(--tinta-3); font-weight:400; font-size:11px; font-family:var(--f-mono); }
-  /* Ecrãs largos (2026-08-19): o painel ocupa a largura toda e cada .linha-stat
-     é um flex com space-between, num monitor de 1900px o número acabava a
-     meio metro do nome a que pertence. Encolher o painel resolvia a distância
-     mas desperdiçava o espaço todo; em vez disso o conteúdo flui por colunas,
-     que aproxima o valor do nome E mostra mais linhas sem scroll.
-     Os controlos (.seg) e as notas de rodapé atravessam as colunas todas,
-     senão apareciam espremidos numa só.
-     Largura de coluna fixa, não número fixo de colunas: com column-count:2 num
-     ecrã de 1280 cada coluna ficava com 640px e o número continuava a 475px do
-     nome. Com column-width o browser mete as colunas que couberem a ~330px, que
-     é a largura a que "Rio Maior ... 1677 34.4%" se lê de uma assentada. */
+  /* Ecrãs largos: o painel flui em colunas de largura fixa, para o número
+     ficar perto do nome. Controlos e notas atravessam as colunas. */
   @media (min-width: 900px) {
     #painel-corpo { columns:260px; column-gap:26px; }
     #painel-corpo > .seg, #painel-corpo > .nota { column-span:all; }
@@ -101,31 +89,18 @@
 </div>
 
 <script>
-// Página do club: só squadratinhos, só os três que têm conta Squadrats.
-// Sem classificação por concelho nem troféus, o assunto aqui é quem
-// partilha o quê. Deliberadamente sem link para o `analise.html` (o mapa
-// pessoal detalhado do dono): são dois sítios separados, e quem recebe este
-// link não deve cair no outro.
-// Liga sim para /atletas/<slug>.html, os perfis são info do clube (as mesmas
-// contagens/ranking que este painel mostra, reunidas por atleta), não o mapa
-// pessoal. O slug vem do club.json (pipeline/fetch_club_squares.py).
-
-// Só o modo "quantos" (2026-08-15, tirei o "quem", cor da pessoa nos
-// exclusivos, escala neutra cinzento-a-branco nos partilhados, sem riscas).
-// Com 5 pessoas há 26 combinações possíveis e não existem 26 cores
-// distinguíveis, por isso a escala dos partilhados é deliberadamente neutra
-//, o *quem* de cada square continua no tooltip (hover/click) e no Detalhe.
+// Página do club: squadratinhos de todos os atletas, quem partilha o quê.
+// Sem link para o analise.html (mapa pessoal), de propósito.
 //
-// Uma cor por atleta, no índice de bit que o club.json fixa
-// (pipeline/fetch_club_squares.py). As cores vêm da fonte única
-// data/membros_cores.json (partilhada com o folha-do-clube), carregada no arranque
-// e mapeada por nome. Preenchido a partir de dados.atletas quando o club.json
-// chega; sem membros_cores.json fica o COR_FALLBACK do shared.js.
+// Exclusivos na cor do atleta; partilhados numa escala neutra por número de
+// donos (não há cores distinguíveis para todas as combinações). O *quem* fica
+// no tooltip e no Detalhe.
+//
+// Uma cor por atleta, pela ordem de bit do club.json, vinda de
+// data/membros_cores.json (fallback: COR_FALLBACK do shared.js).
 let COR_ATLETA = [];
 
-// bandeiras do shared.js (as mesmas do analise.html), aqui em 13x10, um pouco
-// mais pequenas que no mapa pessoal. Estiveram copiadas à mão até 2026-08-18,
-// e a cópia já tinha divergido uma vez.
+// bandeiras do shared.js, aqui em 13x10
 const BANDEIRA = bandeiras(13, 10);
 
 // Escala neutra do modo "quantos": não compete com nenhuma cor de pessoa
@@ -137,7 +112,7 @@ function corPartilha(n) {
 }
 
 let dados = null;
-let dadosGeo = null;           // club_regioes.json, captured por atleta/região (2026-08-15)
+let dadosGeo = null;           // club_regioes.json, captured por atleta/região
 let dadosStats = null;         // stats.json, totais partilhados (denominador), o mesmo p/ toda a gente
 let porCoord = new Map();     // "x,y" -> mask
 let activos = 0;              // bitmask dos atletas ligados
@@ -146,16 +121,11 @@ let detalheAberto = false;
 let leaderboardSoDisputadas = true;  // só regiões com 2+ pessoas, por defeito
 let leaderboardNivel = 'concelho';   // 'pais' | 'distrito' | 'concelho'
 
-// três abas dentro do painel, em vez de tudo empilhado (2026-08-15, revisto
-// no mesmo dia): "sobreposição" (quem tem o quê no mapa, o assunto original
-// desta página), "por atleta" (onde é que cada um anda) e "leaderboard"
-// (quem manda em cada região) são três perguntas diferentes, cada uma na
-// sua aba, conteúdo completo ao clicar, sem mostrar/esconder extra por
-// dentro (a aba já é o mostrar/esconder).
+// três abas no painel: "sobreposição" (quem tem o quê), "por atleta" (onde
+// anda cada um) e "leaderboard" (quem manda em cada região)
 let painelTab = 'sobreposicao';
 
-// zoom em baixo à direita: no canto superior esquerdo ficava por baixo do
-// título. Em baixo também fica mais à mão no telemóvel.
+// zoom em baixo à direita: em cima fica por baixo do título
 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([39.5, -8.8], 9);
 L.control.zoom({ position: 'bottomright' }).addTo(map);
 L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
@@ -410,10 +380,8 @@ function totalDe(bucket, nome) {
 
 const NOME_PAIS = PAIS_NOME; // shared.js
 
-// --- leaderboard por região (2026-08-15), "quem manda em X" ---
-// Não precisa de dados novos: club_regioes.json já tem tudo, isto é só o
-// mesmo club_regioes.json pivotado (por atleta -> por região) em vez de
-// (por região -> por atleta), inteiramente no browser.
+// --- leaderboard por região, "quem manda em X" ---
+// club_regioes.json pivotado no browser (por atleta -> por região).
 // nivel: 'pais' | 'distrito' | 'concelho'. Cada um usa um par de buckets
 // diferente (país é um caso à parte, geo.country já vem plano, sem nome
 // separado do código do país).
@@ -512,8 +480,7 @@ function renderLeaderboard() {
         <span class="txt">${nome}</span></span>
         <b>${e.captured.toLocaleString('pt-PT')}${pct}</b></div>`;
     }).join('');
-    // o nome abre SEMPRE a página do sítio (todos os níveis/países têm página
-    // desde a Fase 3); o salto no mapa fica num botão à parte a seguir.
+    // o nome abre a página do lugar; o salto no mapa é o botão a seguir
     const nomeReg = `<a class="lnome" href="${regiaoHref(leaderboardNivel, r.nome, r.cc)}">${esc(r.nome)}</a>`;
     // BANDEIRA só tem os 5 conhecidos; um país detetado por contorno
     // (ver classify.py) entra na mesma via pivotRegioes, com bandeira
@@ -542,8 +509,7 @@ document.getElementById('painel-cabeca').onclick = function () {
 
 (async function () {
   // dadosUrl / mainUrl / NC / carregarJson / mostrarErroDados / avisoDadosVelhos:
-  // shared.js. club.json vive na branch `data`, não no main (2026-08-14), ver
-  // fetch-map-data.yml; dadosUrl trata disso.
+  // shared.js
   try {
     dados = await carregarJson(dadosUrl('club.json'));
   } catch (e) {
@@ -598,9 +564,7 @@ document.getElementById('painel-cabeca').onclick = function () {
     }).catch(e => console.warn('fronteira do lugar:', e.message));
   }
 
-  // detalhe geográfico: opcional, carregado à parte e sem bloquear o resto,
-  // club_regioes.json é mais recente que club.json (2026-08-15) e pode ainda
-  // não existir num deploy fresco antes do primeiro run do cron
+  // detalhe geográfico: opcional, não bloqueia o resto
   dadosGeo = await carregarJson(dadosUrl('club_regioes.json'))
     .catch(e => { console.warn('club_regioes.json:', e.message); return null; });
   dadosStats = await carregarJson(dadosUrl('stats.json'))
