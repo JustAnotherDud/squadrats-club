@@ -241,6 +241,8 @@ def casos_pipeline(copia):
                 saidas[f] = resumo_ficheiro(copia / f)
         for d in dirs + ["atletas", "lugares"]:
             for p in sorted((copia / d).glob("*.json" if d.startswith("data") else "*.html")):
+                if p.name == "index.html" and d == "lugares":
+                    continue  # feito à mão, não é saída do pipeline
                 saidas[str(p.relative_to(copia)).replace("\\", "/")] = resumo_ficheiro(p)
         out[f"corrida {i} ({agora})"] = {"pedidos": pedidos, "publicou": publicou, "saidas": saidas}
     return out
