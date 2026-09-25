@@ -91,7 +91,7 @@ def snapshots_commits(repo, branch, path, desde=None, com_anterior=False):
     if shas and not snaps:
         raise RuntimeError(
             f"snapshots de {path}: {len(shas)} commit(s) em {branch}, nenhum legível. "
-            "Clone shallow demais? (o workflow faz `git fetch origin data --depth=500`)."
+            "Clone shallow demais? (o workflow faz `git fetch origin data` completo)."
         )
     snaps.sort(key=lambda p: p[0])
     return snaps, saltados

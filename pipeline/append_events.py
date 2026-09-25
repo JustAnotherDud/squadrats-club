@@ -92,7 +92,7 @@ def main(out_dir):
                 f"club_regioes.json e não traz (ultimo={ultimo}, hoje={hoje}; "
                 f"{n_commits} commit(s) do ficheiro na branch, {len(saltados)} ilegível(is); "
                 f"events.json com {len(atual['eventos'])} evento(s)). "
-                "Checkout shallow demais? O workflow faz `git fetch origin data --depth=500`. "
+                "Checkout shallow demais? O workflow faz `git fetch origin data` completo. "
                 "Abortado para não escrever eventos com datas erradas."
             )
         try:

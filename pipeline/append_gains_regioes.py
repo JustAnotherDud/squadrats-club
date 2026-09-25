@@ -63,8 +63,8 @@ def main(out_dir):
     # um dia ainda não coberto. O topo de origin/data pode ser um snapshot de
     # hoje mais cedo (2.º run do dia), usá-lo como baseline daria um delta
     # intra-dia que substituiria a entrada certa do dia. Nesse caso não se
-    # toca no que já lá está; o run seguinte com histórico (--depth=500 no
-    # workflow) recomputa em condições.
+    # toca no que já lá está; o run seguinte com histórico recomputa em
+    # condições.
     if len(dias) < 2 and hoje not in por_data:
         raw = subprocess.run(
             ["git", "-C", REPO, "show", "origin/data:data/club_regioes.json"],

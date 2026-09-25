@@ -45,8 +45,8 @@ jobs:
           git config user.name "squadrats-bot"
           git config user.email "actions@users.noreply.github.com"
           # parte do último estado publicado (cache de cobertura, base dos
-          # ganhos); o append_events e o append_ganhos lêem o histórico
-          git fetch origin data --depth=500
+          # ganhos). Histórico completo: o append_ganhos recalcula tudo desde o início
+          git fetch origin data
           git checkout origin/data -- $FILES "$PROFILES_DIR" "$REGIOES_DIR"
 
       # um passo só: os consumidores partilham o varrimento de cada atleta

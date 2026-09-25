@@ -4,9 +4,8 @@
 Recompute total, não incremental: o histórico de squadrats.json na branch
 `data` já é a fonte de verdade completa, por isso recalcular tudo a cada
 corrida dá sempre o mesmo resultado correcto, sem estado próprio a poder
-desalinhar. Custo: um `git show` por commit de squadrats.json, limitado
-pelo `--depth=500` do workflow (poucos segundos, mesma ordem de grandeza
-do append_events.py).
+desalinhar. Precisa do histórico completo da branch (o workflow faz o
+fetch sem --depth). Custo: um `git show` por commit de squadrats.json.
 
 Uso: py append_ganhos.py [pasta_saida]
 """
