@@ -302,7 +302,7 @@ ORDEM_TIPO = {"marco_clube": -2, "marco_total": -1,
 
 
 def ordenar_feed(evs):
-    """Ordena para o feed: dia desc; dentro do dia os marcos de totais primeiro
+    """Ordena para o feed: dia asc (o site inverte); dentro do dia os marcos de totais primeiro
     (notícia), depois os eventos regionais agrupados por país/nível/região."""
     return sorted(evs, key=lambda e: (
         e["data"],
