@@ -6,8 +6,6 @@ mostra em que regiões caíram.
 Só z17: o club.json é z17, portanto só a coluna Squadratinhos tem "onde".
 
 Consumido por:
-  - backfill_gains_regioes.py  (26 jul -> ontem, reconstrói cada dia do
-    histórico de data/club.json com o Classifier + cache (x,y)->região)
   - append_gains_regioes.py    (passo do run_all.py, diff de dois snapshots
     consecutivos de club_regioes.json, sem classificação nova)
   - build_profiles.py          (fatia por atleta para dentro de cada perfil)
@@ -38,8 +36,8 @@ def diff_snapshots(ant, novo):
     """{nome: {"concelho": {reg: ganho}, "distrito": {reg: ganho},
     "pais": {cc: ganho}}}, só entradas com ganho > 0. `pais` é só o
     estrangeiro (exclui PT), para dar nome ao resíduo do drill-down; vem do
-    bucket `country` do club_regioes.json ou de `by_pais` no snapshot
-    reconstruído pelo backfill.
+    bucket `country` do club_regioes.json ou de `by_pais` (snapshots
+    reconstruídos antes de 15 ago).
 
     Atleta ausente em `ant` (1.ª aparição) não gera ganho, o total dele
     inteiro apareceria como um pico. Mesmo critério do daily_gains.py."""

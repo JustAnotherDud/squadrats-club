@@ -1,9 +1,8 @@
 """Testes do eventos.detectar, sobretudo a guarda de estreia de atleta.
 
 O append (run_all.py) nunca exercita essa guarda hoje: os 5 atletas já estão
-todos no roster. Só o backfill a exercitou (quando o Pedro entrou a 1 ago
-gerava 54 eventos falsos). Estes testes garantem que a guarda não apodrece
-até alguém acrescentar um atleta ao ATHLETES_JSON.
+todos no roster. Estes testes garantem que a guarda não apodrece até alguém
+acrescentar um atleta ao ATHLETES_JSON.
 
 Correr: py -m pytest
 """

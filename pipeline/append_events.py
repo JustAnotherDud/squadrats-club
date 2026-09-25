@@ -1,11 +1,8 @@
 """Passo do run_all.py: acrescenta a data/events.json os eventos dos dias
-ainda não cobertos, sem reprocessar o histórico todo (isso é o
-backfill_events.py).
+ainda não cobertos, sem reprocessar o histórico todo.
 
-Trabalha por DIA UTC, tal como o backfill, assim os dois concordam sempre,
-mesmo quando o pipeline esteve parado vários dias e um run recupera o
-atraso (cada dia em falta fica com os seus eventos, não colapsa tudo no dia
-da recuperação). Num run normal (6×/dia) isto lê 1-2 commits, não 118.
+Trabalha por DIA UTC: quando o pipeline esteve parado vários dias, cada dia
+em falta fica com os seus eventos, não colapsa tudo no dia da recuperação.
 
 O snapshot "de hoje" é o club_regioes.json acabado de gerar (ainda não
 commitado); os dias anteriores vêm do histórico de `origin/data`.
@@ -77,7 +74,7 @@ def main(out_dir):
     # Só temos o snapshot de hoje. Duas situações MUITO diferentes:
     #   - events.json ainda vazio  -> primeiro run / arranque. Não há histórico
     #     de eventos a proteger; compara só o topo de origin/data com o novo
-    #     (1 par, tudo em `hoje`). É o backfill_events.py quem seeda a sério.
+    #     (1 par, tudo em `hoje`).
     #   - events.json já com eventos -> já publicámos snapshots antes, logo o
     #     histórico DEVIA estar acessível e não está: checkout shallow demais,
     #     branch reescrita, ou blobs em falta. Abortar: o fallback do topo

@@ -111,9 +111,6 @@ Not run by the workflow:
 - `refdata/prep.py`: rounds and simplifies the border files (`--check` only
   compares).
 - `refdata/clip.py`: see "Foreign municipalities" below.
-- `backfill_*.py`, `recon_snapshots.py`: rebuild `daily_gains.json`,
-  `events.json` and `gains_regioes.json` from the history of the `data`
-  branch.
 
 ## What each layer's `size` means
 

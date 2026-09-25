@@ -1,13 +1,10 @@
 """Detecção de eventos do clube a partir de snapshots de club_regioes.json.
 
 Um "evento" é uma mudança digna de nota no ranking por região (concelho ou
-distrito, só PT), ou um marco de totais. Consumido por:
-  - backfill_events.py (varre todo o histórico da branch `data`, uma vez)
-  - append_events.py (passo do run_all.py, compara só anterior vs actual)
+distrito, só PT), ou um marco de totais. Consumido pelo append_events.py.
 
-Ambos produzem exactamente os mesmos eventos para o mesmo par de snapshots,
-e a CHAVE de cada evento (`chave`) é por DIA, não por timestamp, os 6 runs/
-dia re-detectam o mesmo flip e o append é idempotente.
+A CHAVE de cada evento (`chave`) é por DIA, não por timestamp: os 6 runs/dia
+re-detectam o mesmo flip e o append é idempotente.
 
 Tipos:
   - ultrapassagem      X passou Y (X agora acima de Y; antes Y acima, ou X ausente)
@@ -34,8 +31,7 @@ MARCOS_CLUBE = [5000, 10000, 25000, 50000, 100000, 250000]
 
 ATLETAS_ORDEM = ["Zé", "Xeira", "Carolina", "Inês S.", "Pedro"]
 
-DESDE = "2026-07-26"  # 1.º dia com club.json (o histórico < 15 ago é
-                      # reconstruído do club.json, ver recon_snapshots.py)
+DESDE = "2026-07-26"  # 1.º dia com club.json
 
 
 def snapshots_commits(repo, branch, path, desde=None, com_anterior=False):
