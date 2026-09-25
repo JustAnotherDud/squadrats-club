@@ -39,7 +39,7 @@ DESDE = "2026-07-26"  # 1.º dia com club.json (o histórico < 15 ago é
 
 
 def snapshots_por_dia(repo, branch="origin/data", desde=None,
-                      path="data/club_regioes.json"):
+                      path="data/club_regioes.json", com_anterior=False):
     """(por_dia, saltados).
 
     `por_dia` = {data_utc: dict}, o ÚLTIMO snapshot commitado de cada dia UTC
@@ -60,7 +60,8 @@ def snapshots_por_dia(repo, branch="origin/data", desde=None,
 
     `desde` (YYYY-MM-DD) limita a leitura aos commits desse dia em diante, o
     passo incremental passa aqui o último dia já coberto para não ler o
-    histórico todo a cada run.
+    histórico todo a cada run. Com `com_anterior=True` junta também o último
+    snapshot antes de `desde`, a base para comparar o próprio dia `desde`.
     """
     import subprocess
     from datetime import datetime
@@ -71,6 +72,11 @@ def snapshots_por_dia(repo, branch="origin/data", desde=None,
     args += ["--", path]
     shas = subprocess.run(args, capture_output=True, text=True,
                           encoding="utf-8", check=True).stdout.split()
+    if desde and com_anterior:
+        shas += subprocess.run(
+            ["git", "-C", repo, "log", branch, "-1", "--format=%H",
+             f"--before={desde}T00:00:00Z", "--", path],
+            capture_output=True, text=True, encoding="utf-8", check=True).stdout.split()
 
     por_dia, ts_por_dia, saltados = {}, {}, []
     for sha in shas:

@@ -28,13 +28,13 @@ REPO = os.path.dirname(HERE)
 DATA_DIR = os.path.join(REPO, "data")
 
 
-def _n_commits_club_regioes(repo=REPO, branch="origin/data"):
+def _n_commits_club_regioes(branch="origin/data"):
     """Quantos commits de data/club_regioes.json existem em `branch`. 0 se a
     ref ou o ficheiro ainda não existem lá. Serve para distinguir 'nunca
     houve snapshot' (primeiro run, normal) de 'o histórico devia estar cá'
     (checkout shallow, anomalia)."""
     r = subprocess.run(
-        ["git", "-C", repo, "log", branch, "--format=%H", "--", "data/club_regioes.json"],
+        ["git", "-C", REPO, "log", branch, "--format=%H", "--", "data/club_regioes.json"],
         capture_output=True, text=True, encoding="utf-8",
     )
     return len(r.stdout.split()) if r.returncode == 0 else 0
@@ -62,11 +62,12 @@ def main(out_dir):
 
     ultimo = max((e["data"] for e in atual["eventos"]), default=eventos.DESDE)
 
-    # caminho preferido: walk dia-a-dia sobre o histórico de origin/data (precisa
-    # de profundidade, o workflow faz `git fetch origin data --depth=500`).
+    # walk dia-a-dia sobre o histórico de origin/data, a partir do último
+    # snapshot antes de `ultimo`: o dia `ultimo` pode ser hoje e precisa de base
     saltados = []
     try:
-        por_dia, saltados = eventos.snapshots_por_dia(REPO, "origin/data", desde=ultimo)
+        por_dia, saltados = eventos.snapshots_por_dia(REPO, "origin/data", desde=ultimo,
+                                                      com_anterior=True)
     except Exception as e:
         print(f"append_events: histórico de origin/data indisponível ({e})")
         por_dia = {}
@@ -120,7 +121,7 @@ def main(out_dir):
     sq_por_dia = {}
     try:
         sq_por_dia, _ = eventos.snapshots_por_dia(
-            REPO, "origin/data", desde=ultimo, path="data/squadrats.json")
+            REPO, "origin/data", desde=ultimo, path="data/squadrats.json", com_anterior=True)
     except Exception as e:
         print(f"append_events: histórico de squadrats.json indisponível, sem marcos de totais ({e})")
     if os.path.exists(sq_novo_path):
