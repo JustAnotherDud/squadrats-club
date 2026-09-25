@@ -18,14 +18,13 @@ DATA_DIR = os.path.join(os.path.dirname(HERE), "data")
 REFDATA_DIR = os.path.join(HERE, "refdata")  # fronteiras não-simplificadas, só para classificação
 
 
-def run_from_tiles(uid, out_dir, bbox=None):
+def run_from_tiles(uid, out_dir):
     """Varre o uid nos vector tiles (tiles_fetch.py) e escreve os ficheiros."""
     from atletas import known_squadratinhos
     from tiles_fetch import scan_athlete
 
-    kwargs = {"bbox": bbox} if bbox else {}
     known = known_squadratinhos(out_dir).get(uid)
-    resultado = scan_athlete(uid, with_trophy_geometry=True, known_squadratinhos=known, **kwargs)
+    resultado = scan_athlete(uid, with_trophy_geometry=True, known_squadratinhos=known)
     if resultado is None:
         # sem alterações: os ficheiros publicados já estão no out_dir
         print(f"UID '{uid}': sem alterações desde a última publicação, a manter ficheiros existentes")
