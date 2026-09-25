@@ -12,28 +12,13 @@ import argparse
 import os
 
 from atletas import ATHLETES
+from gen_lugar_stubs import cabeca
 from slugs import slug_map
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(HERE)
 
-STUB = """<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<link rel="manifest" href="../manifest.json">
-<link rel="icon" href="../favicon.ico" sizes="32x32">
-<link rel="icon" href="../icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<meta name="theme-color" content="#14131b">
-<title>{nome} · Squadrats Club</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../fonts/bricolage-grotesque.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../fonts/ibm-plex-sans-400.woff2">
-<link rel="stylesheet" href="../site.css">
-<link rel="stylesheet" href="perfil.css">
-</head>
-<body>
+STUB = cabeca("{nome}", "perfil.css") + """<body>
 <main id="perfil" data-slug="{slug}">
   <p class="perfil-estado">A carregar o perfil de {nome}…</p>
 </main>
@@ -44,23 +29,7 @@ STUB = """<!DOCTYPE html>
 </html>
 """
 
-INDICE = """<!DOCTYPE html>
-<html lang="pt">
-<head>
-<meta charset="UTF-8">
-<link rel="manifest" href="../manifest.json">
-<link rel="icon" href="../favicon.ico" sizes="32x32">
-<link rel="icon" href="../icon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="../apple-touch-icon.png">
-<meta name="theme-color" content="#14131b">
-<title>Perfis · Squadrats Club</title>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../fonts/bricolage-grotesque.woff2">
-<link rel="preload" as="font" type="font/woff2" crossorigin href="../fonts/ibm-plex-sans-400.woff2">
-<link rel="stylesheet" href="../site.css">
-<link rel="stylesheet" href="perfil.css">
-</head>
-<body>
+INDICE = cabeca("Perfis", "perfil.css") + """<body>
 <main id="perfil-indice">
   <h1>Perfis do clube</h1>
   <ul class="perfil-lista">
