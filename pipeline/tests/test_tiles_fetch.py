@@ -55,3 +55,8 @@ def test_probe_tile_tem_squadratinhos(servidor):
     servidor.clear()
     assert tiles_fetch._scan_athlete("u", known_squadratinhos=1) is None
     assert servidor == [(10, 501, 390)]
+
+
+def test_descoberta_nao_repete_pedidos(servidor):
+    tiles_fetch._scan_athlete("u")
+    assert len(servidor) == len(set(servidor))

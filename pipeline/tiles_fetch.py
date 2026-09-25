@@ -178,20 +178,17 @@ def _project_geometry(geom, z, x, y, extent):
 
 
 def _fetch_batch(uid, z, candidates):
-    """Devolve o subconjunto de `candidates` (x, y) com cobertura (200) a este zoom."""
-    covered = []
+    """{(x, y): decoded|None} de todos os `candidates` a este zoom."""
     with ThreadPoolExecutor(max_workers=DISCOVERY_CONCURRENCY) as pool:
         futures = {pool.submit(fetch_tile, uid, z, x, y): (x, y) for x, y in candidates}
-        for fut, xy in futures.items():
-            if fut.result() is not None:
-                covered.append(xy)
-    return covered
+        return {xy: fut.result() for fut, xy in futures.items()}
 
 
 def discover_coverage(uid):
-    """Descoberta em cascata, devolve os tiles (x, y) com cobertura no último
-    zoom de DISCOVERY_LEVELS. Cada nível só explora os filhos dos tiles com
-    cobertura no anterior, por isso o custo cresce com a cobertura real."""
+    """Descoberta em cascata, devolve {(x, y): decoded|None} dos tiles pedidos
+    no último zoom de DISCOVERY_LEVELS. Cada nível só explora os filhos dos
+    tiles com cobertura no anterior, por isso o custo cresce com a cobertura
+    real."""
     levels = DISCOVERY_LEVELS
     lon_min, lat_min, lon_max, lat_max = WORLD_BBOX
     z0 = levels[0]
@@ -202,10 +199,11 @@ def discover_coverage(uid):
     current = [(x, y) for x in range(xlo, xhi + 1) for y in range(ylo, yhi + 1)]
 
     for i, z in enumerate(levels):
-        hits = _fetch_batch(uid, z, current)
+        tiles = _fetch_batch(uid, z, current)
+        hits = [xy for xy, d in tiles.items() if d is not None]
         print(f"descoberta z{z}: {len(hits)}/{len(current)} tiles com cobertura")
         if i == len(levels) - 1:
-            return hits
+            return tiles
         next_z = levels[i + 1]
         factor = 2 ** (next_z - z)
         current = [
@@ -213,7 +211,6 @@ def discover_coverage(uid):
             for hx, hy in hits
             for dx in range(factor) for dy in range(factor)
         ]
-    return current
 
 
 _CACHE = {}
@@ -395,7 +392,10 @@ def _scan_athlete(uid, known_squadratinhos=None):
         print("cache de cobertura desatualizada (reconstrução não bate com o size "
               "do servidor, squares numa zona nova?), descoberta completa...")
 
-    coarse_covered = discover_coverage(uid)
+    descobertos = discover_coverage(uid)
+    if coarse_zoom == FETCH_ZOOM:
+        results.update(descobertos)  # já buscados na descoberta, não repetir
+    coarse_covered = [xy for xy, d in descobertos.items() if d is not None]
     candidates = _children(coarse_covered, factor)
     print(f"a buscar {len(candidates)} tiles z{FETCH_ZOOM}...")
     _fetch_missing(uid, FETCH_ZOOM, candidates, results)
