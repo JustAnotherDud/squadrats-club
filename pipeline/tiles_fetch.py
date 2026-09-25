@@ -403,6 +403,6 @@ def _scan_athlete(uid, known_squadratinhos=None):
 
     # cobertura real = tiles de coarse_zoom com conteúdo no fetch fino
     with_data = {(x // factor, y // factor) for (x, y), d in results.items() if d is not None}
-    probe_tile = next((xy for xy, d in results.items() if d is not None), None)
+    probe_tile = next((xy for xy, d in results.items() if _serve_para_probe(d)), None)
     _write_coverage_cache(uid, with_data, probe_tile)
     return geometries, counts, trophies
