@@ -6,8 +6,6 @@ state.json
 .env
 *.key.json
 .secrets/
-pipeline/spikes/*.pbf
-pipeline/spikes/*.pkl
 
 # Dados gerados pelo fetch-map-data.yml: vivem só na branch `data`.
 # Localmente: `git checkout origin/data -- data/`.

@@ -114,7 +114,6 @@ Not run by the workflow:
 - `backfill_*.py`, `recon_snapshots.py`: rebuild `daily_gains.json`,
   `events.json` and `gains_regioes.json` from the history of the `data`
   branch.
-- `spikes/`: one-off experiments.
 
 ## What each layer's `size` means
 

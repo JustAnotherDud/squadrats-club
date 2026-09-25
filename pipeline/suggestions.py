@@ -2,8 +2,8 @@
 que garante que sabemos reproduzir as regras da Squadrats antes de as usar
 para sugerir seja o que for.
 
-Validado em pipeline/spikes/reproduzir_regras.py contra o `size` real do
-servidor (yard/übersquadrat batem exatamente, para squadrats e squadratinhos).
+verify_rules confirma em cada corrida que as regras batem com o `size` do
+servidor (yard e übersquadrat, nas duas grelhas).
 """
 from collections import deque
 
