@@ -29,9 +29,9 @@ jobs:
     permissions:
       contents: write
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
-      - uses: actions/setup-python@v5
+      - uses: actions/setup-python@v7
         with:
           python-version: "3.12"
           cache: "pip"
@@ -41,12 +41,13 @@ jobs:
 
       - name: Carregar o estado mais recente da branch 'data'
         run: |
+          # identidade dos commits do bot, para todos os passos (e o worktree)
+          git config user.name "squadrats-bot"
+          git config user.email "actions@users.noreply.github.com"
           # parte do último estado publicado (cache de cobertura, base dos
           # ganhos); o append_events e o append_ganhos lêem o histórico
           git fetch origin data --depth=500
-          git checkout origin/data -- $FILES
-          git checkout origin/data -- "$PROFILES_DIR" 2>/dev/null || true
-          git checkout origin/data -- "$REGIOES_DIR" 2>/dev/null || true
+          git checkout origin/data -- $FILES "$PROFILES_DIR" "$REGIOES_DIR"
 
       # um passo só: os consumidores partilham o varrimento de cada atleta
       - name: Varrer e gerar tudo (mapa detalhado + totais do clube + club)
@@ -62,9 +63,6 @@ jobs:
             echo "sem alterações reais, nada a publicar."
             exit 0
           fi
-
-          git config user.name "squadrats-bot"
-          git config user.email "actions@users.noreply.github.com"
 
           # worktree à parte: o checkout principal nunca troca de branch
           git worktree add -B data /tmp/data-branch origin/data
@@ -83,8 +81,6 @@ jobs:
           done
 
           cd /tmp/data-branch
-          git config user.name "squadrats-bot"
-          git config user.email "actions@users.noreply.github.com"
           git add $FILES
           git add -A "$PROFILES_DIR" "$REGIOES_DIR"
           git commit -m "chore(data): atualizar squares via vector tiles [skip ci]"
@@ -101,9 +97,6 @@ jobs:
         run: |
           python3 pipeline/gen_profile_stubs.py
 
-          git config user.name "squadrats-bot"
-          git config user.email "actions@users.noreply.github.com"
-
           git add atletas/
           if git diff --cached --quiet -- atletas/; then
             echo "stubs dos perfis sem alterações, nada a commitar."
@@ -118,8 +111,6 @@ jobs:
         run: |
           python3 pipeline/gen_lugar_stubs.py
 
-          git config user.name "squadrats-bot"
-          git config user.email "actions@users.noreply.github.com"
           git add lugares/
           if git diff --cached --quiet -- lugares/; then
             echo "stubs dos lugares sem alterações, nada a commitar."
@@ -135,9 +126,6 @@ jobs:
         if: always()
         continue-on-error: true
         run: |
-          git config user.name "squadrats-bot"
-          git config user.email "actions@users.noreply.github.com"
-
           dias=$(( ( $(date +%s) - $(git log -1 --format=%ct) ) / 86400 ))
           if [ "$dias" -lt 25 ]; then
             echo "último commit ao main há $dias dias, schedule seguro, nada a fazer."
