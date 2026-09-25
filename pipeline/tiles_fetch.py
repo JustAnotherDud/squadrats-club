@@ -19,6 +19,8 @@ from shapely.geometry import Polygon, box
 from shapely.ops import unary_union
 from shapely.validation import make_valid
 
+from kml_parse import reconstruct_squares
+
 USER_AGENT = "squadrats-club-sync/1.0 (+github.com/JustAnotherDud/squadrats-club)"
 # Concorrência baixa de propósito (servidor de terceiros). Não subir sem medir
 # se aparecem 500s ou lentidão.
@@ -289,11 +291,26 @@ def _assemble_layers(results):
     return geometries, counts, trophies
 
 
+def squares_validados(geometries, name, uid):
+    """Squares (x, y, lon, lat) da camada, validados contra o `size` do
+    servidor. Camada ausente dá [] com aviso: é também o que um UID errado
+    devolve (204 em todos os tiles)."""
+    if name not in geometries:
+        print(f"ATENÇÃO: UID '{uid}' devolveu 0 squares em '{name}', confirma se o UID está certo (squadrats.com/map/{uid}/17)")
+        return []
+    declared, geom = geometries[name]
+    squares = reconstruct_squares(geom, GEOMETRY_LAYERS[name])
+    if declared is None or len(squares) != declared:
+        raise RuntimeError(
+            f"UID '{uid}': {name}, reconstruídos {len(squares)}, servidor diz "
+            f"{declared}. Varrimento incompleto ou bug de geometria, a abortar sem publicar."
+        )
+    return squares
+
+
 def _coverage_complete(geometries):
     """True se a reconstrução bate com o `size` do servidor em todas as
     camadas presentes, ou seja, a cache de cobertura apanhou tudo."""
-    from kml_parse import reconstruct_squares
-
     if not geometries:
         return False
     for name, zoom in GEOMETRY_LAYERS.items():

@@ -16,8 +16,7 @@ import os
 
 import daily_gains
 from atletas import ATHLETES, known_squadratinhos
-from kml_parse import reconstruct_squares
-from tiles_fetch import GEOMETRY_LAYERS, scan_athlete
+from tiles_fetch import GEOMETRY_LAYERS, scan_athlete, squares_validados
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO_DIR = os.path.dirname(HERE)
@@ -34,23 +33,7 @@ def fetch_totals(uid, known=None):
 
     totals = dict(counts)
     for name in GEOMETRY_LAYERS:
-        if name not in geometries:
-            # zero é aceite, mas também é o que um UID errado devolve (204 em
-            # todos os tiles), por isso avisa
-            print(f"ATENÇÃO: UID '{uid}' devolveu 0 squares em '{name}', confirma se o UID está certo (squadrats.com/map/{uid}/17)")
-            totals[name] = 0
-            continue
-        declared_size, geom = geometries[name]
-        zoom = GEOMETRY_LAYERS[name]
-        reconstructed = len(reconstruct_squares(geom, zoom))
-        if declared_size is None or reconstructed != declared_size:
-            raise RuntimeError(
-                f"UID '{uid}': {name}, reconstruídos {reconstructed}, "
-                f"servidor diz {declared_size}. Varrimento incompleto ou bug de geometria, "
-                f"a abortar sem publicar squadrats.json."
-            )
-        totals[name] = declared_size
-
+        totals[name] = len(squares_validados(geometries, name, uid))
     return totals
 
 

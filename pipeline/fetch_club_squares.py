@@ -12,15 +12,14 @@ import json
 import os
 
 from atletas import ATLETAS, known_squadratinhos
-from kml_parse import reconstruct_squares
 from slugs import slugify
-from tiles_fetch import scan_athlete
+from tiles_fetch import scan_athlete, squares_validados
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 DATA_DIR = os.path.join(os.path.dirname(HERE), "data")
 
 CAMADA = "squadratinhos"
-ZOOM = 17
+ZOOM = 17  # o de CAMADA
 
 
 def squares_de(uid, known=None, anteriores_squares=None, bit=None):
@@ -34,20 +33,7 @@ def squares_de(uid, known=None, anteriores_squares=None, bit=None):
     if resultado is None:
         return {(x, y) for x, y, m in (anteriores_squares or []) if m & bit}
     geometries, _ = resultado
-    if CAMADA not in geometries:
-        # zero é aceite, mas também é o que um UID errado devolve, por isso avisa
-        print(f"ATENÇÃO: UID '{uid}' devolveu 0 squares em '{CAMADA}', confirma se o UID está certo (squadrats.com/map/{uid}/17)")
-        return set()
-
-    declared_size, geom = geometries[CAMADA]
-    squares = {(x, y) for x, y, _lon, _lat in reconstruct_squares(geom, ZOOM)}
-    if declared_size is None or len(squares) != declared_size:
-        raise RuntimeError(
-            f"UID '{uid}': {CAMADA}, reconstruídos {len(squares)}, servidor diz "
-            f"{declared_size}. Varrimento incompleto ou bug de geometria, a abortar "
-            f"sem publicar club.json."
-        )
-    return squares
+    return {(x, y) for x, y, _lon, _lat in squares_validados(geometries, CAMADA, uid)}
 
 
 def main(out_dir):
