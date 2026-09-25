@@ -63,6 +63,7 @@ def snapshots_por_dia(repo, branch="origin/data", desde=None,
     histórico todo a cada run. Com `com_anterior=True` junta também o último
     snapshot antes de `desde`, a base para comparar o próprio dia `desde`.
     """
+    import json
     import subprocess
     from datetime import datetime
 
@@ -90,7 +91,7 @@ def snapshots_por_dia(repo, branch="origin/data", desde=None,
             saltados.append((sha, hint))
             continue
         try:
-            d = __import__("json").loads(r.stdout)
+            d = json.loads(r.stdout)
             ts = datetime.fromisoformat(d["atualizado"].replace("Z", "+00:00"))
         except Exception as e:
             saltados.append((sha, f"club_regioes.json inesperado: {type(e).__name__}: {e}"))
@@ -145,11 +146,11 @@ def ranking(counts):
     return [n for n, _ in presentes]
 
 
-def _marco_cruzado(nivel, antes, agora):
-    """O patamar MAIS ALTO cruzado entre `antes` e `agora` (None se nenhum).
+def _cruzado(patamares, antes, agora):
+    """O patamar mais alto cruzado entre `antes` e `agora` (None se nenhum).
     Num sync grande (20 -> 55) cruzam-se 25 e 50 de uma vez, mas o 50 já
     implica o 25, o evento pequeno é redundante no feed."""
-    cruzados = [T for T in MARCOS.get(nivel, []) if antes < T <= agora]
+    cruzados = [T for T in patamares if antes < T <= agora]
     return max(cruzados) if cruzados else None
 
 
@@ -178,7 +179,7 @@ def detectar(anterior, atual, data):
 
         # --- marcos (independentes do ranking), só o patamar mais alto/dia ---
         for atl, agora in cb.items():
-            T = _marco_cruzado(nivel, ca.get(atl, 0), agora)
+            T = _cruzado(MARCOS.get(nivel, []), ca.get(atl, 0), agora)
             if T is not None:
                 eventos.append(_ev(data, cc, nivel, reg, "marco", atl, None, [T, agora]))
 
@@ -268,10 +269,6 @@ def detectar_totais(sq_ant, sq_hoje, uni_ant, uni_hoje, data):
     Um atleta que aparece pela 1.ª vez no snapshot não gera marco (mesma guarda
     de estreante do detectar()).
     """
-    def _cruzado(patamares, antes, agora):
-        c = [T for T in patamares if antes < T <= agora]
-        return max(c) if c else None
-
     out = []
     estreantes = set(sq_hoje) - set(sq_ant)
     for atl, agora in sq_hoje.items():

@@ -17,10 +17,7 @@
   // Contar segmentos de location.pathname não serve: no GitHub Pages o path
   // tem o prefixo do repo (/squadrats-club/lugares/x.html = 3 segmentos) e
   // localmente não (/lugares/x.html = 2), mesma página, contagem diferente.
-  var meSrc = (document.currentScript && document.currentScript.getAttribute('src')) || '';
-  var P = meSrc
-    ? (meSrc.match(/\.\.\//g) || []).join('')
-    : (/\/(atletas|lugares)\//.test(location.pathname) ? '../' : '');  // fallback
+  var P = (document.currentScript.getAttribute('src').match(/\.\.\//g) || []).join('');
 
   // lugares/* e atletas/* acendem o seu item (a página está "debaixo" desse
   // destino), tal como um perfil acende "Perfis". As de subpasta têm de ser

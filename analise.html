@@ -612,7 +612,7 @@ function irParaRegiao(visao, key) {
 }
 function linkRegiao(visao, country, nome) {
   const key = chaveRegiao(country, nome);
-  return `<a href="#" data-goto-regiao="${visao}::${escapeHtml(key)}">${escapeHtml(nome)} →</a>`;
+  return `<a href="#" data-goto-regiao="${visao}::${esc(key)}">${esc(nome)} →</a>`;
 }
 // delegado num só sítio (sheet-detail é substituído por inteiro a cada
 // render, ligar directo aos elementos morria com o innerHTML seguinte)
@@ -649,7 +649,7 @@ function renderDetailCard(name) {
 
   container.innerHTML = `
     <button class="detail-back" id="detail-back-btn">← voltar à lista</button>
-    <h2>${BANDEIRA[info.country] || ''} ${escapeHtml(info.name)}</h2>
+    <h2>${BANDEIRA[info.country] || ''} ${esc(info.name)}</h2>
     <div class="detail-grid">${grid}${parentHtml}</div>
   `;
   document.getElementById('detail-back-btn').onclick = clearSelection;
@@ -744,7 +744,7 @@ function renderPaisDetailCard(cc) {
 
   container.innerHTML = `
     <button class="detail-back" id="detail-back-btn">← voltar à lista</button>
-    <h2>${BANDEIRA[cc]} ${escapeHtml(info.label)}</h2>
+    <h2>${BANDEIRA[cc]} ${esc(info.label)}</h2>
     <div class="detail-grid">${grid}</div>
   `;
   document.getElementById('detail-back-btn').onclick = clearPaisSelection;
@@ -852,7 +852,7 @@ function renderSquareDetailCard() {
   } else {
     const c = classificarPonto(latC, lonC);
     if (c) {
-      grid += `<div class="detail-item"><div class="label">País</div><div class="value">${BANDEIRA[c.country] || ''} ${escapeHtml(PAIS_INFO[c.country].label)}</div></div>`;
+      grid += `<div class="detail-item"><div class="label">País</div><div class="value">${BANDEIRA[c.country] || ''} ${esc(PAIS_INFO[c.country].label)}</div></div>`;
       grid += `<div class="detail-item"><div class="label">${c.country === 'PT' ? 'Distrito' : 'Região'}</div><div class="value">${linkRegiao('distritos', c.country, c.distrito)}</div></div>`;
       if (c.concelho) {
         grid += `<div class="detail-item"><div class="label">${c.country === 'PT' ? 'Concelho' : 'Concelho/Município'}</div><div class="value">${linkRegiao('concelhos', c.country, c.concelho)}</div></div>`;
@@ -917,7 +917,7 @@ function buildTable(tableId, columns, rows, sortKey, sortDir, interactive = true
   let tbody = '';
   sorted.forEach(row => {
     const selected = state.selected && state.selected.name === row.key;
-    tbody += `<tr class="selectable${selected ? ' selected' : ''}" data-name="${escapeHtml(row.key)}">`;
+    tbody += `<tr class="selectable${selected ? ' selected' : ''}" data-name="${esc(row.key)}">`;
     columns.forEach(col => {
       tbody += `<td class="${col.className || ''}">${col.render ? col.render(row) : row[col.key]}</td>`;
     });
@@ -1003,7 +1003,7 @@ function renderStats() {
 
     const columns = [
       { key: 'name', label: 'Nome', className: 'col-name',
-        render: r => `${BANDEIRA[r.country] || ''} ${escapeHtml(r.name)}` },
+        render: r => `${BANDEIRA[r.country] || ''} ${esc(r.name)}` },
       { key: 'captured', label: 'Capturados' },
       { key: 'total', label: 'Total', className: 'col-total' },
       { key: 'remaining', label: 'Por capturar', className: 'col-remaining' },
@@ -1042,7 +1042,7 @@ function renderStats() {
           <select data-zero-parent="${country}">
             <option value="">escolher para mostrar…</option>
             <option value="__TODOS__" ${escolhido === '__TODOS__' ? 'selected' : ''}>mostrar tudo (${rows.length.toLocaleString('pt-PT')})</option>
-            ${parentsOrdenados.map(p => `<option value="${escapeHtml(p)}" ${p === escolhido ? 'selected' : ''}>${escapeHtml(p)} (${porParent.get(p).length})</option>`).join('')}
+            ${parentsOrdenados.map(p => `<option value="${esc(p)}" ${p === escolhido ? 'selected' : ''}>${esc(p)} (${porParent.get(p).length})</option>`).join('')}
           </select>
         </div>`;
       }
@@ -1069,10 +1069,6 @@ function renderStats() {
   html += `<div class="note">Grelha: ${state.grelha === 'squadrats' ? 'squadrats (1609 m)' : 'squadratinhos (201 m)'} · fronteiras de concelho via GADM + OSM (ref:ine) · totais da grelha calculados uma vez (<code>compute_grid_totals.py</code>), nunca recalculados por export</div>`;
 
   document.getElementById('sheet-list').innerHTML = html;
-}
-
-function escapeHtml(s) {
-  return s.replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 }
 
 document.getElementById('sheet-list').addEventListener('change', e => {

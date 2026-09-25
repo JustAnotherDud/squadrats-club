@@ -84,10 +84,7 @@ def _simplificar(geom, alvo=4000):
         return len(json.dumps(g, separators=(",", ":")))
     if not geom or compacto(geom) <= alvo:
         return geom
-    try:
-        from shapely.geometry import shape, mapping, MultiPolygon
-    except ImportError:
-        return geom
+    from shapely.geometry import shape, mapping, MultiPolygon
     forma = shape(geom)
     if isinstance(forma, MultiPolygon) and len(forma.geoms) > 4:
         maior = max(p.area for p in forma.geoms)
