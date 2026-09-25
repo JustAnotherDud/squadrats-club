@@ -1,15 +1,12 @@
-"""Lógica partilhada das páginas por região (concelho/distrito, PT).
+"""Lógica partilhada das páginas de lugar (PT, estrangeiro e país).
 
 Consumido por:
   - append_regioes.py    (passo do run_all.py: reescreve o estado actual de
                           cada região activa, idempotente)
   - gen_lugar_stubs.py   (escreve lugares/<key>.html a partir de data/regioes/)
 
-Cada região com actividade (algum atleta com >=1 square lá) tem um ficheiro
-data/regioes/<key>.json, onde key = "c-<slug>" (concelho) ou "d-<slug>"
-(distrito), o prefixo desambigua os 18 nomes que são concelho E distrito
-(Santarém, Coimbra, ...). O slug é o mesmo do pipeline.slugs.slugify, para o
-historico.html poder reconstruir o URL com um slugify igual em JS.
+Cada lugar com actividade tem um ficheiro data/regioes/<key>.json (ver
+key_de). O slug é o de slugs.slugify, igual ao slugify do shared.js.
 """
 import json
 import os
@@ -46,12 +43,9 @@ PAIS_NOME = {
 # usa. País não tem (grande de mais, nem há botão).
 #
 # Fonte por nível: os níveis finos (concelho PT, zona estrangeira) leem a
-# geometria PRECISA de refdata/ -- a cópia simplificada de data/ (feita pelo
-# prep.py para o analise.html desenhar a zoom de país) perde lóbulos de
-# municípios pequenos, e o traço encostado aos squares reais mostrava-o
-# (Lobios ~1 km a norte, Montijo perdia um lobo). Distrito, região
-# estrangeira e país ficam em data/: o square está sempre longe da fronteira,
-# a diferença é invisível.
+# geometria precisa de refdata/: a cópia simplificada de data/ perde lóbulos
+# de municípios pequenos. Distrito e região estrangeira usam data/, onde a
+# diferença não se vê.
 _REPO = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_GEOJSON_DIR = os.path.join(_REPO, "data")
 REFDATA_DIR = os.path.join(os.path.dirname(os.path.abspath(__file__)), "refdata")
@@ -83,13 +77,9 @@ def _geojson_features(base, rel):
 
 
 def _simplificar(geom, alvo=4000):
-    """Encolhe uma fronteira gorda para ~`alvo` bytes. Duas causas de gordura:
-      - MultiPolygon com muitas ilhas minúsculas (Funchal traz as Selvagens,
-        178 partes) -> fica só com as partes >= 1% da maior;
-      - contorno com demasiados vértices (regiões MA, sub-simplificadas no
-        prep.py) -> Douglas-Peucker com a tolerância a subir até caber.
-    A fronteira é um traço a zoom <= 11, ilhéus e sub-km não contam. Sem
-    shapely, devolve como está."""
+    """Encolhe uma fronteira para ~`alvo` bytes: tira ilhas com menos de 1%
+    da maior parte e simplifica com tolerância crescente até caber. É um
+    traço a zoom <= 11, o detalhe fino não conta."""
     def compacto(g):
         return len(json.dumps(g, separators=(",", ":")))
     if not geom or compacto(geom) <= alvo:
@@ -185,7 +175,7 @@ def ranking_de(club_regioes, nivel, nome):
     return _ordena_ranking([(a, n) for a, n in pares if n > 0])
 
 
-# --- estrangeiro (Fase 2) ---------------------------------------------------
+# --- estrangeiro ------------------------------------------------------------
 
 def ativas_estrangeiro(club_regioes):
     """{ccl: {"regiao": set(nomes), "zona": set(nomes)}} do estrangeiro com

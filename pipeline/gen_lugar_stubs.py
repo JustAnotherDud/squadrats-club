@@ -1,9 +1,7 @@
 """Gera os stubs HTML das páginas de lugar: lugares/<key>.html, um por
 ficheiro em data/regioes/ (concelho/distrito PT, região/zona estrangeira,
-país). Cada stub é só casca: carrega ../nav.js, ../shared.js e ../regiao.js,
-que lê data/regioes/<key>.json da branch `data` e trata dos cinco níveis.
-(A pasta das páginas é lugares/; a dos dados na branch `data` continua
-regioes/ e não se toca, ninguém a vê.)
+país). Cada stub é só casca: comum.js e regiao.js lêem
+data/regioes/<key>.json da branch `data`.
 
 Corre no fetch-map-data.yml a seguir ao append_regioes; commita para o `main`
 só se a lista de lugares tiver mudado (padrão do gen_profile_stubs.py).
@@ -52,8 +50,7 @@ def main(repo_dir, dados_dir):
     destino = os.path.join(repo_dir, "lugares")
     os.makedirs(destino, exist_ok=True)
 
-    # só o index.html é à mão; as pais-*.html passaram a geradas (têm
-    # data/regioes/pais-<ccl>.json desde a Fase 3).
+    # só o index.html é à mão
     escritos = {"index.html"}
     for p in sorted(glob.glob(os.path.join(dados_dir, "regioes", "*.json"))):
         key = os.path.splitext(os.path.basename(p))[0]  # <key>.json -> <key>

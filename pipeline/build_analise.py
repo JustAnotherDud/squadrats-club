@@ -1,17 +1,9 @@
-"""Constrói a análise pessoal detalhada (analise.html) a partir dos vector tiles
-do squadrats.com de UM uid, classifica cada square por concelho/distrito e
-escreve tile_info_*.json, stats.json, trophies.json, suggestions.json.
+"""Análise pessoal (analise.html) de UM uid: classifica cada square por
+concelho/distrito e escreve tile_info_*.json, stats.json, trophies.json e
+suggestions.json. Para actualizar tudo, usar run_all.py.
 
 Uso:
   py build_analise.py --uid <firebase_uid> [pasta_saida]
-
-ATENÇÃO: correr este ficheiro directamente só actualiza o analise.html. Não toca
-em squadrats.json/club.json/daily_gains.json, os ficheiros que o
-folha-do-clube e o club.html lêem. Para actualizar tudo de uma vez (o que se
-quer quase sempre), usar `run_all.py`, não este ficheiro. Fora de emergência
-local, preferir mesmo `gh workflow run fetch-map-data.yml`, corre run_all.py
-já dentro do fluxo normal de publicação na branch `data`, sem montagem manual
-de git worktree.
 """
 import argparse
 import json
@@ -27,8 +19,7 @@ REFDATA_DIR = os.path.join(HERE, "refdata")  # fronteiras não-simplificadas, s�
 
 
 def run_from_tiles(uid, out_dir, bbox=None):
-    """Fonte principal: fetch directo aos vector tiles da Squadrats (ver
-    tiles_fetch.py). Substitui o export manual de KML."""
+    """Varre o uid nos vector tiles (tiles_fetch.py) e escreve os ficheiros."""
     from atletas import known_squadratinhos
     from tiles_fetch import scan_athlete
 
@@ -36,11 +27,7 @@ def run_from_tiles(uid, out_dir, bbox=None):
     known = known_squadratinhos(out_dir).get(uid)
     resultado = scan_athlete(uid, with_trophy_geometry=True, known_squadratinhos=known, **kwargs)
     if resultado is None:
-        # probe confirmou "sem alterações" (ver tiles_fetch.py), os
-        # ficheiros que este UID publica (tile_info_*.json, stats.json,
-        # trophies.json, suggestions.json) já estão no out_dir, carregados da
-        # branch 'data' antes de correr, não tocar neles é o comportamento
-        # certo, não é um "esquecimento".
+        # sem alterações: os ficheiros publicados já estão no out_dir
         print(f"UID '{uid}': sem alterações desde a última publicação, a manter ficheiros existentes")
         return {}
     geoms, counts, trophies = resultado
@@ -196,10 +183,7 @@ def run_from_geoms(geoms, out_dir, counts=None):
         squares = reconstruct_squares(geom, zoom)
 
         if declared_size is not None and len(squares) != declared_size:
-            # a auto-validação É a rede de segurança do pipeline (ver
-            # tiles_fetch.py), nunca publicar dados que não batam com o total
-            # que o próprio servidor da Squadrats reporta. Era tolerável (só
-            # aviso) no caminho do KML, que deixou de existir em 2026-08-18.
+            # nunca publicar dados que não batam com o total do servidor
             raise RuntimeError(
                 f"{type_name}, reconstruídos {len(squares)}, declarados {declared_size} "
                 f"(diferença indica varrimento incompleto ou bug de geometria)"
@@ -352,10 +336,7 @@ def run_from_geoms(geoms, out_dir, counts=None):
         json.dump(stats, f, ensure_ascii=False, separators=(",", ":"))
     print(f"stats -> {stats_path}")
 
-    # diagnóstico só no log: quantos squares não estão em terra nenhuma e
-    # quantos foram resolvidos por proximidade (fenda de dados vs água). O
-    # ficheiro classification_fallbacks.json que isto escrevia não era lido
-    # por ninguém, tirado no passe de limpeza.
+    # diagnóstico só no log: squares fora de terra e resolvidos por proximidade
     print(f"classificação: {not_on_land}/{total_squares} squares não estão em terra "
           f"nenhuma (resolvidos por proximidade ou sem classificação); "
           f"{len(fallback_events)} campos (país/concelho) resolvidos por proximidade")

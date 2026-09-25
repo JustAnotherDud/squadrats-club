@@ -8,15 +8,6 @@ Consumido por append_ganhos.py (passo do run_all.py).
 Uma "janela de ganho" é [inicio, fim] = os "atualizado" de dois snapshots
 consecutivos de squadrats.json, para um atleta com ganho > 0 de
 squadratinhos nesse intervalo.
-
-(Até 2026-09-13 este módulo também cruzava as janelas com o feed de
-actividades do Strava via folha-do-clube/activities.json, gravado em
-data/atividades.json com uma actividade correspondente por janela quando
-havia. Removido: a taxa real de correspondência ficou em ~9% (7 de 83
-janelas), a coluna "sem actividade Strava correspondente" repetida em mais
-de 90% das linhas era mais ruído do que valor. O histórico continua no git,
-ver o commit que apagou cruzar()/append_atividades.py se um dia isto voltar
-a fazer sentido, ex. com o training_activities pessoal do dono da sessão.)
 """
 import json
 import subprocess
@@ -28,13 +19,9 @@ def _iso(s):
 
 
 def snapshots_todos(repo, branch="origin/data", path="data/squadrats.json"):
-    """[(datetime, dict), ...] em ordem cronológica, UM POR COMMIT (ao
-    contrário de eventos.snapshots_por_dia, que só guarda o último de cada
-    dia) -- cada commit é uma corrida do pipeline, com o seu próprio
-    "atualizado". Mesmo tratamento de commits ilegíveis que
-    snapshots_por_dia: salta e avisa, só levanta RuntimeError se a branch
-    tiver commits do ficheiro e NENHUM for legível (histórico presente mas
-    inacessível, quase sempre um `git fetch --depth` curto demais)."""
+    """[(datetime, dict), ...] em ordem cronológica, um por commit (cada
+    commit é uma corrida). Salta e avisa commits ilegíveis; levanta
+    RuntimeError se nenhum for legível."""
     args = ["git", "-C", repo, "log", branch, "--format=%H", "--reverse", "--", path]
     shas = subprocess.run(args, capture_output=True, text=True,
                           encoding="utf-8", check=True).stdout.split()
@@ -70,10 +57,8 @@ def snapshots_todos(repo, branch="origin/data", path="data/squadrats.json"):
 
 
 def deltas_squadratinhos(snaps):
-    """[{"atleta", "inicio", "fim", "ganho"}, ...] -- ganho de squadratinhos
-    por atleta entre cada par de snapshots consecutivos, só onde ganho > 0.
-    A maioria dos pares dá ganho 0 (6 corridas/dia, poucas com sincronização
-    nova) e fica de fora, por construção."""
+    """[{"atleta", "inicio", "fim", "ganho"}, ...]: ganho de squadratinhos
+    por atleta entre snapshots consecutivos, só onde ganho > 0."""
     janelas = []
     for (t0, d0), (t1, d1) in zip(snaps, snaps[1:]):
         antes, depois = d0.get("atletas", {}), d1.get("atletas", {})

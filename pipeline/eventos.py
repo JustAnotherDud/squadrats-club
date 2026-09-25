@@ -1,16 +1,13 @@
 """Detecção de eventos do clube a partir de snapshots de club_regioes.json.
 
 Um "evento" é uma mudança digna de nota no ranking por região (concelho ou
-distrito, só PT, ver squadrats-historico-plano abaixo). Consumido por:
+distrito, só PT), ou um marco de totais. Consumido por:
   - backfill_events.py (varre todo o histórico da branch `data`, uma vez)
   - append_events.py (passo do run_all.py, compara só anterior vs actual)
 
 Ambos produzem exactamente os mesmos eventos para o mesmo par de snapshots,
 e a CHAVE de cada evento (`chave`) é por DIA, não por timestamp, os 6 runs/
-dia re-detectam o mesmo flip e o append é idempotente (ver README).
-
-Níveis: só `concelho` e `distrito`, só PT. Região/município estrangeiros e
-país: zero eventos em toda a história (2026-08-15+), ficam de fora do v1.
+dia re-detectam o mesmo flip e o append é idempotente.
 
 Tipos:
   - ultrapassagem      X passou Y (X agora acima de Y; antes Y acima, ou X ausente)
@@ -21,10 +18,8 @@ Tipos:
   - marco              X cruzou um patamar de squadratinhos (só para cima)
 """
 
-# patamares por nível, escolhidos contra o histórico real (ver plano):
-# concelho arranca em 25 (~1 km² coberto, "andou lá a sério"), distrito mais
-# alto porque acumula naturalmente mais. Só cruzados para cima.
-# Backfill (26 jul+): ~28 marcos. Projecção futura ~3-6/semana no total.
+# patamares por nível: concelho arranca em 25 (~1 km² coberto), distrito
+# mais alto porque acumula mais. Só cruzados para cima.
 MARCOS = {
     "concelho": [25, 50, 100, 250, 500, 1000],
     "distrito": [50, 100, 250, 500, 1000, 2500],
@@ -164,10 +159,8 @@ def detectar(anterior, atual, data):
     eventos = []
     na, nb = niveis_de(anterior), niveis_de(atual)
 
-    # Atleta que entra no roster (ATHLETES_JSON) não gera eventos no 1.º
-    # snapshot em que aparece, senão "passava" toda a gente em todas as
-    # regiões onde tem squares, num dia só. Mesmo critério do daily_gains.py.
-    # (Aconteceu no backfill quando o Pedro entrou a 1 ago: 54 eventos falsos.)
+    # Atleta que entra no roster não gera eventos no 1.º snapshot em que
+    # aparece, senão "passava" toda a gente num dia só.
     estreantes = (set((atual or {}).get("atletas", {}))
                   - set((anterior or {}).get("atletas", {})))
 

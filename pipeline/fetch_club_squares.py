@@ -1,15 +1,8 @@
-"""Squares dos três atletas com conta Squadrats, num ficheiro só, para a
-página do club (club.html).
+"""Squadratinhos de todos os atletas num ficheiro só, data/club.json.
 
-Só squadratinhos: a z14 os squares são grandes demais para a sobreposição
-dizer alguma coisa, toda a gente partilha o mesmo punhado de quadrados.
-
-Cada square sai como [x, y, mask], em que mask é um bitmask de quem o tem
-(bit 0 = primeiro atleta da lista, e por aí fora). Um ficheiro em vez de
-três evita mandar as coordenadas repetidas dos squares partilhados, que são
-a maioria, vivem todos na mesma zona.
-
-Não classifica por concelho: aqui não serve para nada e é a parte lenta.
+Cada square sai como [x, y, mask], em que mask é o bitmask de quem o tem
+(bit 0 = primeiro atleta de ATHLETES_JSON). Assim os squares partilhados não
+se repetem. Só z17: a z14 quase tudo é partilhado.
 
 Uso: py fetch_club_squares.py [pasta_saida]
 """
@@ -42,12 +35,7 @@ def squares_de(uid, known=None, anteriores_squares=None, bit=None):
         return {(x, y) for x, y, m in (anteriores_squares or []) if m & bit}
     geometries, _ = resultado
     if CAMADA not in geometries:
-        # sem cobertura: o scan chegou aqui sem levantar erro, e uma falha real
-        # (500, geometria inválida) já teria abortado antes disto. Mas isto
-        # também é o que um UID válido mas ERRADO (conta trocada, sem
-        # actividade) produz, 204 em todos os tiles, sem excepção, e o
-        # servidor não distingue os dois casos. Por isso: zero continua a ser
-        # aceite (não aborta o run todo), mas nunca em silêncio.
+        # zero é aceite, mas também é o que um UID errado devolve, por isso avisa
         print(f"ATENÇÃO: UID '{uid}' devolveu 0 squares em '{CAMADA}', confirma se o UID está certo (squadrats.com/map/{uid}/17)")
         return set()
 

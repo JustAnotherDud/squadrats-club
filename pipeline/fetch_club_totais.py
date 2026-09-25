@@ -35,13 +35,8 @@ def fetch_totals(uid, known=None):
     totals = dict(counts)
     for name in GEOMETRY_LAYERS:
         if name not in geometries:
-            # camada sem cobertura: o scan chegou aqui sem levantar erro, e uma
-            # falha real (500, geometria inválida) já teria abortado antes disto.
-            # Mas isto também é o que um UID válido mas ERRADO (conta trocada,
-            # sem actividade) produz, 204 em todos os tiles, sem excepção, e
-            # o servidor não distingue os dois casos. Por isso: zero continua a
-            # ser aceite como resultado (não aborta o run todo), mas nunca em
-            # silêncio, fica visível para confirmares o UID à mão.
+            # zero é aceite, mas também é o que um UID errado devolve (204 em
+            # todos os tiles), por isso avisa
             print(f"ATENÇÃO: UID '{uid}' devolveu 0 squares em '{name}', confirma se o UID está certo (squadrats.com/map/{uid}/17)")
             totals[name] = 0
             continue
@@ -60,20 +55,15 @@ def fetch_totals(uid, known=None):
 
 
 def main(out_dir):
-    # capturado UMA vez, no início, nunca recalculado depois do varrimento
-    # dos 5 atletas, para o "dia" do daily_gains.py nunca poder virar a meio
-    # de uma corrida lenta (ver discussão: uma corrida que atravessasse a
-    # meia-noite UTC atribuiria TODOS os ganhos detectados, mesmo os de horas
-    # antes, ao dia seguinte).
+    # lido uma vez, no início: o "dia" dos ganhos não pode virar a meio de
+    # uma corrida que atravesse a meia-noite UTC
     inicio = datetime.datetime.now(datetime.timezone.utc)
     result = {
         "atualizado": inicio.strftime("%Y-%m-%dT%H:%M:%SZ"),
         "atletas": {},
     }
 
-    # totais/probe-tile já publicados (branch 'data', carregados no out_dir
-    # antes desta corrida), fonte do probe barato e do "reaproveitar" quando
-    # ele confirma que nada mudou (ver tiles_fetch.py, atletas.py).
+    # totais já publicados: base do probe e do "reaproveitar"
     known = known_squadratinhos(out_dir)
     anteriores = {}
     try:
@@ -88,8 +78,7 @@ def main(out_dir):
         if totals is None:
             totals = anteriores.get(name)
             if totals is None:
-                # não devia acontecer: known só vem preenchido quando já há
-                # uma entrada anterior para este nome no mesmo squadrats.json
+                # known só tem UIDs com entrada anterior neste ficheiro
                 raise RuntimeError(
                     f"'{name}': probe disse 'sem alterações' mas não há publicação "
                     f"anterior para reaproveitar, inconsistência entre known_squadratinhos "
@@ -104,9 +93,7 @@ def main(out_dir):
         json.dump(result, f, ensure_ascii=False, indent=2)
     print(f"escrito: {out_path}")
 
-    # baseline = ultimo_total guardado no próprio daily_gains.json (sem git,
-    # por causa do checkout shallow no CI, ver daily_gains.py). hoje_iso vem
-    # do início da corrida (`inicio`), não de "agora", ver comentário acima.
+    # base = ultimo_total guardado no próprio daily_gains.json (ver daily_gains.py)
     delta = daily_gains.actualizar(out_dir, result["atletas"], hoje_iso=inicio.date().isoformat())
     if delta:
         print(f"ganhos desde a última corrida: {delta}")

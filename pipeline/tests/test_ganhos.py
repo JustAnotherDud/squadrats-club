@@ -1,10 +1,6 @@
 """Testes de ganhos.py: deltas entre snapshots consecutivos de
 squadrats.json. snapshots_todos (git log/show) fica de fora, é canalização
-fina sobre o mesmo padrão já provado em eventos.snapshots_por_dia.
-
-(Até 2026-09-13 havia aqui também testes de cruzar() com um feed de
-actividades do Strava, removido por baixa taxa de correspondência real
-(~9%) -- ver o commit que tirou isso e o append_atividades.py.)
+fina sobre o mesmo padrão de eventos.snapshots_por_dia.
 
 Correr: py -m pytest
 """

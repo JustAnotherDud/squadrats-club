@@ -1,12 +1,6 @@
 """Classificação por concelho/distrito/região dos squares de todos os
-atletas do clube, data/club_regioes.json, consumido por club.html para a
-vista de detalhe geográfico por atleta (2026-08-15).
-
-Reaproveita data/club.json (já produzido por fetch_club_squares.py na mesma
-corrida de run_all.py, sempre corrido antes deste passo) em vez de voltar a
-varrer o Squadrats, os squares (x,y) de cada atleta já lá estão, filtrados
-pelo bitmask. Só faltava classificar cada um por concelho/país, que é o que
-este script faz. Zero pedidos de rede extra.
+atletas do clube, data/club_regioes.json. Lê o club.json da mesma corrida,
+sem pedidos de rede.
 
 Escreve dois blocos: "atletas" (captured por região, por atleta) e "uniao"
 (squadratinhos que o clube cobre por região, partilhados contados uma vez;
@@ -205,8 +199,7 @@ def main(out_dir):
         print(f"AVISO: {detalhe} square(s) num país sem geometria de região, "
               f"preparar refdata/foreign/<CC>.geojson (ver README)")
 
-    # avisos: o que o site mostra a quem não lê os logs do Actions (Fase 5).
-    # Só entra no JSON quando há algo; um dict vazio não aparece.
+    # avisos: o site mostra-os a quem não lê os logs. Só entra se houver algo.
     avisos = {}
     if clip_misses:
         avisos["clip_misses"] = dict(sorted(clip_misses.items()))

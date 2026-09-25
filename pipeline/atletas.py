@@ -1,14 +1,7 @@
 """Lista única dos atletas do clube.
 
-Antes desta extracção, os mesmos nomes/UIDs viviam em triplicado
-(fetch_club_totais.py, fetch_club_squares.py, run_all.py), um UID trocado
-por engano num só desses sítios só se notaria quando os totais não
-batessem. Agora há uma fonte só.
-
-Os dados (nome → firebase UID) vêm do env `ATHLETES_JSON`, não do código,
-é informação de terceiros, não pertence a um repo público. No CI vem de um
-secret (ver .github/workflows/fetch-map-data.yml); localmente, exportar à
-mão:
+Os dados (nome → firebase UID) vêm do env `ATHLETES_JSON`, não do código. No
+CI vem de um secret; localmente, exportar à mão:
 
     export ATHLETES_JSON='{"Nome A": "uid...", "Nome B": "uid..."}'
 
@@ -46,20 +39,11 @@ JOSE_UID = next(iter(ATHLETES.values()))
 
 def known_squadratinhos(out_dir):
     """{uid: último total de squadratinhos publicado}, lido do squadrats.json
-    já carregado no out_dir (branch 'data', ver fetch-map-data.yml), fonte
-    do probe barato de tiles_fetch.scan_athlete (2026-08-14).
+    do out_dir, para o probe de tiles_fetch.scan_athlete.
 
-    Squadratinhos (201m) é a grelha mais fina: capturar qualquer square novo
-    nas outras camadas (squadrats, yard/yardinho, übersquadrat/-inho) implica
-    sempre passar por um squadratinho ainda não visitado nesse mesmo sítio,
-    nunca o contrário, porque estar dentro de um squadrat ainda não capturado
-    significa estar também dentro de um squadratinho ainda não capturado (é a
-    mesma presença física). Por isso esta única contagem chega para confirmar
-    "nada mudou" em todas elas.
-
-    Ficheiro ausente/ilegível ou atleta sem entrada -> não entra no dict, e
-    scan_athlete faz sempre o caminho completo para esse UID (comportamento
-    anterior a esta optimização, sem risco de nunca actualizar por engano)."""
+    Squadratinhos é a grelha mais fina: qualquer captura nova noutra camada
+    passa por um squadratinho novo. Por isso esta contagem chega para saber
+    se algo mudou. Atleta sem entrada fica de fora e leva o scan completo."""
     path = os.path.join(out_dir, "squadrats.json")
     try:
         with open(path, encoding="utf-8") as f:

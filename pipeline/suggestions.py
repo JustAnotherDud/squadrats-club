@@ -50,8 +50,8 @@ def maior_uber(visitados):
 
 
 def verify_rules(visitados, esperado_yard, esperado_uber, label):
-    """O guard: se isto falhar, não sabemos reproduzir as regras da Squadrats
-   , não publicar sugestões inventadas com ar de rigor. Falhar alto."""
+    """Se isto falhar, não sabemos reproduzir as regras da Squadrats e as
+    sugestões seriam inventadas. Falhar alto."""
     clusters = clusters_fechados(visitados)
     maior_yard = max((len(c) for c in clusters), default=0)
     uber, _ = maior_uber(visitados)

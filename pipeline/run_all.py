@@ -1,13 +1,6 @@
 """Orquestrador do pipeline: corre todos os passos no mesmo processo, para
-cada atleta ser varrido do Squadrats uma vez só.
-
-Os três que tocam a rede (build_analise, fetch_club_totais, fetch_club_squares)
-partilhavam os mesmos UIDs; em passos separados do workflow cada um varria-os
-de novo, ~1200 pedidos de tiles em duplicado por run, sem ganho, contra um
-servidor que não é API pública. A cache vive no `tiles_fetch.scan_athlete`;
-aqui garante-se que correm no mesmo processo. Os passos seguintes (classify,
-eventos, regiões, ganhos, perfis) não tocam a rede, só juntam o que os
-primeiros produziram.
+cada atleta ser varrido do Squadrats uma vez só (a cache vive em
+tiles_fetch.scan_athlete). Só os três primeiros passos tocam a rede.
 
 Uso: py run_all.py [pasta_saida]
 """

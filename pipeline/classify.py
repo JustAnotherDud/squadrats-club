@@ -114,13 +114,9 @@ class Classifier:
         # zero alterações de código.
         self.foreign = self._load_foreign(foreign_dir)
 
-        # município/concelho equivalente estrangeiro (2026-08-15), mesmo
-        # princípio do foreign acima, mas nível mais fino (ex: refdata/
-        # foreign_muni/ES.geojson, 8132 municípios). Só ES tem isto por
-        # agora; um país sem ficheiro aqui simplesmente não aparece na vista
-        # "Concelhos" (ver NIVEL_INFO no analise.html). Nomes duplicados
-        # dentro do mesmo país já vêm desambiguados no próprio ficheiro
-        # (ex: "Sada (Province)"), mesmo padrão do Calheta Açores/Madeira.
+        # município estrangeiro, mesmo princípio mas nível mais fino
+        # (refdata/foreign_muni/<CC>.geojson, recortado pelo clip.py). Nomes
+        # duplicados já vêm desambiguados no ficheiro.
         self.foreign_muni = self._load_foreign(foreign_muni_dir)
 
         # contornos de país (Natural Earth, refdata/outlines/europe.geojson):

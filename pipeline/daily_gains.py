@@ -4,12 +4,7 @@ O ficheiro é auto-contido: além dos dias, guarda `ultimo_total` (os totais
 absolutos da última corrida observada). O ganho de uma corrida é o delta
 contra esse `ultimo_total`, acumulado na entrada do dia corrente.
 
-NÃO consulta o git. A primeira versão disto procurava a baseline no
-histórico de commits do squadrats.json, funcionava localmente e falhava em
-silêncio no CI, onde actions/checkout usa fetch-depth: 1 e o histórico não
-existe (baseline None -> ganhos vazios -> a entrada do dia era removida sem
-ser reposta; perdeu-se o dia 2026-08-08 antes de isto ser apanhado). Ler
-apenas o próprio ficheiro elimina essa dependência.
+Não consulta o git: no CI o checkout do main é shallow.
 
 Efeitos de acumular contra `ultimo_total` em vez de comparar dias:
 - 2 corridas no mesmo dia somam o que cada uma trouxe de novo; correr duas
