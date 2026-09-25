@@ -44,7 +44,10 @@ def main(out_dir):
     ultimo = max(por_data, default=gains_regioes.DESDE)
 
     try:
-        snaps, saltados = eventos.snapshots_por_dia(REPO, "origin/data", desde=ultimo)
+        # com o último snapshot antes de `ultimo`: o dia `ultimo` (que pode ser
+        # hoje) recalcula-se todo, não só com a primeira corrida que teve ganhos
+        snaps, saltados = eventos.snapshots_por_dia(REPO, "origin/data", desde=ultimo,
+                                                    com_anterior=True)
     except Exception as e:
         print(f"append_gains_regioes: histórico de origin/data indisponível ({e})")
         snaps, saltados = {}, []

@@ -2389,7 +2389,7 @@
    }
   }
  },
- "pytest": "50 passed",
+ "pytest": "51 passed",
  "site": {
   "analise.html": {
    "erros": [],
