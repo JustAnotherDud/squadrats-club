@@ -9,7 +9,6 @@ a:hover { text-decoration-color: var(--tinta); }
   overflow-x: clip;
 }
 .reg-estado { color: var(--tinta-2); padding: 48px 0; text-align: center; }
-.reg-erro { color: #e88a6a; }
 
 /* cabeçalho */
 .reg-cab h1 { margin: 0; }
@@ -59,18 +58,8 @@ a:hover { text-decoration-color: var(--tinta); }
 .reg-cobre { margin: 14px 0 0; font-size: 12.5px; color: var(--tinta-2); }
 .reg-cobre b { color: var(--tinta); font-weight: 500; font-family: var(--f-mono); }
 
-/* sub-regiões expansíveis (país) */
+/* sub-regiões (país) */
 .reg-rank .sr-nome { color: var(--tinta); }
-.reg-rank.sr-exp .sr-row.exp { cursor: pointer; }
-.reg-rank.sr-exp .sr-row.exp:hover td { background: var(--ch-1); }
-.sr-tri { display: inline-block; width: 12px; color: var(--tinta-3); font-size: 9px;
-  transition: transform .12s;
-  background: none; border: 0; padding: 0; line-height: 1; font-family: inherit;
-  cursor: pointer; vertical-align: baseline; }
-.sr-row.aberto .sr-tri { transform: rotate(90deg); }
-.sr-det > td { padding: 6px 5px 14px 20px; border-bottom: 1px solid var(--hair);
-  background: var(--ch-1); }
-.sr-det .reg-rank { margin: 0; }
 
 /* feed de eventos */
 .reg-ev {

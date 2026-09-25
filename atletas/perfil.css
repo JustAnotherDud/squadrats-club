@@ -6,7 +6,6 @@
   overflow-x: clip;
 }
 .perfil-estado { color: var(--tinta-2); padding: 44px 0; text-align: center; }
-.perfil-erro { color: #e88a6a; }
 
 /* cabeçalho */
 .perfil-cabeca {

@@ -48,15 +48,6 @@
   --vazio: #211f2c;  /* célula não capturada */
   --ouro:  #e6bd63;  /* usado só na marca de região disputada */
 
-  /* aliases dos nomes antigos */
-  --fundo: var(--ch-0);
-  --cartao: var(--ch-1);
-  --cartao-alto: var(--ch-2);
-  --borda: var(--rule);
-  --linha: var(--hair);
-  --texto: var(--tinta);
-  --suave: var(--tinta-2);
-  --fraco: var(--tinta-3);
 
   --f-txt:  "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, "Cascadia Mono", Menlo, Consolas, monospace;
@@ -117,7 +108,7 @@ body {
 }
 
 /* números, datas, contadores: sempre mono e tabulares */
-.mono, .num, .fig, time,
+.mono, .num, time,
 td.num, td.uni, td.pct, .reg-rank th {
   font-family: var(--f-mono);
   font-variant-numeric: tabular-nums;
@@ -164,12 +155,12 @@ td.num, td.uni, td.pct, .reg-rank th {
 .meta dd { color: var(--tinta-2); margin: 0; }
 
 /* links: texto quase-branco, sublinhado roxo. Sem setas. */
-a, .lig {
+a {
   color: var(--tinta); text-decoration: underline;
   text-decoration-color: var(--marca);
   text-decoration-thickness: 1.5px; text-underline-offset: 3px;
 }
-a:hover, .lig:hover { text-decoration-color: var(--tinta); }
+a:hover { text-decoration-color: var(--tinta); }
 .voltar::before {
   content: ""; display: inline-block; width: 5px; height: 5px;
   margin-right: 7px; vertical-align: 1px;
