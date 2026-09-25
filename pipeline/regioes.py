@@ -166,13 +166,39 @@ def _ordena_ranking(pares):
     return pares
 
 
-def ranking_de(club_regioes, nivel, nome):
-    """[(atleta, captured), ...] ordenado desc; empate pela ordem canónica.
-    Só atletas com captured > 0."""
-    b = CHAVE_BUCKET[nivel]
-    pares = [(atleta, (info.get(b) or {}).get(nome, 0))
-             for atleta, info in club_regioes.get("atletas", {}).items()]
-    return _ordena_ranking([(a, n) for a, n in pares if n > 0])
+def _totais(stats_entry):
+    """(z14, z17) totais de uma entrada de stats.json."""
+    e = stats_entry or {}
+    return (e.get("z14") or {}).get("total"), (e.get("z17") or {}).get("total")
+
+
+def _ranking(pares, exc, z17):
+    """[(atleta, captured)] -> ranking ordenado, só com captured > 0."""
+    return [
+        {"nome": a, "captured": n, "exclusivos": exc.get(a, 0),
+         "pct": round(100 * n / z17, 2) if z17 else None}
+        for a, n in _ordena_ranking([(a, n) for a, n in pares if n > 0])
+    ]
+
+
+def _lugar(key, cc, nivel, nome, pai, avo, z14, z17, uni, centro, fronteira, ranking, viz):
+    """Dict de um lugar, igual para os três níveis. `pai`/`avo` = (key, nome)."""
+    return {
+        "key": key,
+        "cc": cc,
+        "nivel": nivel,
+        "regiao": nome,
+        "pai_key": pai[0],
+        "pai_nome": pai[1],
+        "avo_key": avo[0],
+        "avo_nome": avo[1],
+        "totais": {"z14": z14, "z17": z17},
+        "uniao": {"z17": uni, "pct": round(100 * uni / z17, 2) if z17 else None},
+        "centro": centro,
+        "fronteira": fronteira,
+        "ranking": ranking,
+        "vizinhos": viz,
+    }
 
 
 # --- estrangeiro ------------------------------------------------------------
@@ -204,107 +230,56 @@ def parent_map_estrangeiro(foreign_muni_path):
 
 def construir_estrangeiro(ccl, nivel, nome, snapshot, stats, adjacency,
                           ativas_estr, parent):
-    """Dict de uma região (nivel "regiao") ou zona (nivel "zona") estrangeira,
-    mesma forma que construir() mais cc / pai_key / avo_key. `parent` = nome da
-    província que contém a zona (parent_map_estrangeiro), None para regiões."""
+    """Dict de uma região (nivel "regiao") ou zona (nivel "zona") estrangeira.
+    `parent` = nome da província que contém a zona (parent_map_estrangeiro),
+    None para regiões."""
     cc = ccl.upper()
     ba = BUCKET_ATLETA_ESTR[nivel]
     skey = ("by_region_" if nivel == "regiao" else "by_municipio_") + ccl
     adjbkt = (ADJ_REGIAO if nivel == "regiao" else ADJ_ZONA).get(ccl)
-
-    total = (stats.get(skey, {}).get(nome) or {})
-    z14 = (total.get("z14") or {}).get("total")
-    z17 = (total.get("z17") or {}).get("total")
+    z14, z17 = _totais(stats.get(skey, {}).get(nome))
 
     uni_b = snapshot.get("uniao") or {}
     uni = ((uni_b.get(ba) or {}).get(ccl) or {}).get(nome, 0)
-    uni_pct = round(100 * uni / z17, 2) if z17 else None
     exc = (((uni_b.get("exclusivos") or {}).get(ba) or {}).get(ccl) or {}).get(nome, {})
-
     pares = [(atleta, ((info.get(ba) or {}).get(ccl) or {}).get(nome, 0))
              for atleta, info in snapshot.get("atletas", {}).items()]
-    ranking = [
-        {"nome": a, "captured": n, "exclusivos": exc.get(a, 0),
-         "pct": round(100 * n / z17, 2) if z17 else None}
-        for a, n in _ordena_ranking([(a, n) for a, n in pares if n > 0])
-    ]
 
     viz = []
     pagina_de = ativas_estr.get(ccl, {}).get(nivel, set())
     for vn in (adjacency.get(adjbkt, {}).get(nome, {}) or {}).get("neighbors", []) if adjbkt else []:
         viz.append({"nome": vn, "key": key_de(cc, nivel, vn), "tem_pagina": vn in pagina_de})
 
-    pais_key, pais_nome = key_de(cc, "pais", cc), PAIS_NOME.get(cc, cc)
+    pais = (key_de(cc, "pais", cc), PAIS_NOME.get(cc, cc))
     if nivel == "regiao":
-        pai_key, pai_nome, avo_key, avo_nome = pais_key, pais_nome, None, None
+        pai, avo = pais, (None, None)
     else:
-        pai_key = key_de(cc, "regiao", parent) if parent else pais_key
-        pai_nome = parent or pais_nome
-        avo_key, avo_nome = pais_key, pais_nome
+        pai = (key_de(cc, "regiao", parent), parent) if parent else pais
+        avo = pais
 
-    return {
-        "key": key_de(cc, nivel, nome),
-        "cc": cc,
-        "nivel": nivel,
-        "regiao": nome,
-        "pai_key": pai_key,
-        "pai_nome": pai_nome,
-        "avo_key": avo_key,
-        "avo_nome": avo_nome,
-        "totais": {"z14": z14, "z17": z17},
-        "uniao": {"z17": uni, "pct": uni_pct},
-        "centro": centro_de(snapshot, cc, nivel, nome),
-        "fronteira": fronteira_de(cc, nivel, nome),
-        "ranking": ranking,
-        "vizinhos": viz,
-    }
+    return _lugar(key_de(cc, nivel, nome), cc, nivel, nome, pai, avo, z14, z17, uni,
+                  centro_de(snapshot, cc, nivel, nome), fronteira_de(cc, nivel, nome),
+                  _ranking(pares, exc, z17), viz)
 
 
 def construir_pais(cc, snapshot, stats, adjacency, paises_com_pagina):
-    """Dict de uma página de país (nivel 'pais'). Ranking por atleta do bucket
-    `country`, união de uniao.by_pais, exclusivos, vizinhos de
-    adjacency['paises']. As sub-regiões (distritos PT / províncias
-    estrangeiras) vêm do regioes_index.json por pai_key, como os concelhos de
-    um distrito, não vão aqui."""
-    ccl = cc.lower()
-    pais_stats = stats.get(f"country_{ccl}") or {}
-    z14 = (pais_stats.get("z14") or {}).get("total")
-    z17 = (pais_stats.get("z17") or {}).get("total")
+    """Dict de uma página de país. As sub-regiões vêm do regioes_index.json
+    por pai_key, não vão aqui."""
+    z14, z17 = _totais(stats.get(f"country_{cc.lower()}"))
 
     uni_b = snapshot.get("uniao") or {}
     uni = (uni_b.get("by_pais") or {}).get(cc, 0)
-    uni_pct = round(100 * uni / z17, 2) if z17 else None
     exc = ((uni_b.get("exclusivos") or {}).get("by_pais") or {}).get(cc, {})
-
     pares = [(atleta, (info.get("country") or {}).get(cc, 0))
              for atleta, info in snapshot.get("atletas", {}).items()]
-    ranking = [
-        {"nome": a, "captured": n, "exclusivos": exc.get(a, 0),
-         "pct": round(100 * n / z17, 2) if z17 else None}
-        for a, n in _ordena_ranking([(a, n) for a, n in pares if n > 0])
-    ]
 
     viz = []
     for vn in (adjacency.get("paises", {}).get(cc, {}) or {}).get("neighbors", []):
         viz.append({"nome": PAIS_NOME.get(vn, vn), "key": f"pais-{vn.lower()}",
                     "tem_pagina": vn in paises_com_pagina})
 
-    return {
-        "key": f"pais-{ccl}",
-        "cc": cc,
-        "nivel": "pais",
-        "regiao": PAIS_NOME.get(cc, cc),
-        "pai_key": None,
-        "pai_nome": None,
-        "avo_key": None,
-        "avo_nome": None,
-        "totais": {"z14": z14, "z17": z17},
-        "uniao": {"z17": uni, "pct": uni_pct},
-        "centro": None,
-        "fronteira": None,
-        "ranking": ranking,
-        "vizinhos": viz,
-    }
+    return _lugar(f"pais-{cc.lower()}", cc, "pais", PAIS_NOME.get(cc, cc), (None, None),
+                  (None, None), z14, z17, uni, None, None, _ranking(pares, exc, z17), viz)
 
 
 def _distrito_pai(concelhos_geojson_path, nome):
@@ -322,61 +297,34 @@ def _distrito_pai(concelhos_geojson_path, nome):
 
 def construir(nivel, nome, snapshot_atual, stats, adjacency,
               ativas, concelhos_geojson_path):
-    """Dict final de uma região. `ativas` = regioes_ativas(snapshot_atual)
+    """Dict de um concelho ou distrito PT. `ativas` = regioes_ativas(...),
     para saber que vizinhos têm página."""
-    total = (stats.get(CHAVE_STATS[nivel], {}).get(nome) or {})
-    z14 = (total.get("z14") or {}).get("total")
-    z17 = (total.get("z17") or {}).get("total")
+    z14, z17 = _totais(stats.get(CHAVE_STATS[nivel], {}).get(nome))
 
     # união do clube: squadratinhos cobertos por qualquer membro, sem duplicar
-    # partilhados (classify_club.classify_uniao). É a métrica de "actividade"
-    # do índice de regiões, o total da região (z17) só diz o tamanho.
+    # partilhados; exclusivos: os que mais nenhum membro tem aqui
     uni_b = snapshot_atual.get("uniao") or {}
     uni = (uni_b.get(CHAVE_BUCKET[nivel]) or {}).get(nome, 0)
-    uni_pct = round(100 * uni / z17, 2) if z17 else None
-    # exclusivos por atleta: squadratinhos que mais nenhum membro tem aqui.
     exc = ((uni_b.get("exclusivos") or {}).get(CHAVE_BUCKET[nivel]) or {}).get(nome, {})
-
-    rank = ranking_de(snapshot_atual, nivel, nome)
-    ranking = [
-        {"nome": a, "captured": n, "exclusivos": exc.get(a, 0),
-         "pct": round(100 * n / z17, 2) if z17 else None}
-        for a, n in rank
-    ]
+    b = CHAVE_BUCKET[nivel]
+    pares = [(atleta, (info.get(b) or {}).get(nome, 0))
+             for atleta, info in snapshot_atual.get("atletas", {}).items()]
 
     viz = []
     for vn in (adjacency.get(CHAVE_ADJ[nivel], {}).get(nome, {}) or {}).get("neighbors", []):
         viz.append({"nome": vn, "key": key_de("PT", nivel, vn),
                     "tem_pagina": vn in ativas[nivel]})
 
-    # hierarquia acima, uniforme com o estrangeiro: pai_key/pai_nome e
-    # avo_key/avo_nome. Concelho -> distrito -> Portugal; distrito -> Portugal.
-    pai = _distrito_pai(concelhos_geojson_path, nome) if nivel == "concelho" else None
-    if nivel == "concelho" and pai:
-        pai_key, pai_nome = key_de("PT", "distrito", pai), pai
-        avo_key, avo_nome = "pais-pt", "Portugal"
-    else:  # distrito (ou concelho sem distrito conhecido, não devia acontecer)
-        pai_key, pai_nome = "pais-pt", "Portugal"
-        avo_key, avo_nome = None, None
+    # concelho -> distrito -> Portugal; distrito -> Portugal
+    distrito = _distrito_pai(concelhos_geojson_path, nome) if nivel == "concelho" else None
+    if distrito:
+        pai, avo = (key_de("PT", "distrito", distrito), distrito), ("pais-pt", "Portugal")
+    else:
+        pai, avo = ("pais-pt", "Portugal"), (None, None)
 
-    # `key` fica só para o escrever() saber o nome do ficheiro, não vai para o
-    # JSON (é o próprio nome do ficheiro).
-    return {
-        "key": key_de("PT", nivel, nome),
-        "cc": "PT",
-        "nivel": nivel,
-        "regiao": nome,
-        "pai_key": pai_key,
-        "pai_nome": pai_nome,
-        "avo_key": avo_key,
-        "avo_nome": avo_nome,
-        "totais": {"z14": z14, "z17": z17},
-        "uniao": {"z17": uni, "pct": uni_pct},
-        "centro": centro_de(snapshot_atual, "PT", nivel, nome),
-        "fronteira": fronteira_de("PT", nivel, nome),
-        "ranking": ranking,
-        "vizinhos": viz,
-    }
+    return _lugar(key_de("PT", nivel, nome), "PT", nivel, nome, pai, avo, z14, z17, uni,
+                  centro_de(snapshot_atual, "PT", nivel, nome), fronteira_de("PT", nivel, nome),
+                  _ranking(pares, exc, z17), viz)
 
 
 def escrever(out_dir, regiao_dict, gerado):
