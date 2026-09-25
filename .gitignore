@@ -19,7 +19,6 @@ data/club.json
 data/club_regioes.json
 data/daily_gains.json
 data/scan_cache.json
-data/classification_fallbacks.json
 data/atletas/
 data/events.json
 data/regioes/

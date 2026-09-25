@@ -1,7 +1,7 @@
 {
   "name": "Squadrats Club",
   "short_name": "Squadrats",
-  "description": "KOMs, squadratinhos e rankings do clube.",
+  "description": "Squadratinhos, lugares e rankings do clube.",
   "lang": "pt-PT",
   "start_url": "./index.html",
   "scope": "./",
