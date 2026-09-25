@@ -164,7 +164,7 @@ def run_from_geoms(geoms, out_dir, counts=None):
         stats[f"by_municipio_{cc.lower()}"] = {}
     total_squares = 0
     not_on_land = 0
-    fallback_events = []  # squares resolvidos por proximidade (país e/ou concelho), não por área
+    n_proximidade = 0  # campos (país/concelho) resolvidos por proximidade, não por área
 
     # países que TÊM geometria de município no disco (após o clip da
     # refdata/clip.py, isto é só a zona já visitada + 10 km). Se um square
@@ -195,7 +195,7 @@ def run_from_geoms(geoms, out_dir, counts=None):
         by_country_nodata = {}  # {country: count}: país detetado por contorno, sem dados de região
         muni_clip_misses = {}   # {country: count}: tem ficheiro de município mas o clip não apanhou o square
         unclassified_foreign = 0
-        pt_captured = foreign_captured = 0
+        pt_captured = 0
         for x, y, lon, lat in squares:
             info = classifier.classify(tile_bounds(x, y, zoom))
             out.append({
@@ -212,27 +212,13 @@ def run_from_geoms(geoms, out_dir, counts=None):
             if not info["on_land"]:
                 not_on_land += 1
 
-            for level, deg in (
-                ("country", info["country_fallback_deg"]),
-                ("concelho", info["concelho_fallback_deg"]),
-            ):
-                if deg is not None:
-                    fallback_events.append({
-                        "x": x, "y": y, "zoom": zoom,
-                        "lon": round(lon, 6), "lat": round(lat, 6),
-                        "level": level,
-                        "resolved_to": info["concelho"] if level == "concelho"
-                                       else (info["district"] if info["in_portugal"] else f"{info['country']}/{info['region']}"),
-                        "distance_deg": round(deg, 6),
-                        "distance_m_approx": round(deg * 111_000),  # aproximado, sem correcção de latitude
-                    })
+            n_proximidade += (info["country_fallback_deg"] is not None) + (info["concelho_fallback_deg"] is not None)
 
             if info["in_portugal"]:
                 pt_captured += 1
                 by_concelho_captured[info["concelho"]] = by_concelho_captured.get(info["concelho"], 0) + 1
                 by_distrito_captured[info["district"]] = by_distrito_captured.get(info["district"], 0) + 1
             else:
-                foreign_captured += 1
                 cc = info["country"]
                 if cc and info["region"]:
                     by_foreign_captured.setdefault(cc, {})
@@ -338,7 +324,7 @@ def run_from_geoms(geoms, out_dir, counts=None):
     # diagnóstico só no log: squares fora de terra e resolvidos por proximidade
     print(f"classificação: {not_on_land}/{total_squares} squares não estão em terra "
           f"nenhuma (resolvidos por proximidade ou sem classificação); "
-          f"{len(fallback_events)} campos (país/concelho) resolvidos por proximidade")
+          f"{n_proximidade} campos (país/concelho) resolvidos por proximidade")
 
     if clip_misses_total:
         detalhe = ", ".join(f"{cc}: {n}" for cc, n in sorted(clip_misses_total.items()))
