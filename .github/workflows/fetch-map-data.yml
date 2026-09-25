@@ -1,98 +1,26 @@
 name: fetch-map-data
 
-# Único caminho: fetch directo aos vector tiles da Squadrats, sem export
-# manual. (O antigo process-kml.yml/Drive foi removido em 2026-08-18, ver
-# secção "KML/Drive path" no README se algum dia for preciso reconstruir.)
-# 2x/dia (2026-08-08, subiu de 1x): com a cache de cobertura (tiles_fetch.py)
-# uma corrida normal já só custa ~2032 pedidos, não os ~6274 de antes, 2x/dia
-# fica em ~4064/dia, ainda abaixo do regime antigo de 1x/dia sem cache.
-# Motivo de subir: encolher a janela entre uma actividade acontecer e ser
-# detectada, um atleta que sincroniza tarde ficava com o ganho atribuído ao
-# dia da corrida seguinte, não ao dia real (ver daily_gains.py). Não subir
-# mais sem recalcular o orçamento de pedidos/dia primeiro.
-# Horas escolhidas (13h/20h UTC, não 6h/18h) para a corrida tardia ficar
-# perto do fim do dia em Lisboa, apanha a maior parte do dia antes de
-# qualquer detecção transitar para o dia seguinte (o "dia" do
-# daily_gains.py é sempre por data UTC no INÍCIO da corrida, não hora
-# local, ver fetch_club_totais.py). O último slot é às 20h07 e não mais
-# tarde de propósito: dá ~4h de folga até à meia-noite UTC (a fronteira real
-# que importa, não a meia-noite local) para absorver o atraso do GitHub
-# Actions a disparar o cron agendado, sem SLA documentado sobre isso, e sem
-# essa folga um atraso empurra o início da corrida para o dia UTC seguinte,
-# o que nenhum código nosso consegue proteger (a fronteira fica ultrapassada
-# antes de o script sequer arrancar). Foi 22h07 até 2026-09-11, ver nota abaixo.
-# Commit condicional (git diff --quiet) garante que corridas sem
-# sincronização nova não geram ruído nenhum, só custo de correr.
-# TODO: trigger por atividade real (Garmin/Strava/intervals.icu/calendário)
-# em vez de tempo fixo, para não haver atraso entre sincronizar e o mapa
-# atualizar, precisa de webhook novo, não implementado ainda (ver README
-# das regras de uso do endpoint antes de desenhar isso).
-# Minuto 7, não 0 (2026-08-10): ao minuto 0 em ponto é o pico de carga
-# documentado do scheduler do GitHub Actions, a corrida das 13h chegou a
-# atrasar-se ~52min nesse dia, e uma corrida nem chegou a disparar sozinha
-# (só correu porque foi accionada à mão). Não muda as horas nem a folga até
-# à meia-noite UTC explicada acima, só desvia do minuto mais concorrido.
-# Nota (2026-08-12): não elimina o atraso, só afasta-o do pico, mesmo já
-# no minuto 7, dia 11 Ago houve corridas ~50min e ~1h16 depois da hora
-# marcada. Sem SLA do GitHub sobre isto, este desvio é mitigação, não cura.
-# Nota (2026-09-11): último slot 22h07 -> 20h07. Duas semanas de histórico:
-# o GitHub deixa cair ~1/3 dos 6 disparos diários (quase sempre os de 1h/9h)
-# e atrasa os da tarde/noite 2-3h. O slot das 22h07 aterrava a seguir à
-# meia-noite UTC ~metade dos dias, e como o "dia" do daily_gains.py/eventos
-# é a data no arranque da corrida, capturas das 22h-23h59 ficavam creditadas
-# ao dia seguinte. 20h07 dá ~4h de folga (aguenta o pior atraso já visto,
-# 3h20) e ainda fecha o dia antes da meia-noite. O gap 20h07->1h07 (5h) é de
-# madrugada em Lisboa, sem capturas, custo prático nenhum. NÃO mexe no número
-# de runs (continua 6). Se o scheduler do GitHub continuar a falhar depois
-# disto: disparar via workflow_dispatch de um cron externo pontual
-# (Cloudflare Worker ou Task Scheduler local), ver README.
-# Dados numa branch própria, não no main (2026-08-14): antes, cada corrida
-# comitava os JSONs directamente no main, cada commit disparava rebuild
-# completo do Pages (clássico, serve do main), e qualquer push nosso a
-# código ao mesmo tempo que o cron corria colidia com o commit do bot
-# (aconteceu de facto: `git pull --rebase` com conflito a meio de um fix).
-# Agora o bot só toca na branch `data`; código e docs continuam a viver só no
-# main. As páginas que lêem estes JSON (squadrats-club: analise.html, club.html,
-# historico.html, atletas/*, lugares/*; e o folha-do-clube) puxam de
-# raw.githubusercontent.com/.../data/... (branch `data`) em vez do URL do
-# Pages, serve o JSON na hora, sem rebuild nenhum, e sem risco de colidir
-# com commits de código.
-# Histórico git dos dados mantém-se (a branch `data` continua com commits
-# normais), o backfill_daily_gains.py continua a poder reconstruir a partir
-# daí se for preciso.
-# 2x/dia -> 6x/dia (2026-08-14), a seguir ao probe de 1 pedido do
-# tiles_fetch.py (ver README): sem o probe, 6x/dia custaria ~6x mais no pior
-# caso (~12.2k pedidos/dia). Com ele, correr mais vezes não multiplica o
-# custo por correr mais vezes, só paga o scan completo de quem realmente
-# mudou, e isso não acontece mais vezes só porque se verifica mais vezes.
-# Corridas "paradas" custam ~5 pedidos (1 probe/atleta) cada.
-# Âncoras: 13h07 e o slot tardio (20h07 desde 2026-09-11, era 22h07) (ver
-# comentário acima sobre a folga até à meia-noite UTC); as outras (1h/5h/
-# 9h/17h) preenchem o resto do dia. Passo intermédio de propósito, não
-# 1x/hora logo, subir de 2 para 6 primeiro, confirmar uns dias sem
-# 500s/lentidão nova (mesmo critério já usado para a concorrência); a
-# investigação de 2026-09-11 concluiu para NÃO subir mais (o GitHub já não
-# cumpre 6, e é mais carga no endpoint de terceiros sem info nova).
+# Lê os vector tiles do Squadrats, gera os JSON e publica-os na branch `data`
+# só quando mudam. O site e o folha-do-clube lêem-nos por raw.githubusercontent,
+# por isso o main só recebe código e stubs.
+# Horário: 6 corridas por dia, ao minuto 7 para fugir ao pico do scheduler. A
+# última é às 20h07 UTC porque o GitHub atrasa as corridas 2 a 3 h e o dia dos
+# ganhos é a data UTC do arranque. Não subir a frequência sem refazer as contas
+# de pedidos ao Squadrats (README, "usage rules").
 on:
   schedule:
-    - cron: "7 1,5,9,13,17,20 * * *" # 6x/dia, minuto 7; último slot 20h07 (ver nota 2026-09-11)
-  workflow_dispatch: {} # para correr manualmente sem esperar pelo cron
+    - cron: "7 1,5,9,13,17,20 * * *"
+  workflow_dispatch: {}
 
 concurrency:
   group: squadrats-data-push
   cancel-in-progress: false
 
 env:
-  # os únicos ficheiros que o cron regenera (ver pipeline/run_all.py), o
-  # resto de data/ (geojsons de fronteiras, adjacency.json) é estático,
-  # fica só no main, nunca precisa de ir para a branch `data`.
+  # ficheiros que o pipeline regenera; o resto de data/ é estático e vive no main
   FILES: "data/tile_info_squadrats.json data/tile_info_squadratinhos.json data/stats.json data/squadrats.json data/trophies.json data/suggestions.json data/club.json data/club_regioes.json data/daily_gains.json data/gains_regioes.json data/regioes_index.json data/scan_cache.json data/events.json data/ganhos.json"
-  # pasta (não lista fixa): um <slug>.json por atleta + index.json, gerados por
-  # pipeline/build_profiles.py a partir dos $FILES acima. Mesma regra, vive só
-  # na branch `data`, lido por atletas/perfil.js via raw.
+  # um JSON por atleta (build_profiles.py) e por lugar (append_regioes.py)
   PROFILES_DIR: "data/atletas"
-  # idem, um <key>.json por região com actividade (append_regioes.py), lido
-  # por regioes/regiao.js via raw.
   REGIOES_DIR: "data/regioes"
 
 jobs:
@@ -113,41 +41,23 @@ jobs:
 
       - name: Carregar o estado mais recente da branch 'data'
         run: |
-          # sobrepõe os ficheiros dinâmicos com a última versão publicada,
-          # sem isto, cada corrida arrancava do snapshot congelado que ficou
-          # no main no dia da migração, perdendo o scan_cache.json (a
-          # cache de cobertura que faz a corrida custar ~2032 pedidos em vez
-          # de ~6274, ver comentário do tiles_fetch.py) e o baseline do
-          # daily_gains.json.
-          # --depth=500: o append_events.py (passo do run_all) anda dia-a-dia
-          # pelo histórico de club_regioes.json para atribuir cada evento ao
-          # dia certo mesmo depois de um gap; sem profundidade só via o topo.
-          # ~500 commits cobre bem mais de um ano do bot.
+          # parte do último estado publicado (cache de cobertura, base dos
+          # ganhos); o append_events e o append_ganhos lêem o histórico
           git fetch origin data --depth=500
           git checkout origin/data -- $FILES
-          # as pastas dos perfis / regiões podem ainda não existir na branch
-          # `data` (primeira corrida com a feature), não falhar o job por isso.
           git checkout origin/data -- "$PROFILES_DIR" 2>/dev/null || true
           git checkout origin/data -- "$REGIOES_DIR" 2>/dev/null || true
 
-      # Um passo só, de propósito: os três consumidores partilham o varrimento
-      # (ver pipeline/run_all.py). Em passos separados, cada um varria os
-      # mesmos UIDs outra vez.
+      # um passo só: os consumidores partilham o varrimento de cada atleta
       - name: Varrer e gerar tudo (mapa detalhado + totais do clube + club)
         env:
-          # nomes → firebase UID dos atletas do clube; fora do código porque é
-          # informação de terceiros (ver pipeline/atletas.py). Ordem do JSON =
-          # ordem dos bits do bitmask, não mexer sem regenerar data/club.json.
+          # {nome: UID Firebase}; a ordem fixa os bits do club.json
           ATHLETES_JSON: ${{ secrets.ATHLETES_JSON }}
         run: python3 pipeline/run_all.py data
 
       - name: Publicar na branch 'data' só se houver diferença real
         run: |
-          # diff contra o índice, não contra o HEAD do main: o passo
-          # anterior ("carregar o estado mais recente") já deixou o índice a
-          # apontar para o último estado publicado na branch `data`, isto
-          # detecta corretamente "o pipeline não mudou nada desde a última
-          # publicação", mesmo o main nunca mais sendo tocado depois disto.
+          # o passo de carregar deixou o índice no último estado publicado
           if git diff --quiet -- $FILES "$PROFILES_DIR" "$REGIOES_DIR"; then
             echo "sem alterações reais, nada a publicar."
             exit 0
@@ -156,18 +66,14 @@ jobs:
           git config user.name "squadrats-bot"
           git config user.email "actions@users.noreply.github.com"
 
-          # worktree à parte para a branch `data`, de propósito: NUNCA troca
-          # de branch no checkout principal (que continua em main até ao
-          # fim do job). Trocar de branch a meio, com estes ficheiros por
-          # comitar, arriscava "local changes would be overwritten".
+          # worktree à parte: o checkout principal nunca troca de branch
           git worktree add -B data /tmp/data-branch origin/data
           for f in $FILES; do
             mkdir -p "/tmp/data-branch/$(dirname "$f")"
             cp "$f" "/tmp/data-branch/$f"
           done
-          # perfis: mirror da pasta (rm antes de copiar) para um atleta removido
-          # de ATHLETES_JSON também desaparecer da branch `data`, não só ficar
-          # órfão. build_profiles.py escreve sempre a pasta inteira.
+          # substitui as pastas inteiras, para um ficheiro apagado aqui
+          # desaparecer também na branch
           for D in "$PROFILES_DIR" "$REGIOES_DIR"; do
             rm -rf "/tmp/data-branch/$D"
             if [ -d "$D" ]; then
@@ -184,11 +90,9 @@ jobs:
           git commit -m "chore(data): atualizar squares via vector tiles [skip ci]"
           git push origin data
 
-      # Stubs dos perfis (atletas/<slug>.html), dependem SÓ de ATHLETES_JSON,
-      # não dos dados. Vivem no `main` (GitHub Pages serve de lá) e mudam
-      # ~nunca (só quando entra/sai um atleta), por isso o commit é
-      # condicional, mesmo padrão do heartbeat. O perfil.js/perfil.css são
-      # fixos, não são regenerados aqui.
+      # Os stubs vivem no main (o Pages serve de lá) e só mudam quando entra
+      # ou sai um atleta ou um lugar. `--only`: o passo de carregar deixou os
+      # dados staged no índice do main e não podem ir para lá.
       - name: Regenerar stubs dos perfis (só commita se o conjunto de atletas mudou)
         if: always()
         continue-on-error: true
@@ -201,8 +105,6 @@ jobs:
           git config user.email "actions@users.noreply.github.com"
 
           git add atletas/
-          # --only atletas/ pelo mesmo motivo do heartbeat: o passo "carregar o
-          # estado" deixou os $FILES da branch `data` staged no índice do main.
           if git diff --cached --quiet -- atletas/; then
             echo "stubs dos perfis sem alterações, nada a commitar."
             exit 0
@@ -210,10 +112,6 @@ jobs:
           git commit --only atletas/ -m "chore: regenerar stubs dos perfis [skip ci]"
           git push origin HEAD:main
 
-      # Stubs das páginas de lugar (lugares/<key>.html), dependem da lista de
-      # lugares com actividade (data/regioes/, produzido no passo "Varrer").
-      # Nova região explorada -> novo stub -> commit ao main -> rebuild Pages.
-      # Mesmo padrão condicional dos stubs dos perfis.
       - name: Regenerar stubs dos lugares (só commita se a lista mudou)
         if: always()
         continue-on-error: true
@@ -230,23 +128,11 @@ jobs:
           git commit --only lugares/ -m "chore: regenerar stubs dos lugares [skip ci]"
           git push origin HEAD:main
 
-      # GitHub desativa `schedule` em repos sem atividade há 60 dias, se isso
-      # acontecer, o cron morre em silêncio e o mapa fica congelado. Este passo
-      # mantém o main "vivo" sem depender de trabalho real: só commita
-      # heartbeat.txt se o último commit ao main tiver mais de 25 dias.
-      #
-      # Herdado do renew-drive-watch.yml, removido em 2026-08-18 com o resto do
-      # stack Drive/KML. Lá o passo tinha um bug latente: lia
-      # `git log -1 -- heartbeat.txt` num checkout shallow (depth 1), onde o
-      # commit de fronteira parece introduzir todos os ficheiros, devolvia a
-      # data do último commit ao main, não a do último heartbeat (o log dizia
-      # "há 1 dias" com o heartbeat.txt parado desde 19 Jul). Como o que
-      # interessa é mesmo a atividade do repo, aqui pede-se isso directamente,
-      # sem precisar do histórico do ficheiro (continua a dar certo em shallow).
+      # O GitHub desliga o schedule de um repo público sem actividade há 60
+      # dias. Commit ao main se o último tiver mais de 25 dias. `--only`: ver
+      # os stubs acima.
       - name: Heartbeat (mantém o schedule do Actions ativo)
         if: always()
-        # nunca deixar um problema do heartbeat marcar como falhada uma corrida
-        # que publicou dados bem, isto é rede de segurança, não o trabalho.
         continue-on-error: true
         run: |
           git config user.name "squadrats-bot"
@@ -259,10 +145,5 @@ jobs:
           fi
 
           date -u +"%Y-%m-%dT%H:%M:%SZ" > heartbeat.txt
-          # --only heartbeat.txt de propósito: o passo "carregar o estado mais
-          # recente" faz `git checkout origin/data -- $FILES`, que deixa esses
-          # ficheiros de dados STAGED no índice do main. Um `git commit` sem
-          # restrição de caminho arrastava-os para o main, exactamente o que
-          # a migração para a branch `data` (2026-08-14) veio evitar.
           git commit --only heartbeat.txt -m "chore: heartbeat (mantém o schedule do Actions ativo) [skip ci]"
           git push origin HEAD:main
