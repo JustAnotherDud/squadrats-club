@@ -15,6 +15,7 @@ import json
 import os
 from datetime import datetime, timezone
 
+import eventos
 import ganhos
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -32,7 +33,7 @@ def main(out_dir):
 
     # histórico publicado + o snapshot desta corrida (ainda não commitado),
     # mesmo princípio do "hoje" no append_events.py
-    snaps = ganhos.snapshots_todos(REPO, "origin/data")
+    snaps, _ = eventos.snapshots_commits(REPO, "origin/data", "data/squadrats.json")
     hoje_ts = datetime.fromisoformat(hoje["atualizado"].replace("Z", "+00:00"))
     snaps.append((hoje_ts, hoje))
     snaps.sort(key=lambda p: p[0])

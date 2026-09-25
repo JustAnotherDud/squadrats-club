@@ -1,6 +1,5 @@
 """Testes de ganhos.py: deltas entre snapshots consecutivos de
-squadrats.json. snapshots_todos (git log/show) fica de fora, é canalização
-fina sobre o mesmo padrão de eventos.snapshots_por_dia.
+squadrats.json. A leitura do git (eventos.snapshots_commits) fica de fora.
 
 Correr: py -m pytest
 """

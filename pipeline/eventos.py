@@ -38,82 +38,72 @@ DESDE = "2026-07-26"  # 1.º dia com club.json (o histórico < 15 ago é
                       # reconstruído do club.json, ver recon_snapshots.py)
 
 
-def snapshots_por_dia(repo, branch="origin/data", desde=None,
-                      path="data/club_regioes.json", com_anterior=False):
-    """(por_dia, saltados).
+def snapshots_commits(repo, branch, path, desde=None, com_anterior=False):
+    """(snaps, saltados). `snaps` = [(datetime, dict), ...] em ordem
+    cronológica, um por commit de `path` na branch (o dict tem de ter
+    "atualizado").
 
-    `por_dia` = {data_utc: dict}, o ÚLTIMO snapshot commitado de cada dia UTC
-    na branch dada (o dict é o JSON de `path`; tem de ter "atualizado").
-    Mesma regra que o backfill_daily_gains.py. Serve o club_regioes.json (por
-    defeito) e o squadrats.json (marcos de totais).
+    `desde` (YYYY-MM-DD) limita a leitura aos commits desse dia em diante. Com
+    `com_anterior=True` junta também o último commit antes de `desde`, a base
+    para comparar o próprio dia `desde`.
 
-    `saltados` = [(sha, motivo), ...] dos commits que o `git log` listou mas
-    que não deu para ler (blob em falta num checkout shallow, ou JSON/formato
-    inesperado). Vazio no caminho feliz. Quem chama decide o que fazer com
-    ele; um commit saltado no meio do histórico faz um dia colapsar no
-    anterior, por isso não deve passar despercebido.
-
-    Levanta RuntimeError se o `git log` listou commits e NENHUM deu para ler
-    (histórico presente na branch mas inacessível no clone, quase sempre um
-    `git fetch --depth` curto demais). Um clone sem qualquer commit do
-    ficheiro devolve ({}, []) sem erro: é o primeiro run, não uma anomalia.
-
-    `desde` (YYYY-MM-DD) limita a leitura aos commits desse dia em diante, o
-    passo incremental passa aqui o último dia já coberto para não ler o
-    histórico todo a cada run. Com `com_anterior=True` junta também o último
-    snapshot antes de `desde`, a base para comparar o próprio dia `desde`.
+    `saltados` = [(sha, motivo), ...] dos commits que não deu para ler (blob em
+    falta num checkout shallow, ou JSON inesperado). Levanta RuntimeError se
+    havia commits e nenhum deu para ler. Sem commits devolve ([], []).
     """
     import json
     import subprocess
+    from collections import Counter
     from datetime import datetime
 
-    args = ["git", "-C", repo, "log", branch, "--format=%H"]
-    if desde:
-        args += [f"--since={desde}T00:00:00Z"]
-    args += ["--", path]
-    shas = subprocess.run(args, capture_output=True, text=True,
-                          encoding="utf-8", check=True).stdout.split()
-    if desde and com_anterior:
-        shas += subprocess.run(
-            ["git", "-C", repo, "log", branch, "-1", "--format=%H",
-             f"--before={desde}T00:00:00Z", "--", path],
-            capture_output=True, text=True, encoding="utf-8", check=True).stdout.split()
+    def git(*args):
+        return subprocess.run(["git", "-C", repo, *args], capture_output=True,
+                              text=True, encoding="utf-8")
 
-    por_dia, ts_por_dia, saltados = {}, {}, []
+    def log(*args):
+        r = git("log", branch, "--format=%H", *args, "--", path)
+        r.check_returncode()
+        return r.stdout.split()
+
+    shas = log(f"--since={desde}T00:00:00Z") if desde else log()
+    if desde and com_anterior:
+        shas += log("-1", f"--before={desde}T00:00:00Z")
+
+    snaps, saltados = [], []
     for sha in shas:
-        r = subprocess.run(
-            ["git", "-C", repo, "show", f"{sha}:{path}"],
-            capture_output=True, text=True, encoding="utf-8",
-        )
+        r = git("show", f"{sha}:{path}")
         if r.returncode != 0:
             err = " ".join((r.stderr or "").split())[:120]
-            hint = "blob em falta (checkout shallow?)" if not err else f"git show falhou: {err}"
-            saltados.append((sha, hint))
+            saltados.append((sha, f"git show falhou: {err}" if err else "blob em falta (checkout shallow?)"))
             continue
         try:
             d = json.loads(r.stdout)
             ts = datetime.fromisoformat(d["atualizado"].replace("Z", "+00:00"))
         except Exception as e:
-            saltados.append((sha, f"club_regioes.json inesperado: {type(e).__name__}: {e}"))
+            saltados.append((sha, f"{path} inesperado: {type(e).__name__}: {e}"))
             continue
-        dia = ts.date().isoformat()
-        if dia not in ts_por_dia or ts > ts_por_dia[dia]:
-            por_dia[dia] = d
-            ts_por_dia[dia] = ts
+        snaps.append((ts, d))
 
     if saltados:
-        from collections import Counter
         resumo = Counter(m for _, m in saltados)
-        print(f"snapshots_por_dia: {len(saltados)}/{len(shas)} commit(s) saltado(s), "
+        print(f"snapshots de {path}: {len(saltados)}/{len(shas)} commit(s) saltado(s), "
               + "; ".join(f"{n}x {m}" for m, n in resumo.most_common()))
-
-    if shas and not por_dia:
+    if shas and not snaps:
         raise RuntimeError(
-            f"snapshots_por_dia: {len(shas)} commit(s) de data/club_regioes.json em "
-            f"{branch}, nenhum legível. Clone shallow demais? "
-            "(o workflow faz `git fetch origin data --depth=500`)."
+            f"snapshots de {path}: {len(shas)} commit(s) em {branch}, nenhum legível. "
+            "Clone shallow demais? (o workflow faz `git fetch origin data --depth=500`)."
         )
-    return por_dia, saltados
+    snaps.sort(key=lambda p: p[0])
+    return snaps, saltados
+
+
+def snapshots_por_dia(repo, branch="origin/data", desde=None,
+                      path="data/club_regioes.json", com_anterior=False):
+    """(por_dia, saltados): {data_utc: dict} com o último snapshot de cada dia
+    UTC (ver snapshots_commits). Um commit saltado no meio do histórico faz um
+    dia colapsar no anterior; quem chama decide o que fazer com `saltados`."""
+    snaps, saltados = snapshots_commits(repo, branch, path, desde, com_anterior)
+    return {ts.date().isoformat(): d for ts, d in snaps}, saltados
 
 
 def _idx(nome):
