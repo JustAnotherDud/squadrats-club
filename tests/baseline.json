@@ -1,0 +1,2665 @@
+{
+ "pipeline": {
+  "corrida 1 (2026-09-01T10:07:00Z)": {
+   "pedidos": {
+    "z10": 262,
+    "z4": 510,
+    "z7": 192
+   },
+   "publicou": true,
+   "saidas": {
+    "atletas/ana.html": {
+     "n": 26,
+     "sha": "bb5fb52ef792c704"
+    },
+    "atletas/bruno.html": {
+     "n": 26,
+     "sha": "3090645e73678b2d"
+    },
+    "atletas/celia.html": {
+     "n": 26,
+     "sha": "bf4d37eda6b2fa32"
+    },
+    "atletas/index.html": {
+     "n": 34,
+     "sha": "1327e03c71823fb2"
+    },
+    "data/atletas/ana.json": {
+     "atualizado": "2026-09-01T10:07:00Z",
+     "ganhos_diarios": [],
+     "geo": {
+      "n": 3,
+      "sha": "94f45af5d5937061"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nome": "Ana",
+     "slug": "ana",
+     "sobreposicao": {
+      "exclusivos": 196,
+      "partilhados": 16,
+      "total": 212
+     },
+     "totais": {
+      "squadratinhos": 212,
+      "squadrats": 10,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 14,
+      "yard": 0,
+      "yardinho": 144
+     },
+     "uid": "uid-ana"
+    },
+    "data/atletas/bruno.json": {
+     "atualizado": "2026-09-01T10:07:00Z",
+     "ganhos_diarios": [],
+     "geo": {
+      "n": 3,
+      "sha": "e71cb08956e51111"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nome": "Bruno",
+     "slug": "bruno",
+     "sobreposicao": {
+      "exclusivos": 57,
+      "partilhados": 16,
+      "total": 73
+     },
+     "totais": {
+      "squadratinhos": 73,
+      "squadrats": 6,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 8,
+      "yard": 0,
+      "yardinho": 36
+     },
+     "uid": "uid-bruno"
+    },
+    "data/atletas/celia.json": {
+     "atualizado": "2026-09-01T10:07:00Z",
+     "ganhos_diarios": [],
+     "geo": {
+      "n": 3,
+      "sha": "00160fbfaebc7c46"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nome": "Célia",
+     "slug": "celia",
+     "sobreposicao": {
+      "exclusivos": 61,
+      "partilhados": 0,
+      "total": 61
+     },
+     "totais": {
+      "squadratinhos": 61,
+      "squadrats": 6,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 6,
+      "yard": 0,
+      "yardinho": 16
+     },
+     "uid": "uid-celia"
+    },
+    "data/atletas/index.json": {
+     "atletas": [
+      {
+       "nome": "Ana",
+       "slug": "ana"
+      },
+      {
+       "nome": "Bruno",
+       "slug": "bruno"
+      },
+      {
+       "nome": "Célia",
+       "slug": "celia"
+      }
+     ],
+     "gerado": "2026-09-01T10:07:00Z"
+    },
+    "data/club.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "cd3915f079d660a8"
+     },
+     "atualizado": "2026-09-01T10:07:00Z",
+     "por_mask": {
+      "1": 196,
+      "2": 57,
+      "3": 16,
+      "4": 61
+     },
+     "squares": {
+      "n": 330,
+      "sha": "7ed4033d48b8aca7"
+     },
+     "zoom": 17
+    },
+    "data/club_regioes.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "6ee9f7f1665cd2d9"
+     },
+     "atualizado": "2026-09-01T10:07:00Z",
+     "uniao": {
+      "n": 7,
+      "sha": "7cf1b4ec53404736"
+     },
+     "zoom": 17
+    },
+    "data/daily_gains.json": {
+     "dias": [],
+     "gerado": "2026-09-01T10:07:00Z",
+     "ultimo_total": {
+      "n": 3,
+      "sha": "1d6e2f4fa2969b9b"
+     }
+    },
+    "data/events.json": {
+     "desde": "2026-07-26",
+     "eventos": [],
+     "gerado": "2026-09-01T10:07:00Z"
+    },
+    "data/gains_regioes.json": {
+     "desde": "2026-07-26",
+     "dias": [],
+     "gerado": "2026-09-01T10:07:00Z"
+    },
+    "data/ganhos.json": {
+     "gerado": "2026-09-01T10:07:00Z",
+     "janelas": []
+    },
+    "data/regioes/c-almada.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62209,
+      50236
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "3afa904f2c82f9ff"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-setubal",
+     "pai_nome": "Setúbal",
+     "ranking": [
+      {
+       "captured": 4,
+       "exclusivos": 4,
+       "nome": "Ana",
+       "pct": 0.16
+      }
+     ],
+     "regiao": "Almada",
+     "totais": {
+      "z14": 45,
+      "z17": 2549
+     },
+     "uniao": {
+      "pct": 0.16,
+      "z17": 4
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "39120a54b22d91aa"
+     }
+    },
+    "data/regioes/c-amadora.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62178,
+      50208
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "572b7beee013f492"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-lisboa",
+     "pai_nome": "Lisboa",
+     "ranking": [
+      {
+       "captured": 16,
+       "exclusivos": 16,
+       "nome": "Ana",
+       "pct": 3.83
+      },
+      {
+       "captured": 5,
+       "exclusivos": 5,
+       "nome": "Bruno",
+       "pct": 1.2
+      }
+     ],
+     "regiao": "Amadora",
+     "totais": {
+      "z14": 6,
+      "z17": 418
+     },
+     "uniao": {
+      "pct": 5.02,
+      "z17": 21
+     },
+     "vizinhos": {
+      "n": 4,
+      "sha": "12d2622d0df0a2aa"
+     }
+    },
+    "data/regioes/c-barreiro.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62223,
+      50238
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "9f63c0038e930a81"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-setubal",
+     "pai_nome": "Setúbal",
+     "ranking": [
+      {
+       "captured": 24,
+       "exclusivos": 24,
+       "nome": "Bruno",
+       "pct": 3.0
+      }
+     ],
+     "regiao": "Barreiro",
+     "totais": {
+      "z14": 15,
+      "z17": 801
+     },
+     "uniao": {
+      "pct": 3.0,
+      "z17": 24
+     },
+     "vizinhos": {
+      "n": 6,
+      "sha": "8a5d3158c1a8395d"
+     }
+    },
+    "data/regioes/c-lisboa.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62211,
+      50230
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "98437d60fbd270d6"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-lisboa",
+     "pai_nome": "Lisboa",
+     "ranking": {
+      "n": 3,
+      "sha": "dadc4964949277ec"
+     },
+     "regiao": "Lisboa",
+     "totais": {
+      "z14": 36,
+      "z17": 2027
+     },
+     "uniao": {
+      "pct": 12.63,
+      "z17": 256
+     },
+     "vizinhos": {
+      "n": 5,
+      "sha": "3c3e4b7c75a03da4"
+     }
+    },
+    "data/regioes/d-lisboa.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": [
+      62209,
+      50228
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "039b006a8519b69f"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "distrito",
+     "pai_key": "pais-pt",
+     "pai_nome": "Portugal",
+     "ranking": {
+      "n": 3,
+      "sha": "4542642e05d379f6"
+     },
+     "regiao": "Lisboa",
+     "totais": {
+      "z14": 916,
+      "z17": 54595
+     },
+     "uniao": {
+      "pct": 0.51,
+      "z17": 277
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "87081868b6663a8e"
+     }
+    },
+    "data/regioes/d-setubal.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": [
+      62221,
+      50238
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "2f42d75b445c8bc9"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "distrito",
+     "pai_key": "pais-pt",
+     "pai_nome": "Portugal",
+     "ranking": [
+      {
+       "captured": 24,
+       "exclusivos": 24,
+       "nome": "Bruno",
+       "pct": 0.02
+      },
+      {
+       "captured": 4,
+       "exclusivos": 4,
+       "nome": "Ana",
+       "pct": 0.0
+      }
+     ],
+     "regiao": "Setúbal",
+     "totais": {
+      "z14": 1642,
+      "z17": 100713
+     },
+     "uniao": {
+      "pct": 0.03,
+      "z17": 28
+     },
+     "vizinhos": {
+      "n": 4,
+      "sha": "8fa6ba5212f8dc03"
+     }
+    },
+    "data/regioes/es-r-sevilla.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "ES",
+     "centro": [
+      63357,
+      50840
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "b50bc045d507654b"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "regiao",
+     "pai_key": "pais-es",
+     "pai_nome": "Espanha",
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 0.01
+      }
+     ],
+     "regiao": "Sevilla",
+     "totais": {
+      "z14": 3734,
+      "z17": 238539
+     },
+     "uniao": {
+      "pct": 0.01,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 5,
+      "sha": "d99d102315366e26"
+     }
+    },
+    "data/regioes/es-z-sevilla.json": {
+     "avo_key": "pais-es",
+     "avo_nome": "Espanha",
+     "cc": "ES",
+     "centro": [
+      63357,
+      50840
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "d3c946f13b1ed106"
+     },
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "zona",
+     "pai_key": "es-r-sevilla",
+     "pai_nome": "Sevilla",
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 1.04
+      }
+     ],
+     "regiao": "Sevilla",
+     "totais": {
+      "z14": 39,
+      "z17": 2406
+     },
+     "uniao": {
+      "pct": 1.04,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 14,
+      "sha": "4b5c0367088a0f6b"
+     }
+    },
+    "data/regioes/pais-es.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "ES",
+     "centro": null,
+     "fronteira": null,
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "pais",
+     "pai_key": null,
+     "pai_nome": null,
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 0.0
+      }
+     ],
+     "regiao": "Espanha",
+     "totais": {
+      "z14": 155125,
+      "z17": 9811083
+     },
+     "uniao": {
+      "pct": 0.0,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "bf33a641d4165aad"
+     }
+    },
+    "data/regioes/pais-pt.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": null,
+     "fronteira": null,
+     "gerado": "2026-09-01T10:07:00Z",
+     "nivel": "pais",
+     "pai_key": null,
+     "pai_nome": null,
+     "ranking": {
+      "n": 3,
+      "sha": "9f90af75e55eb2d5"
+     },
+     "regiao": "Portugal",
+     "totais": {
+      "z14": 28730,
+      "z17": 1758486
+     },
+     "uniao": {
+      "pct": 0.02,
+      "z17": 305
+     },
+     "vizinhos": [
+      {
+       "key": "pais-es",
+       "nome": "Espanha",
+       "tem_pagina": true
+      }
+     ]
+    },
+    "data/regioes_index.json": {
+     "gerado": "2026-09-01T10:07:00Z",
+     "regioes": {
+      "n": 10,
+      "sha": "c437a13724087ab9"
+     }
+    },
+    "data/scan_cache.json": {
+     "uid-ana": {
+      "n": 6,
+      "sha": "f937928ef6a40801"
+     },
+     "uid-bruno": {
+      "n": 6,
+      "sha": "f937928ef6a40801"
+     },
+     "uid-celia": {
+      "n": 6,
+      "sha": "6b2c6caa029defe1"
+     }
+    },
+    "data/squadrats.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "1d6e2f4fa2969b9b"
+     },
+     "atualizado": "2026-09-01T10:07:00Z"
+    },
+    "data/stats.json": {
+     "by_concelho": {
+      "n": 308,
+      "sha": "50781e4705a156b2"
+     },
+     "by_distrito": {
+      "n": 20,
+      "sha": "da586d1c8e1e04be"
+     },
+     "by_municipio_de": {
+      "n": 22,
+      "sha": "97c640972791bdc7"
+     },
+     "by_municipio_es": {
+      "n": 139,
+      "sha": "9916b0bcd83c47e8"
+     },
+     "by_municipio_ma": {
+      "Cercle de Zagora": {
+       "z14": {
+        "captured": 0,
+        "pct": 0.0,
+        "total": 2935
+       },
+       "z17": {
+        "captured": 0,
+        "pct": 0.0,
+        "total": 184743
+       }
+      }
+     },
+     "by_region_ad": {
+      "n": 7,
+      "sha": "31cb7d66678c9077"
+     },
+     "by_region_de": {
+      "n": 16,
+      "sha": "b014a29c436067e4"
+     },
+     "by_region_es": {
+      "n": 52,
+      "sha": "d6e43364b723e0e4"
+     },
+     "by_region_ma": {
+      "n": 12,
+      "sha": "3d689f1769837216"
+     },
+     "country_ad": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 236
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 14203
+      }
+     },
+     "country_de": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 160790
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 10192259
+      }
+     },
+     "country_es": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 155125
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 9811083
+      }
+     },
+     "country_ma": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 159375
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 10092111
+      }
+     },
+     "country_pt": {
+      "z14": {
+       "captured": 10,
+       "pct": 0.03,
+       "total": 28730
+      },
+      "z17": {
+       "captured": 212,
+       "pct": 0.01,
+       "total": 1758486
+      }
+     },
+     "foreign": {
+      "z14": {
+       "unclassified": 0
+      },
+      "z17": {
+       "unclassified": 0
+      }
+     }
+    },
+    "data/suggestions.json": {
+     "squadratinhos": {
+      "n": 4,
+      "sha": "5c69e38d4e2fb250"
+     }
+    },
+    "data/tile_info_squadratinhos.json": {
+     "n": 212,
+     "sha": "239f57c94fddd141"
+    },
+    "data/tile_info_squadrats.json": {
+     "n": 10,
+     "sha": "439cd4435fb8c295"
+    },
+    "data/trophies.json": {
+     "squadratinhos": {
+      "n": 2,
+      "sha": "11d6759cfcc79f52"
+     },
+     "squadrats": {
+      "n": 1,
+      "sha": "1dc6331e94a89c77"
+     }
+    },
+    "lugares/c-almada.html": {
+     "n": 27,
+     "sha": "35fe730e5a9626ed"
+    },
+    "lugares/c-amadora.html": {
+     "n": 27,
+     "sha": "35e28a68a6421546"
+    },
+    "lugares/c-barreiro.html": {
+     "n": 27,
+     "sha": "534d7445c1c9de6b"
+    },
+    "lugares/c-lisboa.html": {
+     "n": 27,
+     "sha": "c2e26ea2158e7683"
+    },
+    "lugares/d-lisboa.html": {
+     "n": 27,
+     "sha": "90c0ef46a1028129"
+    },
+    "lugares/d-setubal.html": {
+     "n": 27,
+     "sha": "7c97c8c6d61bf1ee"
+    },
+    "lugares/es-r-sevilla.html": {
+     "n": 27,
+     "sha": "3ffe59a8c0e70806"
+    },
+    "lugares/es-z-sevilla.html": {
+     "n": 27,
+     "sha": "421c1796678ace44"
+    },
+    "lugares/index.html": {
+     "n": 257,
+     "sha": "f9ff719d7c901d6a"
+    },
+    "lugares/pais-es.html": {
+     "n": 27,
+     "sha": "460ca60ae54fa94e"
+    },
+    "lugares/pais-pt.html": {
+     "n": 27,
+     "sha": "e5894458b8b07242"
+    }
+   }
+  },
+  "corrida 2 (2026-09-02T13:07:00Z)": {
+   "pedidos": {
+    "z10": 5
+   },
+   "publicou": true,
+   "saidas": {
+    "atletas/ana.html": {
+     "n": 26,
+     "sha": "bb5fb52ef792c704"
+    },
+    "atletas/bruno.html": {
+     "n": 26,
+     "sha": "3090645e73678b2d"
+    },
+    "atletas/celia.html": {
+     "n": 26,
+     "sha": "bf4d37eda6b2fa32"
+    },
+    "atletas/index.html": {
+     "n": 34,
+     "sha": "1327e03c71823fb2"
+    },
+    "data/atletas/ana.json": {
+     "atualizado": "2026-09-02T13:07:00Z",
+     "ganhos_diarios": [],
+     "geo": {
+      "n": 3,
+      "sha": "7370ba9d24e78b6e"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nome": "Ana",
+     "slug": "ana",
+     "sobreposicao": {
+      "exclusivos": 196,
+      "partilhados": 16,
+      "total": 212
+     },
+     "totais": {
+      "squadratinhos": 212,
+      "squadrats": 10,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 14,
+      "yard": 0,
+      "yardinho": 144
+     },
+     "uid": "uid-ana"
+    },
+    "data/atletas/bruno.json": {
+     "atualizado": "2026-09-02T13:07:00Z",
+     "ganhos_diarios": [
+      {
+       "data": "2026-09-02",
+       "regioes": {
+        "concelho": {
+         "Amadora": 19,
+         "Lisboa": 30
+        },
+        "distrito": {
+         "Lisboa": 49
+        }
+       },
+       "squadratinhos": 49,
+       "squadrats": 3
+      }
+     ],
+     "geo": {
+      "n": 3,
+      "sha": "156e87da342a131b"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nome": "Bruno",
+     "slug": "bruno",
+     "sobreposicao": {
+      "exclusivos": 106,
+      "partilhados": 16,
+      "total": 122
+     },
+     "totais": {
+      "squadratinhos": 122,
+      "squadrats": 9,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 8,
+      "yard": 0,
+      "yardinho": 36
+     },
+     "uid": "uid-bruno"
+    },
+    "data/atletas/celia.json": {
+     "atualizado": "2026-09-02T13:07:00Z",
+     "ganhos_diarios": [],
+     "geo": {
+      "n": 3,
+      "sha": "47aa9281e95534fa"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nome": "Célia",
+     "slug": "celia",
+     "sobreposicao": {
+      "exclusivos": 61,
+      "partilhados": 0,
+      "total": 61
+     },
+     "totais": {
+      "squadratinhos": 61,
+      "squadrats": 6,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 6,
+      "yard": 0,
+      "yardinho": 16
+     },
+     "uid": "uid-celia"
+    },
+    "data/atletas/index.json": {
+     "atletas": [
+      {
+       "nome": "Ana",
+       "slug": "ana"
+      },
+      {
+       "nome": "Bruno",
+       "slug": "bruno"
+      },
+      {
+       "nome": "Célia",
+       "slug": "celia"
+      }
+     ],
+     "gerado": "2026-09-02T13:07:00Z"
+    },
+    "data/club.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "40cc7da33d6733a9"
+     },
+     "atualizado": "2026-09-02T13:07:00Z",
+     "por_mask": {
+      "1": 196,
+      "2": 106,
+      "3": 16,
+      "4": 61
+     },
+     "squares": {
+      "n": 379,
+      "sha": "a2a666958637bc41"
+     },
+     "zoom": 17
+    },
+    "data/club_regioes.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "bddd1a189a294f26"
+     },
+     "atualizado": "2026-09-02T13:07:00Z",
+     "uniao": {
+      "n": 7,
+      "sha": "fdfa1360a206715e"
+     },
+     "zoom": 17
+    },
+    "data/daily_gains.json": {
+     "dias": [
+      {
+       "atletas": {
+        "Bruno": {
+         "squadratinhos": 49,
+         "squadrats": 3
+        }
+       },
+       "data": "2026-09-02"
+      }
+     ],
+     "gerado": "2026-09-02T13:07:00Z",
+     "ultimo_total": {
+      "n": 3,
+      "sha": "8d1243a606a10eda"
+     }
+    },
+    "data/events.json": {
+     "desde": "2026-07-26",
+     "eventos": {
+      "n": 3,
+      "sha": "42da79a32ffc44ed"
+     },
+     "gerado": "2026-09-02T13:07:00Z"
+    },
+    "data/gains_regioes.json": {
+     "desde": "2026-07-26",
+     "dias": [
+      {
+       "atletas": {
+        "Bruno": {
+         "concelho": {
+          "Amadora": 19,
+          "Lisboa": 30
+         },
+         "distrito": {
+          "Lisboa": 49
+         }
+        }
+       },
+       "data": "2026-09-02"
+      }
+     ],
+     "gerado": "2026-09-02T13:07:00Z"
+    },
+    "data/ganhos.json": {
+     "gerado": "2026-09-02T13:07:00Z",
+     "janelas": [
+      {
+       "atleta": "Bruno",
+       "fim": "2026-09-02T13:07:00Z",
+       "ganho": 49,
+       "inicio": "2026-09-01T10:07:00Z"
+      }
+     ]
+    },
+    "data/regioes/c-almada.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62209,
+      50236
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "3afa904f2c82f9ff"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-setubal",
+     "pai_nome": "Setúbal",
+     "ranking": [
+      {
+       "captured": 4,
+       "exclusivos": 4,
+       "nome": "Ana",
+       "pct": 0.16
+      }
+     ],
+     "regiao": "Almada",
+     "totais": {
+      "z14": 45,
+      "z17": 2549
+     },
+     "uniao": {
+      "pct": 0.16,
+      "z17": 4
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "39120a54b22d91aa"
+     }
+    },
+    "data/regioes/c-amadora.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62180,
+      50211
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "572b7beee013f492"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-lisboa",
+     "pai_nome": "Lisboa",
+     "ranking": [
+      {
+       "captured": 24,
+       "exclusivos": 24,
+       "nome": "Bruno",
+       "pct": 5.74
+      },
+      {
+       "captured": 16,
+       "exclusivos": 16,
+       "nome": "Ana",
+       "pct": 3.83
+      }
+     ],
+     "regiao": "Amadora",
+     "totais": {
+      "z14": 6,
+      "z17": 418
+     },
+     "uniao": {
+      "pct": 9.57,
+      "z17": 40
+     },
+     "vizinhos": {
+      "n": 4,
+      "sha": "12d2622d0df0a2aa"
+     }
+    },
+    "data/regioes/c-barreiro.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62223,
+      50238
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "9f63c0038e930a81"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-setubal",
+     "pai_nome": "Setúbal",
+     "ranking": [
+      {
+       "captured": 24,
+       "exclusivos": 24,
+       "nome": "Bruno",
+       "pct": 3.0
+      }
+     ],
+     "regiao": "Barreiro",
+     "totais": {
+      "z14": 15,
+      "z17": 801
+     },
+     "uniao": {
+      "pct": 3.0,
+      "z17": 24
+     },
+     "vizinhos": {
+      "n": 6,
+      "sha": "8a5d3158c1a8395d"
+     }
+    },
+    "data/regioes/c-lisboa.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62209,
+      50228
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "98437d60fbd270d6"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-lisboa",
+     "pai_nome": "Lisboa",
+     "ranking": {
+      "n": 3,
+      "sha": "c44381d666714652"
+     },
+     "regiao": "Lisboa",
+     "totais": {
+      "z14": 36,
+      "z17": 2027
+     },
+     "uniao": {
+      "pct": 14.11,
+      "z17": 286
+     },
+     "vizinhos": {
+      "n": 5,
+      "sha": "3c3e4b7c75a03da4"
+     }
+    },
+    "data/regioes/d-lisboa.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": [
+      62205,
+      50226
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "039b006a8519b69f"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "distrito",
+     "pai_key": "pais-pt",
+     "pai_nome": "Portugal",
+     "ranking": {
+      "n": 3,
+      "sha": "1aa7e35fc0fd02d6"
+     },
+     "regiao": "Lisboa",
+     "totais": {
+      "z14": 916,
+      "z17": 54595
+     },
+     "uniao": {
+      "pct": 0.6,
+      "z17": 326
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "87081868b6663a8e"
+     }
+    },
+    "data/regioes/d-setubal.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": [
+      62221,
+      50238
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "2f42d75b445c8bc9"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "distrito",
+     "pai_key": "pais-pt",
+     "pai_nome": "Portugal",
+     "ranking": [
+      {
+       "captured": 24,
+       "exclusivos": 24,
+       "nome": "Bruno",
+       "pct": 0.02
+      },
+      {
+       "captured": 4,
+       "exclusivos": 4,
+       "nome": "Ana",
+       "pct": 0.0
+      }
+     ],
+     "regiao": "Setúbal",
+     "totais": {
+      "z14": 1642,
+      "z17": 100713
+     },
+     "uniao": {
+      "pct": 0.03,
+      "z17": 28
+     },
+     "vizinhos": {
+      "n": 4,
+      "sha": "8fa6ba5212f8dc03"
+     }
+    },
+    "data/regioes/es-r-sevilla.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "ES",
+     "centro": [
+      63357,
+      50840
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "b50bc045d507654b"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "regiao",
+     "pai_key": "pais-es",
+     "pai_nome": "Espanha",
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 0.01
+      }
+     ],
+     "regiao": "Sevilla",
+     "totais": {
+      "z14": 3734,
+      "z17": 238539
+     },
+     "uniao": {
+      "pct": 0.01,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 5,
+      "sha": "d99d102315366e26"
+     }
+    },
+    "data/regioes/es-z-sevilla.json": {
+     "avo_key": "pais-es",
+     "avo_nome": "Espanha",
+     "cc": "ES",
+     "centro": [
+      63357,
+      50840
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "d3c946f13b1ed106"
+     },
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "zona",
+     "pai_key": "es-r-sevilla",
+     "pai_nome": "Sevilla",
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 1.04
+      }
+     ],
+     "regiao": "Sevilla",
+     "totais": {
+      "z14": 39,
+      "z17": 2406
+     },
+     "uniao": {
+      "pct": 1.04,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 14,
+      "sha": "4b5c0367088a0f6b"
+     }
+    },
+    "data/regioes/pais-es.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "ES",
+     "centro": null,
+     "fronteira": null,
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "pais",
+     "pai_key": null,
+     "pai_nome": null,
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 0.0
+      }
+     ],
+     "regiao": "Espanha",
+     "totais": {
+      "z14": 155125,
+      "z17": 9811083
+     },
+     "uniao": {
+      "pct": 0.0,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "bf33a641d4165aad"
+     }
+    },
+    "data/regioes/pais-pt.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": null,
+     "fronteira": null,
+     "gerado": "2026-09-02T13:07:00Z",
+     "nivel": "pais",
+     "pai_key": null,
+     "pai_nome": null,
+     "ranking": {
+      "n": 3,
+      "sha": "c7992f60c3846156"
+     },
+     "regiao": "Portugal",
+     "totais": {
+      "z14": 28730,
+      "z17": 1758486
+     },
+     "uniao": {
+      "pct": 0.02,
+      "z17": 354
+     },
+     "vizinhos": [
+      {
+       "key": "pais-es",
+       "nome": "Espanha",
+       "tem_pagina": true
+      }
+     ]
+    },
+    "data/regioes_index.json": {
+     "gerado": "2026-09-02T13:07:00Z",
+     "regioes": {
+      "n": 10,
+      "sha": "0b25b5eee3016052"
+     }
+    },
+    "data/scan_cache.json": {
+     "uid-ana": {
+      "n": 6,
+      "sha": "f937928ef6a40801"
+     },
+     "uid-bruno": {
+      "n": 6,
+      "sha": "f937928ef6a40801"
+     },
+     "uid-celia": {
+      "n": 6,
+      "sha": "6b2c6caa029defe1"
+     }
+    },
+    "data/squadrats.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "8d1243a606a10eda"
+     },
+     "atualizado": "2026-09-02T13:07:00Z"
+    },
+    "data/stats.json": {
+     "by_concelho": {
+      "n": 308,
+      "sha": "50781e4705a156b2"
+     },
+     "by_distrito": {
+      "n": 20,
+      "sha": "da586d1c8e1e04be"
+     },
+     "by_municipio_de": {
+      "n": 22,
+      "sha": "97c640972791bdc7"
+     },
+     "by_municipio_es": {
+      "n": 139,
+      "sha": "9916b0bcd83c47e8"
+     },
+     "by_municipio_ma": {
+      "Cercle de Zagora": {
+       "z14": {
+        "captured": 0,
+        "pct": 0.0,
+        "total": 2935
+       },
+       "z17": {
+        "captured": 0,
+        "pct": 0.0,
+        "total": 184743
+       }
+      }
+     },
+     "by_region_ad": {
+      "n": 7,
+      "sha": "31cb7d66678c9077"
+     },
+     "by_region_de": {
+      "n": 16,
+      "sha": "b014a29c436067e4"
+     },
+     "by_region_es": {
+      "n": 52,
+      "sha": "d6e43364b723e0e4"
+     },
+     "by_region_ma": {
+      "n": 12,
+      "sha": "3d689f1769837216"
+     },
+     "country_ad": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 236
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 14203
+      }
+     },
+     "country_de": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 160790
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 10192259
+      }
+     },
+     "country_es": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 155125
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 9811083
+      }
+     },
+     "country_ma": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 159375
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 10092111
+      }
+     },
+     "country_pt": {
+      "z14": {
+       "captured": 10,
+       "pct": 0.03,
+       "total": 28730
+      },
+      "z17": {
+       "captured": 212,
+       "pct": 0.01,
+       "total": 1758486
+      }
+     },
+     "foreign": {
+      "z14": {
+       "unclassified": 0
+      },
+      "z17": {
+       "unclassified": 0
+      }
+     }
+    },
+    "data/suggestions.json": {
+     "squadratinhos": {
+      "n": 4,
+      "sha": "5c69e38d4e2fb250"
+     }
+    },
+    "data/tile_info_squadratinhos.json": {
+     "n": 212,
+     "sha": "239f57c94fddd141"
+    },
+    "data/tile_info_squadrats.json": {
+     "n": 10,
+     "sha": "439cd4435fb8c295"
+    },
+    "data/trophies.json": {
+     "squadratinhos": {
+      "n": 2,
+      "sha": "11d6759cfcc79f52"
+     },
+     "squadrats": {
+      "n": 1,
+      "sha": "1dc6331e94a89c77"
+     }
+    },
+    "lugares/c-almada.html": {
+     "n": 27,
+     "sha": "35fe730e5a9626ed"
+    },
+    "lugares/c-amadora.html": {
+     "n": 27,
+     "sha": "35e28a68a6421546"
+    },
+    "lugares/c-barreiro.html": {
+     "n": 27,
+     "sha": "534d7445c1c9de6b"
+    },
+    "lugares/c-lisboa.html": {
+     "n": 27,
+     "sha": "c2e26ea2158e7683"
+    },
+    "lugares/d-lisboa.html": {
+     "n": 27,
+     "sha": "90c0ef46a1028129"
+    },
+    "lugares/d-setubal.html": {
+     "n": 27,
+     "sha": "7c97c8c6d61bf1ee"
+    },
+    "lugares/es-r-sevilla.html": {
+     "n": 27,
+     "sha": "3ffe59a8c0e70806"
+    },
+    "lugares/es-z-sevilla.html": {
+     "n": 27,
+     "sha": "421c1796678ace44"
+    },
+    "lugares/index.html": {
+     "n": 257,
+     "sha": "f9ff719d7c901d6a"
+    },
+    "lugares/pais-es.html": {
+     "n": 27,
+     "sha": "460ca60ae54fa94e"
+    },
+    "lugares/pais-pt.html": {
+     "n": 27,
+     "sha": "e5894458b8b07242"
+    }
+   }
+  },
+  "corrida 3 (2026-09-03T15:07:00Z)": {
+   "pedidos": {
+    "z10": 200,
+    "z4": 170,
+    "z7": 128
+   },
+   "publicou": true,
+   "saidas": {
+    "atletas/ana.html": {
+     "n": 26,
+     "sha": "bb5fb52ef792c704"
+    },
+    "atletas/bruno.html": {
+     "n": 26,
+     "sha": "3090645e73678b2d"
+    },
+    "atletas/celia.html": {
+     "n": 26,
+     "sha": "bf4d37eda6b2fa32"
+    },
+    "atletas/index.html": {
+     "n": 34,
+     "sha": "1327e03c71823fb2"
+    },
+    "data/atletas/ana.json": {
+     "atualizado": "2026-09-03T15:07:00Z",
+     "ganhos_diarios": [
+      {
+       "data": "2026-09-03",
+       "regioes": {
+        "concelho": {
+         "Lisboa": 3
+        },
+        "distrito": {
+         "Lisboa": 3
+        }
+       },
+       "squadratinhos": 3,
+       "yardinho": 2
+      }
+     ],
+     "geo": {
+      "n": 3,
+      "sha": "bc3ab6fa8b61da07"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nome": "Ana",
+     "slug": "ana",
+     "sobreposicao": {
+      "exclusivos": 199,
+      "partilhados": 16,
+      "total": 215
+     },
+     "totais": {
+      "squadratinhos": 215,
+      "squadrats": 10,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 14,
+      "yard": 0,
+      "yardinho": 146
+     },
+     "uid": "uid-ana"
+    },
+    "data/atletas/bruno.json": {
+     "atualizado": "2026-09-03T15:07:00Z",
+     "ganhos_diarios": [
+      {
+       "data": "2026-09-02",
+       "regioes": {
+        "concelho": {
+         "Amadora": 19,
+         "Lisboa": 30
+        },
+        "distrito": {
+         "Lisboa": 49
+        }
+       },
+       "squadratinhos": 49,
+       "squadrats": 3
+      }
+     ],
+     "geo": {
+      "n": 3,
+      "sha": "3b77248300b911f8"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nome": "Bruno",
+     "slug": "bruno",
+     "sobreposicao": {
+      "exclusivos": 106,
+      "partilhados": 16,
+      "total": 122
+     },
+     "totais": {
+      "squadratinhos": 122,
+      "squadrats": 9,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 8,
+      "yard": 0,
+      "yardinho": 36
+     },
+     "uid": "uid-bruno"
+    },
+    "data/atletas/celia.json": {
+     "atualizado": "2026-09-03T15:07:00Z",
+     "ganhos_diarios": [
+      {
+       "data": "2026-09-03",
+       "regioes": {
+        "pais": {
+         "FR": 9
+        }
+       },
+       "squadratinhos": 9,
+       "squadrats": 2
+      }
+     ],
+     "geo": {
+      "n": 3,
+      "sha": "c86eea572ba04872"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nome": "Célia",
+     "slug": "celia",
+     "sobreposicao": {
+      "exclusivos": 70,
+      "partilhados": 0,
+      "total": 70
+     },
+     "totais": {
+      "squadratinhos": 70,
+      "squadrats": 8,
+      "ubersquadrat": 2,
+      "ubersquadratinho": 6,
+      "yard": 0,
+      "yardinho": 16
+     },
+     "uid": "uid-celia"
+    },
+    "data/atletas/index.json": {
+     "atletas": [
+      {
+       "nome": "Ana",
+       "slug": "ana"
+      },
+      {
+       "nome": "Bruno",
+       "slug": "bruno"
+      },
+      {
+       "nome": "Célia",
+       "slug": "celia"
+      }
+     ],
+     "gerado": "2026-09-03T15:07:00Z"
+    },
+    "data/club.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "9a8ebe22c3adb5d3"
+     },
+     "atualizado": "2026-09-03T15:07:00Z",
+     "por_mask": {
+      "1": 199,
+      "2": 106,
+      "3": 16,
+      "4": 70
+     },
+     "squares": {
+      "n": 391,
+      "sha": "25862f79ed53a2a3"
+     },
+     "zoom": 17
+    },
+    "data/club_regioes.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "836eab8a72195036"
+     },
+     "atualizado": "2026-09-03T15:07:00Z",
+     "avisos": {
+      "sem_dados_regiao": {
+       "FR": 9
+      }
+     },
+     "uniao": {
+      "n": 7,
+      "sha": "2aa20272951afa47"
+     },
+     "zoom": 17
+    },
+    "data/daily_gains.json": {
+     "dias": {
+      "n": 2,
+      "sha": "026ecb1795192965"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "ultimo_total": {
+      "n": 3,
+      "sha": "02bd9b995f709b6c"
+     }
+    },
+    "data/events.json": {
+     "desde": "2026-07-26",
+     "eventos": {
+      "n": 3,
+      "sha": "42da79a32ffc44ed"
+     },
+     "gerado": "2026-09-03T15:07:00Z"
+    },
+    "data/gains_regioes.json": {
+     "desde": "2026-07-26",
+     "dias": {
+      "n": 2,
+      "sha": "4f53bb3d1eb4b8a2"
+     },
+     "gerado": "2026-09-03T15:07:00Z"
+    },
+    "data/ganhos.json": {
+     "gerado": "2026-09-03T15:07:00Z",
+     "janelas": {
+      "n": 3,
+      "sha": "bbc3fee37f49506a"
+     }
+    },
+    "data/regioes/c-almada.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62209,
+      50236
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "3afa904f2c82f9ff"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-setubal",
+     "pai_nome": "Setúbal",
+     "ranking": [
+      {
+       "captured": 4,
+       "exclusivos": 4,
+       "nome": "Ana",
+       "pct": 0.16
+      }
+     ],
+     "regiao": "Almada",
+     "totais": {
+      "z14": 45,
+      "z17": 2549
+     },
+     "uniao": {
+      "pct": 0.16,
+      "z17": 4
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "39120a54b22d91aa"
+     }
+    },
+    "data/regioes/c-amadora.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62180,
+      50211
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "572b7beee013f492"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-lisboa",
+     "pai_nome": "Lisboa",
+     "ranking": [
+      {
+       "captured": 24,
+       "exclusivos": 24,
+       "nome": "Bruno",
+       "pct": 5.74
+      },
+      {
+       "captured": 16,
+       "exclusivos": 16,
+       "nome": "Ana",
+       "pct": 3.83
+      }
+     ],
+     "regiao": "Amadora",
+     "totais": {
+      "z14": 6,
+      "z17": 418
+     },
+     "uniao": {
+      "pct": 9.57,
+      "z17": 40
+     },
+     "vizinhos": {
+      "n": 4,
+      "sha": "12d2622d0df0a2aa"
+     }
+    },
+    "data/regioes/c-barreiro.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62223,
+      50238
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "9f63c0038e930a81"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-setubal",
+     "pai_nome": "Setúbal",
+     "ranking": [
+      {
+       "captured": 24,
+       "exclusivos": 24,
+       "nome": "Bruno",
+       "pct": 3.0
+      }
+     ],
+     "regiao": "Barreiro",
+     "totais": {
+      "z14": 15,
+      "z17": 801
+     },
+     "uniao": {
+      "pct": 3.0,
+      "z17": 24
+     },
+     "vizinhos": {
+      "n": 6,
+      "sha": "8a5d3158c1a8395d"
+     }
+    },
+    "data/regioes/c-lisboa.json": {
+     "avo_key": "pais-pt",
+     "avo_nome": "Portugal",
+     "cc": "PT",
+     "centro": [
+      62209,
+      50228
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "98437d60fbd270d6"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "concelho",
+     "pai_key": "d-lisboa",
+     "pai_nome": "Lisboa",
+     "ranking": {
+      "n": 3,
+      "sha": "31bcbb2598f261c3"
+     },
+     "regiao": "Lisboa",
+     "totais": {
+      "z14": 36,
+      "z17": 2027
+     },
+     "uniao": {
+      "pct": 14.26,
+      "z17": 289
+     },
+     "vizinhos": {
+      "n": 5,
+      "sha": "3c3e4b7c75a03da4"
+     }
+    },
+    "data/regioes/d-lisboa.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": [
+      62205,
+      50226
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "039b006a8519b69f"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "distrito",
+     "pai_key": "pais-pt",
+     "pai_nome": "Portugal",
+     "ranking": {
+      "n": 3,
+      "sha": "46071744d4d0e31d"
+     },
+     "regiao": "Lisboa",
+     "totais": {
+      "z14": 916,
+      "z17": 54595
+     },
+     "uniao": {
+      "pct": 0.6,
+      "z17": 329
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "87081868b6663a8e"
+     }
+    },
+    "data/regioes/d-setubal.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": [
+      62221,
+      50238
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "2f42d75b445c8bc9"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "distrito",
+     "pai_key": "pais-pt",
+     "pai_nome": "Portugal",
+     "ranking": [
+      {
+       "captured": 24,
+       "exclusivos": 24,
+       "nome": "Bruno",
+       "pct": 0.02
+      },
+      {
+       "captured": 4,
+       "exclusivos": 4,
+       "nome": "Ana",
+       "pct": 0.0
+      }
+     ],
+     "regiao": "Setúbal",
+     "totais": {
+      "z14": 1642,
+      "z17": 100713
+     },
+     "uniao": {
+      "pct": 0.03,
+      "z17": 28
+     },
+     "vizinhos": {
+      "n": 4,
+      "sha": "8fa6ba5212f8dc03"
+     }
+    },
+    "data/regioes/es-r-sevilla.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "ES",
+     "centro": [
+      63357,
+      50840
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "b50bc045d507654b"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "regiao",
+     "pai_key": "pais-es",
+     "pai_nome": "Espanha",
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 0.01
+      }
+     ],
+     "regiao": "Sevilla",
+     "totais": {
+      "z14": 3734,
+      "z17": 238539
+     },
+     "uniao": {
+      "pct": 0.01,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 5,
+      "sha": "d99d102315366e26"
+     }
+    },
+    "data/regioes/es-z-sevilla.json": {
+     "avo_key": "pais-es",
+     "avo_nome": "Espanha",
+     "cc": "ES",
+     "centro": [
+      63357,
+      50840
+     ],
+     "fronteira": {
+      "n": 2,
+      "sha": "d3c946f13b1ed106"
+     },
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "zona",
+     "pai_key": "es-r-sevilla",
+     "pai_nome": "Sevilla",
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 1.04
+      }
+     ],
+     "regiao": "Sevilla",
+     "totais": {
+      "z14": 39,
+      "z17": 2406
+     },
+     "uniao": {
+      "pct": 1.04,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 14,
+      "sha": "4b5c0367088a0f6b"
+     }
+    },
+    "data/regioes/pais-es.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "ES",
+     "centro": null,
+     "fronteira": null,
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "pais",
+     "pai_key": null,
+     "pai_nome": null,
+     "ranking": [
+      {
+       "captured": 25,
+       "exclusivos": 25,
+       "nome": "Célia",
+       "pct": 0.0
+      }
+     ],
+     "regiao": "Espanha",
+     "totais": {
+      "z14": 155125,
+      "z17": 9811083
+     },
+     "uniao": {
+      "pct": 0.0,
+      "z17": 25
+     },
+     "vizinhos": {
+      "n": 3,
+      "sha": "0ff99a48070cde46"
+     }
+    },
+    "data/regioes/pais-fr.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "FR",
+     "centro": null,
+     "fronteira": null,
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "pais",
+     "pai_key": null,
+     "pai_nome": null,
+     "ranking": [
+      {
+       "captured": 9,
+       "exclusivos": 9,
+       "nome": "Célia",
+       "pct": null
+      }
+     ],
+     "regiao": "França",
+     "totais": {
+      "z14": null,
+      "z17": null
+     },
+     "uniao": {
+      "pct": null,
+      "z17": 9
+     },
+     "vizinhos": {
+      "n": 8,
+      "sha": "192c66ff7f909643"
+     }
+    },
+    "data/regioes/pais-pt.json": {
+     "avo_key": null,
+     "avo_nome": null,
+     "cc": "PT",
+     "centro": null,
+     "fronteira": null,
+     "gerado": "2026-09-03T15:07:00Z",
+     "nivel": "pais",
+     "pai_key": null,
+     "pai_nome": null,
+     "ranking": {
+      "n": 3,
+      "sha": "8fb13580a0abc928"
+     },
+     "regiao": "Portugal",
+     "totais": {
+      "z14": 28730,
+      "z17": 1758486
+     },
+     "uniao": {
+      "pct": 0.02,
+      "z17": 357
+     },
+     "vizinhos": [
+      {
+       "key": "pais-es",
+       "nome": "Espanha",
+       "tem_pagina": true
+      }
+     ]
+    },
+    "data/regioes_index.json": {
+     "gerado": "2026-09-03T15:07:00Z",
+     "regioes": {
+      "n": 11,
+      "sha": "260c8047a2870400"
+     }
+    },
+    "data/scan_cache.json": {
+     "uid-ana": {
+      "n": 6,
+      "sha": "f937928ef6a40801"
+     },
+     "uid-bruno": {
+      "n": 6,
+      "sha": "f937928ef6a40801"
+     },
+     "uid-celia": {
+      "n": 6,
+      "sha": "f51ef8f4e357f8eb"
+     }
+    },
+    "data/squadrats.json": {
+     "atletas": {
+      "n": 3,
+      "sha": "02bd9b995f709b6c"
+     },
+     "atualizado": "2026-09-03T15:07:00Z"
+    },
+    "data/stats.json": {
+     "by_concelho": {
+      "n": 308,
+      "sha": "13078f33ba78d756"
+     },
+     "by_distrito": {
+      "n": 20,
+      "sha": "ed0cc23efb5ae329"
+     },
+     "by_municipio_de": {
+      "n": 22,
+      "sha": "97c640972791bdc7"
+     },
+     "by_municipio_es": {
+      "n": 139,
+      "sha": "9916b0bcd83c47e8"
+     },
+     "by_municipio_ma": {
+      "Cercle de Zagora": {
+       "z14": {
+        "captured": 0,
+        "pct": 0.0,
+        "total": 2935
+       },
+       "z17": {
+        "captured": 0,
+        "pct": 0.0,
+        "total": 184743
+       }
+      }
+     },
+     "by_region_ad": {
+      "n": 7,
+      "sha": "31cb7d66678c9077"
+     },
+     "by_region_de": {
+      "n": 16,
+      "sha": "b014a29c436067e4"
+     },
+     "by_region_es": {
+      "n": 52,
+      "sha": "d6e43364b723e0e4"
+     },
+     "by_region_ma": {
+      "n": 12,
+      "sha": "3d689f1769837216"
+     },
+     "country_ad": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 236
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 14203
+      }
+     },
+     "country_de": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 160790
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 10192259
+      }
+     },
+     "country_es": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 155125
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 9811083
+      }
+     },
+     "country_ma": {
+      "z14": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 159375
+      },
+      "z17": {
+       "captured": 0,
+       "pct": 0.0,
+       "total": 10092111
+      }
+     },
+     "country_pt": {
+      "z14": {
+       "captured": 10,
+       "pct": 0.03,
+       "total": 28730
+      },
+      "z17": {
+       "captured": 215,
+       "pct": 0.01,
+       "total": 1758486
+      }
+     },
+     "foreign": {
+      "z14": {
+       "unclassified": 0
+      },
+      "z17": {
+       "unclassified": 0
+      }
+     }
+    },
+    "data/suggestions.json": {
+     "squadratinhos": {
+      "n": 4,
+      "sha": "bd5bc1be92da0239"
+     }
+    },
+    "data/tile_info_squadratinhos.json": {
+     "n": 215,
+     "sha": "2ddcdc234fb0bf04"
+    },
+    "data/tile_info_squadrats.json": {
+     "n": 10,
+     "sha": "439cd4435fb8c295"
+    },
+    "data/trophies.json": {
+     "squadratinhos": {
+      "n": 2,
+      "sha": "783bd84b2c9f84d1"
+     },
+     "squadrats": {
+      "n": 1,
+      "sha": "1dc6331e94a89c77"
+     }
+    },
+    "lugares/c-almada.html": {
+     "n": 27,
+     "sha": "35fe730e5a9626ed"
+    },
+    "lugares/c-amadora.html": {
+     "n": 27,
+     "sha": "35e28a68a6421546"
+    },
+    "lugares/c-barreiro.html": {
+     "n": 27,
+     "sha": "534d7445c1c9de6b"
+    },
+    "lugares/c-lisboa.html": {
+     "n": 27,
+     "sha": "c2e26ea2158e7683"
+    },
+    "lugares/d-lisboa.html": {
+     "n": 27,
+     "sha": "90c0ef46a1028129"
+    },
+    "lugares/d-setubal.html": {
+     "n": 27,
+     "sha": "7c97c8c6d61bf1ee"
+    },
+    "lugares/es-r-sevilla.html": {
+     "n": 27,
+     "sha": "3ffe59a8c0e70806"
+    },
+    "lugares/es-z-sevilla.html": {
+     "n": 27,
+     "sha": "421c1796678ace44"
+    },
+    "lugares/index.html": {
+     "n": 257,
+     "sha": "f9ff719d7c901d6a"
+    },
+    "lugares/pais-es.html": {
+     "n": 27,
+     "sha": "460ca60ae54fa94e"
+    },
+    "lugares/pais-fr.html": {
+     "n": 27,
+     "sha": "142b3b8793249222"
+    },
+    "lugares/pais-pt.html": {
+     "n": 27,
+     "sha": "e5894458b8b07242"
+    }
+   }
+  }
+ },
+ "pytest": "48 passed",
+ "site": {
+  "analise.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": [
+     "index.html",
+     "#",
+     "#"
+    ],
+    "svg": 220,
+    "texto": "← clube + − Squadrats (1609 m) Squadratinhos (201 m) País Região Zona Yardinho Über Sugestões ▼ Grelha 215 sq capturados ▲",
+    "titulo": "Análise · Squadrats Club"
+   },
+   "vista região": {
+    "canvas": 0,
+    "links": [
+     "index.html",
+     "#",
+     "#"
+    ],
+    "svg": 322,
+    "texto": "← clube + − Squadrats (1609 m) Squadratinhos (201 m) País Região Zona Yardinho Über Sugestões ▼ Grelha 215 sq capturados ▲",
+    "titulo": "Análise · Squadrats Club"
+   }
+  },
+  "atletas/ana.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 13,
+     "sha": "f7f6eee7ee6d9038"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "f0d6eac929af34fd"
+    },
+    "titulo": "Ana · Squadrats Club"
+   }
+  },
+  "atletas/celia.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 13,
+     "sha": "c064bc7c4b245050"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "9015e8b8df151c12"
+    },
+    "titulo": "Célia · Squadrats Club"
+   }
+  },
+  "atletas/index.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": [
+     "../index.html",
+     "../club.html",
+     "../atletas/",
+     "../lugares/",
+     "../historico.html",
+     "../ganhos.html",
+     "ana.html",
+     "bruno.html",
+     "celia.html",
+     "../club.html"
+    ],
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "4f44c1110203a2ac"
+    },
+    "titulo": "Perfis · Squadrats Club"
+   }
+  },
+  "club.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 12,
+    "links": {
+     "n": 15,
+     "sha": "9b2160823efa7d77"
+    },
+    "svg": 0,
+    "texto": "Squadrats Club Mapa Perfis Lugares Histórico Ganhos + − Mapa do clube Ana Bruno Célia 391 squadratinhos visíveis ▲",
+    "titulo": "Mapa do clube · Squadrats Club"
+   },
+   "painel aberto": {
+    "n": 1,
+    "sha": "ccc3a75d988f2bab"
+   }
+  },
+  "ganhos.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 10,
+     "sha": "44ed3bd4415624bb"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "ade007f416afe6a8"
+    },
+    "titulo": "Ganhos · Squadrats Club"
+   }
+  },
+  "historico.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 15,
+     "sha": "9686ceb24c9e5625"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "0f4da8299f6fe508"
+    },
+    "titulo": "Histórico · Squadrats Club"
+   }
+  },
+  "index.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 15,
+     "sha": "37fa0414910ef3de"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "1dde88066d25610f"
+    },
+    "titulo": "Squadrats Club"
+   }
+  },
+  "lugares/c-almada.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 14,
+     "sha": "582374e12911e132"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "aa639ed34d0693d4"
+    },
+    "titulo": "Almada · Squadrats Club"
+   }
+  },
+  "lugares/d-lisboa.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 18,
+     "sha": "15c176fcffe99e51"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "18d45b80725d8adb"
+    },
+    "titulo": "Lisboa · Squadrats Club"
+   }
+  },
+  "lugares/es-r-sevilla.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 13,
+     "sha": "a1b14ef9cb32d0b7"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "0d5c864eb0c69612"
+    },
+    "titulo": "Sevilla · Squadrats Club"
+   }
+  },
+  "lugares/es-z-sevilla.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 13,
+     "sha": "ed5f15252fc1e7c3"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "593b92897f741c90"
+    },
+    "titulo": "Sevilla · Squadrats Club"
+   }
+  },
+  "lugares/index.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 10,
+     "sha": "595dec28839e1ba2"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "02c8c0852669a493"
+    },
+    "titulo": "Lugares · Squadrats Club"
+   }
+  },
+  "lugares/pais-es.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 13,
+     "sha": "c436f989d123105f"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "f0dd5ba9e866d945"
+    },
+    "titulo": "Espanha · Squadrats Club"
+   }
+  },
+  "lugares/pais-pt.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 15,
+     "sha": "49f1453322b1783c"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "2e499fec220485e9"
+    },
+    "titulo": "Portugal · Squadrats Club"
+   }
+  }
+ }
+}

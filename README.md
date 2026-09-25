@@ -469,6 +469,31 @@ kept out of the code because it is third-party data (see
 by hand. The JSON order fixes the bitmask bit order, do not reorder without
 regenerating `data/club.json`.
 
+## Tests
+
+`tests/harness.py` checks that the pipeline and the site behave as recorded in
+`tests/baseline.json`. It runs the unit tests, three pipeline runs against a
+fake Squadrats tile server (three fictional athletes), and every page type in
+Microsoft Edge through Playwright. No requests go to Squadrats; only Leaflet
+comes from its CDN. Large outputs are stored as count + hash.
+
+Setup, once:
+
+```
+py -m venv .venv
+.venv/Scripts/python -m pip install -r tests/requirements.txt
+```
+
+Run:
+
+```
+.venv/Scripts/python tests/harness.py
+```
+
+`--update` rewrites the baseline after an intended change. Without Edge, run
+`playwright install chromium` and set `HARNESS_BROWSER=` (empty).
+`python -m pytest` alone runs only the unit tests (as CI does).
+
 ## Architecture
 
 ### Vector tiles (`fetch-map-data.yml`, cron 6×/day)
