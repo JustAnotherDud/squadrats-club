@@ -1,6 +1,6 @@
 """Reduz o peso dos geojson de fronteiras, de forma reprodutível.
 
-Duas transformações, nenhuma toca na fonte (GADM 4.1, ver README) nem a vai
+Três transformações, nenhuma toca na fonte (GADM 4.1, ver README) nem a vai
 buscar: só reprocessa o que já está commitado.
 
   1. refdata/ (verdade da classificação): arredonda coordenadas a 6 casas
@@ -29,7 +29,7 @@ buscar: só reprocessa o que já está commitado.
 Uso:
   py prep.py                reescreve todos os ficheiros da tabela abaixo
   py prep.py --check        não escreve; sai 1 se algum ficheiro no disco não
-                            for igual ao que o prep produziria (guarda de CI)
+                            for igual ao que o prep produziria
   py prep.py --fetch-outlines
                             (re)gera outlines/europe.geojson da Natural Earth
 
