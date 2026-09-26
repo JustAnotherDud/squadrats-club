@@ -14,6 +14,7 @@ Tipos:
                        outro atleta (juntou-se a um board existente)
   - marco              X cruzou um patamar de squadratinhos (só para cima)
 """
+import os
 
 # patamares por nível: concelho arranca em 25 (~1 km² coberto), distrito
 # mais alto porque acumula mais. Só cruzados para cima.
@@ -33,11 +34,49 @@ ATLETAS_ORDEM = ["Zé", "Xeira", "Carolina", "Inês S.", "Pedro"]
 
 DESDE = "2026-07-26"  # 1.º dia com club.json
 
+# correcções de snapshots publicados (histórico da branch data não se reescreve)
+CORRECOES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "correcoes_snapshots.json")
 
-def snapshots_commits(repo, branch, path, desde=None, com_anterior=False):
+
+def carregar_correcoes(path=CORRECOES):
+    """{sha: {atleta: sha_correcto}} de correcoes_snapshots.json, sem "motivo".
+
+    Formato do ficheiro: {sha: {atleta: sha_correcto, ..., "motivo": "..."}}.
+    No snapshot `sha`, a entrada de `atleta` em "atletas" passa a ser a do
+    snapshot `sha_correcto` (mesmo ficheiro). Serve para dados publicados que
+    a fonte depois desmentiu (ex. atividade apagada pelo atleta): todos os
+    passos que lêem o histórico vêem o valor corrigido. Só o bloco "atletas";
+    agregados como `uniao` do club_regioes.json ficam como estão. SHAs
+    completos, para não haver ambiguidade. Sem ficheiro: {}."""
+    import json
+    import re
+
+    try:
+        with open(path, encoding="utf-8") as f:
+            raw = json.load(f)
+    except FileNotFoundError:
+        return {}
+    sha_ok = re.compile(r"[0-9a-f]{40}")
+    out = {}
+    for sha, por_atleta in raw.items():
+        subs = {a: s for a, s in por_atleta.items() if a != "motivo"}
+        for s in (sha, *subs.values()):
+            if not sha_ok.fullmatch(s):
+                raise ValueError(f"{path}: '{s}' não é um SHA completo")
+        if subs:
+            out[sha] = subs
+    return out
+
+
+def snapshots_commits(repo, branch, path, desde=None, com_anterior=False, correcoes=None):
     """(snaps, saltados). `snaps` = [(datetime, dict), ...] em ordem
     cronológica, um por commit de `path` na branch (o dict tem de ter
     "atualizado").
+
+    `correcoes` ({sha: {atleta: sha_correcto}}, por omissão o
+    correcoes_snapshots.json, ver carregar_correcoes) é aplicado a cada
+    snapshot lido. Uma correcção que não dê para aplicar levanta RuntimeError,
+    antes isso que publicar o valor que se quis corrigir.
 
     `desde` (YYYY-MM-DD) limita a leitura aos commits desse dia em diante. Com
     `com_anterior=True` junta também o último commit antes de `desde`, a base
@@ -65,6 +104,23 @@ def snapshots_commits(repo, branch, path, desde=None, com_anterior=False):
     if desde and com_anterior:
         shas += log("-1", f"--before={desde}T00:00:00Z")
 
+    if correcoes is None:
+        correcoes = carregar_correcoes()
+    correctos = {}  # sha_correcto -> "atletas" desse snapshot, lido uma vez
+
+    def corrigir(sha, d):
+        for atl, sha_ok in correcoes.get(sha, {}).items():
+            if sha_ok not in correctos:
+                r = git("show", f"{sha_ok}:{path}")
+                if r.returncode != 0:
+                    raise RuntimeError(
+                        f"correcção de {sha[:8]} ({atl}): {path} ilegível em {sha_ok[:8]}")
+                correctos[sha_ok] = json.loads(r.stdout).get("atletas", {})
+            if atl in correctos[sha_ok]:
+                d.setdefault("atletas", {})[atl] = correctos[sha_ok][atl]
+            else:
+                d.get("atletas", {}).pop(atl, None)
+
     snaps, saltados = [], []
     for sha in shas:
         r = git("show", f"{sha}:{path}")
@@ -78,6 +134,7 @@ def snapshots_commits(repo, branch, path, desde=None, com_anterior=False):
         except Exception as e:
             saltados.append((sha, f"{path} inesperado: {type(e).__name__}: {e}"))
             continue
+        corrigir(sha, d)
         snaps.append((ts, d))
 
     if saltados:

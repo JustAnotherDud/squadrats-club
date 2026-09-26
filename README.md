@@ -99,6 +99,16 @@ git checkout origin/data -- data/
 py pipeline/run_all.py data
 ```
 
+### Correcting published snapshots
+
+The `append_*` steps recompute from the history of `origin/data`, so a
+hand-edit of the derived files is undone by the next run when that history is
+wrong (e.g. an activity the athlete later deleted).
+`pipeline/correcoes_snapshots.json` fixes it without rewriting history:
+`{sha: {athlete: correct_sha, "motivo": "..."}}` makes every history read
+(`eventos.snapshots_commits`) use the athlete's entry from `correct_sha` in
+snapshot `sha`. Full SHAs only; only the `atletas` block is replaced.
+
 ### Manual tools
 
 Not run by the workflow:
