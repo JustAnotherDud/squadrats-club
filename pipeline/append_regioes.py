@@ -4,10 +4,7 @@ Recomputa ranking/totais/união/vizinhos de cada região activa a partir do
 club_regioes.json novo. Idempotente: escreve o estado actual, sem histórico
 acumulado. O workflow faz mirror da pasta, portanto uma região que deixou de
 ter actividade desaparece sozinha.
-
-Uso: py append_regioes.py [pasta_saida]
 """
-import argparse
 import json
 import os
 from datetime import datetime, timezone
@@ -16,7 +13,6 @@ import regioes
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-DATA_DIR = os.path.join(REPO, "data")
 # só se usa para o lookup concelho -> distrito (properties.parent), geometria
 # nenhuma; lê da fonte de precisão (refdata), não da cópia simplificada de
 # data/ que agora só serve para o analise.html desenhar.
@@ -88,11 +84,3 @@ def main(out_dir):
     regioes.escrever_indice(out_dir, indice, gerado)
     print(f"append_regioes: {n} PT + {ne} estrangeiras + {len(paises)} países, "
           f"{len(disputadas)} disputadas -> regioes_index.json")
-
-
-if __name__ == "__main__":
-    p = argparse.ArgumentParser()
-    p.add_argument("out_dir", nargs="?", default=DATA_DIR)
-    a = p.parse_args()
-    os.makedirs(os.path.join(a.out_dir, "regioes"), exist_ok=True)
-    main(a.out_dir)

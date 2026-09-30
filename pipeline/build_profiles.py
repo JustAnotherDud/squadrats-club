@@ -12,10 +12,7 @@ diários do atleta (daily_gains.json), a sobreposição de squadratinhos
 (club.json), o detalhe geográfico de squadratinhos com % (club_regioes.json +
 totais partilhados de stats.json) e a posição do atleta em cada região
 (pivot de club_regioes.json, o mesmo que o club.html faz no browser).
-
-Uso: py build_profiles.py [pasta_saida]
 """
-import argparse
 import datetime
 import json
 import os
@@ -23,8 +20,6 @@ import os
 from atletas import ATHLETES
 from slugs import slug_map
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(os.path.dirname(HERE), "data")
 
 CAMPOS = ["squadrats", "squadratinhos", "yard", "yardinho",
           "ubersquadrat", "ubersquadratinho"]
@@ -237,11 +232,3 @@ def main(out_dir):
     with open(idx_path, "w", encoding="utf-8") as f:
         json.dump({"gerado": gerado, "atletas": indice}, f, ensure_ascii=False, separators=(",", ":"))
     print(f"índice -> {idx_path}")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("out_dir", nargs="?", default=DATA_DIR)
-    args = parser.parse_args()
-    os.makedirs(args.out_dir, exist_ok=True)
-    main(args.out_dir)

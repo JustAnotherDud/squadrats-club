@@ -7,10 +7,7 @@ Idempotente entre os 6 runs/dia: recomputa o(s) dia(s) do topo e reescreve.
 
 Fallback shallow (mesmo padrão do append_regioes.py): se o git log de
 origin/data não der histórico, compara só o topo vs o snapshot novo.
-
-Uso: py append_gains_regioes.py [pasta_saida]
 """
-import argparse
 import json
 import os
 import subprocess
@@ -21,7 +18,6 @@ import gains_regioes
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-DATA_DIR = os.path.join(REPO, "data")
 
 
 def _carrega(path):
@@ -97,11 +93,3 @@ def main(out_dir):
     dias_final = [por_data[k] for k in sorted(por_data)]
     gains_regioes.escrever(out_dir, dias_final, gerado)
     print(f"append_gains_regioes: {novos} dia(s) recomputado(s), {len(dias_final)} no total")
-
-
-if __name__ == "__main__":
-    p = argparse.ArgumentParser()
-    p.add_argument("out_dir", nargs="?", default=DATA_DIR)
-    a = p.parse_args()
-    os.makedirs(a.out_dir, exist_ok=True)
-    main(a.out_dir)

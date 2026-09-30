@@ -6,10 +6,7 @@ não se toca no folha-do-clube.
 Falha alto se algum UID devolver 500 ou se squadrats/squadratinhos não
 baterem com o `size` do servidor, nunca publica o último valor bom em
 silêncio (ver tiles_fetch.py).
-
-Uso: py fetch_club_totais.py [pasta_saida]
 """
-import argparse
 import datetime
 import json
 import os
@@ -17,10 +14,6 @@ import os
 import daily_gains
 from atletas import ATHLETES, known_squadratinhos
 from tiles_fetch import GEOMETRY_LAYERS, scan_athlete, squares_validados
-
-HERE = os.path.dirname(os.path.abspath(__file__))
-REPO_DIR = os.path.dirname(HERE)
-DATA_DIR = os.path.join(REPO_DIR, "data")
 
 
 def fetch_totals(uid, known=None):
@@ -82,11 +75,3 @@ def main(out_dir):
         print(f"ganhos desde a última corrida: {delta}")
     else:
         print("ganhos desde a última corrida: nenhum")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("out_dir", nargs="?", default=DATA_DIR)
-    args = parser.parse_args()
-    os.makedirs(args.out_dir, exist_ok=True)
-    main(args.out_dir)

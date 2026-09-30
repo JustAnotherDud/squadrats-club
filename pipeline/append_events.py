@@ -9,10 +9,7 @@ commitado); os dias anteriores vêm do histórico de `origin/data`.
 
 Append idempotente: a chave de cada evento é por dia (eventos.chave), por
 isso os 6 runs do mesmo dia não duplicam nada.
-
-Uso: py append_events.py [pasta_saida]
 """
-import argparse
 import json
 import os
 import subprocess
@@ -22,7 +19,6 @@ import eventos
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-DATA_DIR = os.path.join(REPO, "data")
 
 
 def _n_commits_club_regioes(branch="origin/data"):
@@ -166,11 +162,3 @@ def main(out_dir):
     atual["gerado"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
     with open(events_path, "w", encoding="utf-8") as f:
         json.dump(atual, f, ensure_ascii=False, separators=(",", ":"))
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("out_dir", nargs="?", default=DATA_DIR)
-    args = parser.parse_args()
-    os.makedirs(args.out_dir, exist_ok=True)
-    main(args.out_dir)

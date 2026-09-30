@@ -6,10 +6,7 @@ Recompute total, não incremental: o histórico de squadrats.json na branch
 corrida dá sempre o mesmo resultado correcto, sem estado próprio a poder
 desalinhar. Precisa do histórico completo da branch (o workflow faz o
 fetch sem --depth). Custo: um `git show` por commit de squadrats.json.
-
-Uso: py append_ganhos.py [pasta_saida]
 """
-import argparse
 import json
 import os
 from datetime import datetime, timezone
@@ -19,7 +16,6 @@ import ganhos
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-DATA_DIR = os.path.join(REPO, "data")
 
 
 def main(out_dir):
@@ -53,11 +49,3 @@ def main(out_dir):
         json.dump(out, f, ensure_ascii=False, separators=(",", ":"))
 
     print(f"append_ganhos: {len(resultado)} janela(s) de ganho -> ganhos.json")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("out_dir", nargs="?", default=DATA_DIR)
-    args = parser.parse_args()
-    os.makedirs(args.out_dir, exist_ok=True)
-    main(args.out_dir)

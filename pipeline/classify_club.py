@@ -7,10 +7,7 @@ Escreve dois blocos: "atletas" (captured por região, por atleta) e "uniao"
 usado como número e ordenação do regioes/index.html via regioes.py). Os
 totais (denominador) são os mesmos para toda a gente, já em stats.json (via
 grid_totals.json, ver build_analise.py): o frontend combina os dois.
-
-Uso: py classify_club.py [pasta_saida]
 """
-import argparse
 import datetime
 import json
 import os
@@ -20,7 +17,6 @@ from classify import Classifier
 from kml_parse import tile_bounds
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(os.path.dirname(HERE), "data")
 REFDATA_DIR = os.path.join(HERE, "refdata")
 
 ZOOM = 17  # club.json só tem squadratinhos (ver fetch_club_squares.py)
@@ -218,11 +214,3 @@ def main(out_dir):
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(resultado, f, ensure_ascii=False, separators=(",", ":"))
     print(f"escrito: {out_path}")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("out_dir", nargs="?", default=DATA_DIR)
-    args = parser.parse_args()
-    os.makedirs(args.out_dir, exist_ok=True)
-    main(args.out_dir)

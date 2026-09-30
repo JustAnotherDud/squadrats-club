@@ -3,10 +3,7 @@
 Cada square sai como [x, y, mask], em que mask é o bitmask de quem o tem
 (bit 0 = primeiro atleta de ATHLETES_JSON). Assim os squares partilhados não
 se repetem. Só z17: a z14 quase tudo é partilhado.
-
-Uso: py fetch_club_squares.py [pasta_saida]
 """
-import argparse
 import datetime
 import json
 import os
@@ -15,8 +12,6 @@ from atletas import ATLETAS, known_squadratinhos
 from slugs import slugify
 from tiles_fetch import scan_athlete, squares_validados
 
-HERE = os.path.dirname(os.path.abspath(__file__))
-DATA_DIR = os.path.join(os.path.dirname(HERE), "data")
 
 CAMADA = "squadratinhos"
 ZOOM = 17  # o de CAMADA
@@ -86,11 +81,3 @@ def main(out_dir):
     with open(out_path, "w", encoding="utf-8") as f:
         json.dump(resultado, f, ensure_ascii=False, separators=(",", ":"))
     print(f"{len(mascaras)} squares distintos -> {out_path}")
-
-
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser()
-    parser.add_argument("out_dir", nargs="?", default=DATA_DIR)
-    args = parser.parse_args()
-    os.makedirs(args.out_dir, exist_ok=True)
-    main(args.out_dir)
