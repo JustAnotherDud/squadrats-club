@@ -110,6 +110,21 @@ const esc = s => String(s).replace(/[&<>"]/g,
 // número em pt-PT; null/undefined -> "·", não "0".
 const nfmt = n => (n == null ? '·' : n.toLocaleString('pt-PT'));
 
+// Ordena linhas pela coluna `col` ({num, val}) e `sort.dir`. Numéricas: null
+// vai para o fim em desc; `desempate(a, b)` (opcional) resolve os empates.
+function sortBy(linhas, col, sort, desempate) {
+  const dir = sort.dir === 'asc' ? 1 : -1;
+  return [...linhas].sort((a, b) => {
+    let va = col.val(a), vb = col.val(b);
+    if (col.num) {
+      va = va == null ? -Infinity : va;
+      vb = vb == null ? -Infinity : vb;
+      return (va - vb) * dir || (desempate ? desempate(a, b) : 0);
+    }
+    return String(va).localeCompare(String(vb), 'pt') * dir;
+  });
+}
+
 // quadrado de cor do atleta (.tile do site.css)
 const tile = n => `<span class="tile" style="background:${cor(n)}"></span>`;
 

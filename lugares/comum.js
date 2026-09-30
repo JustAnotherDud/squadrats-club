@@ -58,17 +58,8 @@ const SR_COLS = [
 ];
 
 function ordenarSub(linhas, sort) {
-  const col = SR_COLS.find(c => c.k === sort.k) || SR_COLS[2];
-  const dir = sort.dir === 'asc' ? 1 : -1;
-  return [...linhas].sort((a, b) => {
-    let va = col.val(a), vb = col.val(b);
-    if (col.num) {
-      va = va == null ? -Infinity : va;
-      vb = vb == null ? -Infinity : vb;
-      return (va - vb) * dir || a.nome.localeCompare(b.nome, 'pt');
-    }
-    return String(va).localeCompare(String(vb), 'pt') * dir;
-  });
+  return sortBy(linhas, SR_COLS.find(c => c.k === sort.k) || SR_COLS[2], sort,
+    (a, b) => a.nome.localeCompare(b.nome, 'pt'));
 }
 
 function tabelaSubRegioes(linhas, opts) {

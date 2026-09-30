@@ -108,17 +108,7 @@
   ];
 
   function ordenar(linhas, sort) {
-    const col = COLS.find(c => c.k === sort.k) || COLS[1];
-    const dir = sort.dir === 'asc' ? 1 : -1;
-    return [...linhas].sort((a, b) => {
-      let va = col.val(a), vb = col.val(b);
-      if (col.num) {
-        va = va == null ? -Infinity : va;
-        vb = vb == null ? -Infinity : vb;
-        return (va - vb) * dir;
-      }
-      return String(va).localeCompare(String(vb), 'pt') * dir;
-    });
+    return sortBy(linhas, COLS.find(c => c.k === sort.k) || COLS[1], sort);
   }
 
   // Placeholder "·": visualmente um ponto, mas com nome para leitor de ecrã.
