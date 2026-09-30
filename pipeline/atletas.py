@@ -13,6 +13,8 @@ regenerar data/club.json.
 import json
 import os
 
+from util import load_json
+
 _raw = os.environ.get("ATHLETES_JSON", "").strip()
 if not _raw:
     raise RuntimeError(
@@ -45,10 +47,8 @@ def known_squadratinhos(out_dir):
     passa por um squadratinho novo. Por isso esta contagem chega para saber
     se algo mudou. Atleta sem entrada fica de fora e leva o scan completo."""
     path = os.path.join(out_dir, "squadrats.json")
-    try:
-        with open(path, encoding="utf-8") as f:
-            data = json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    data = load_json(path)
+    if data is None:
         return {}
     return {
         ATHLETES[nome]: info["squadratinhos"]

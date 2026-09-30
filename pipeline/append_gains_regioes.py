@@ -15,21 +15,14 @@ from datetime import datetime, timezone
 
 import eventos
 import gains_regioes
+from util import load_json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
 
 
-def _carrega(path):
-    try:
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return None
-
-
 def main(out_dir):
-    novo = _carrega(os.path.join(out_dir, "club_regioes.json"))
+    novo = load_json(os.path.join(out_dir, "club_regioes.json"))
     if not novo:
         print("append_gains_regioes: sem club_regioes.json novo, nada a fazer")
         return

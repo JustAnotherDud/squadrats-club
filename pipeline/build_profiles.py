@@ -19,6 +19,7 @@ import os
 
 from atletas import ATHLETES
 from slugs import slug_map
+from util import load_json
 
 
 CAMPOS = ["squadrats", "squadratinhos", "yard", "yardinho",
@@ -36,13 +37,6 @@ NIVEIS = {
 def _carregar(out_dir, nome):
     with open(os.path.join(out_dir, nome), encoding="utf-8") as f:
         return json.load(f)
-
-
-def _carregar_opcional(out_dir, nome):
-    try:
-        return _carregar(out_dir, nome)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return None
 
 
 def _total_stats(stats, bucket, nome=None):
@@ -162,11 +156,11 @@ def _merge_geo(nome, geo_nome, stats, pivot):
 
 def main(out_dir):
     squadrats = _carregar(out_dir, "squadrats.json")
-    club = _carregar_opcional(out_dir, "club.json") or {"atletas": []}
-    regioes = _carregar_opcional(out_dir, "club_regioes.json") or {"atletas": {}}
-    ganhos = _carregar_opcional(out_dir, "daily_gains.json") or {"dias": []}
-    gains_reg = _carregar_opcional(out_dir, "gains_regioes.json") or {"dias": []}
-    stats = _carregar_opcional(out_dir, "stats.json")
+    club = load_json(os.path.join(out_dir, "club.json")) or {"atletas": []}
+    regioes = load_json(os.path.join(out_dir, "club_regioes.json")) or {"atletas": {}}
+    ganhos = load_json(os.path.join(out_dir, "daily_gains.json")) or {"dias": []}
+    gains_reg = load_json(os.path.join(out_dir, "gains_regioes.json")) or {"dias": []}
+    stats = load_json(os.path.join(out_dir, "stats.json"))
 
     # {data: {nome: {"concelho": {...}, "distrito": {...}}}}, drill-down da
     # coluna Squadratinhos na tabela de ganhos diários (só z17)

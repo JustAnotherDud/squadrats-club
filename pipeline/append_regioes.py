@@ -5,11 +5,11 @@ club_regioes.json novo. Idempotente: escreve o estado actual, sem histórico
 acumulado. O workflow faz mirror da pasta, portanto uma região que deixou de
 ter actividade desaparece sozinha.
 """
-import json
 import os
 from datetime import datetime, timezone
 
 import regioes
+from util import load_json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -20,16 +20,8 @@ CONCELHOS_GEO = os.path.join(HERE, "refdata", "concelhos_pt.geojson")
 FOREIGN_MUNI_DIR = os.path.join(HERE, "refdata", "foreign_muni")
 
 
-def _carrega(path, default=None):
-    try:
-        with open(path, encoding="utf-8") as f:
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        return default
-
-
 def main(out_dir):
-    novo = _carrega(os.path.join(out_dir, "club_regioes.json"))
+    novo = load_json(os.path.join(out_dir, "club_regioes.json"))
     if not novo:
         print("append_regioes: sem club_regioes.json novo, nada a fazer")
         return
@@ -38,15 +30,15 @@ def main(out_dir):
     # as fronteiras (regioes.fronteira_de) saem das cópias simplificadas em
     # data/*.geojson, que ficam ao lado dos JSON de saída
     regioes.DATA_GEOJSON_DIR = out_dir
-    stats = _carrega(os.path.join(out_dir, "stats.json")) or {}
-    adjacency = _carrega(os.path.join(REPO, "data", "adjacency.json")) or {}
+    stats = load_json(os.path.join(out_dir, "stats.json")) or {}
+    adjacency = load_json(os.path.join(REPO, "data", "adjacency.json")) or {}
     gerado = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
     # "disputada" no índice = evento de troca real (ultrapassagem / novo
     # líder), igual ao historico.html e ao regiao.js. O events.json já está
     # escrito neste ponto, o append_events corre antes deste passo.
     disputadas = regioes.disputadas_de(
-        (_carrega(os.path.join(out_dir, "events.json")) or {}).get("eventos", []))
+        (load_json(os.path.join(out_dir, "events.json")) or {}).get("eventos", []))
 
     indice = []
     n = 0
