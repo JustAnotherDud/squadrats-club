@@ -19,7 +19,7 @@ import os
 
 from atletas import ATHLETES
 from slugs import slug_map
-from util import load_json
+from util import iso_utc, load_json
 
 
 CAMPOS = ["squadrats", "squadratinhos", "yard", "yardinho",
@@ -173,7 +173,7 @@ def main(out_dir):
     destino = os.path.join(out_dir, "atletas")
     os.makedirs(destino, exist_ok=True)
 
-    gerado = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gerado = iso_utc(datetime.datetime.now(datetime.timezone.utc))
     indice = []
 
     for nome, uid in ATHLETES.items():

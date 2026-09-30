@@ -14,6 +14,7 @@ import os
 import daily_gains
 from atletas import ATHLETES, known_squadratinhos
 from tiles_fetch import GEOMETRY_LAYERS, scan_athlete, squares_validados
+from util import iso_utc
 
 
 def fetch_totals(uid, known=None):
@@ -35,7 +36,7 @@ def main(out_dir):
     # uma corrida que atravesse a meia-noite UTC
     inicio = datetime.datetime.now(datetime.timezone.utc)
     result = {
-        "atualizado": inicio.strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "atualizado": iso_utc(inicio),
         "atletas": {},
     }
 

@@ -15,7 +15,7 @@ from datetime import datetime, timezone
 
 import eventos
 import gains_regioes
-from util import load_json
+from util import iso_utc, load_json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -26,7 +26,7 @@ def main(out_dir):
     if not novo:
         print("append_gains_regioes: sem club_regioes.json novo, nada a fazer")
         return
-    hoje = datetime.fromisoformat(novo["atualizado"].replace("Z", "+00:00")).date().isoformat()
+    hoje = datetime.fromisoformat(novo["atualizado"]).date().isoformat()
 
     existente = gains_regioes.carregar(out_dir)
     por_data = {x["data"]: x for x in existente["dias"]}
@@ -82,7 +82,7 @@ def main(out_dir):
                 por_data.pop(data_key, None)
         prev = d
 
-    gerado = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gerado = iso_utc(datetime.now(timezone.utc))
     dias_final = [por_data[k] for k in sorted(por_data)]
     gains_regioes.escrever(out_dir, dias_final, gerado)
     print(f"append_gains_regioes: {novos} dia(s) recomputado(s), {len(dias_final)} no total")

@@ -130,7 +130,7 @@ def snapshots_commits(repo, branch, path, desde=None, com_anterior=False, correc
             continue
         try:
             d = json.loads(r.stdout)
-            ts = datetime.fromisoformat(d["atualizado"].replace("Z", "+00:00"))
+            ts = datetime.fromisoformat(d["atualizado"])
         except Exception as e:
             saltados.append((sha, f"{path} inesperado: {type(e).__name__}: {e}"))
             continue

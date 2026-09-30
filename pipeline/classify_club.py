@@ -15,6 +15,7 @@ import os
 from atletas import ATLETAS
 from classify import Classifier
 from kml_parse import tile_bounds
+from util import iso_utc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REFDATA_DIR = os.path.join(HERE, "refdata")
@@ -203,7 +204,7 @@ def main(out_dir):
         avisos["sem_dados_regiao"] = dict(sorted(sem_dados_regiao.items()))
 
     resultado = {
-        "atualizado": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "atualizado": iso_utc(datetime.datetime.now(datetime.timezone.utc)),
         "zoom": club["zoom"],
         "atletas": atletas_out,
         "uniao": uniao,

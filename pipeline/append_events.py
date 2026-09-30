@@ -16,6 +16,7 @@ import subprocess
 from datetime import datetime, timezone
 
 import eventos
+from util import iso_utc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -40,9 +41,7 @@ def main(out_dir):
         return
     with open(novo_path, encoding="utf-8") as f:
         novo = json.load(f)
-    hoje = datetime.fromisoformat(
-        novo["atualizado"].replace("Z", "+00:00")
-    ).date().isoformat()
+    hoje = datetime.fromisoformat(novo["atualizado"]).date().isoformat()
 
     events_path = os.path.join(out_dir, "events.json")
     try:
@@ -159,6 +158,6 @@ def main(out_dir):
     else:
         print("append_events: sem eventos novos")
 
-    atual["gerado"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    atual["gerado"] = iso_utc(datetime.now(timezone.utc))
     with open(events_path, "w", encoding="utf-8") as f:
         json.dump(atual, f, ensure_ascii=False, separators=(",", ":"))

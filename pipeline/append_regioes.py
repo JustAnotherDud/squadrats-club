@@ -9,7 +9,7 @@ import os
 from datetime import datetime, timezone
 
 import regioes
-from util import load_json
+from util import iso_utc, load_json
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -32,7 +32,7 @@ def main(out_dir):
     regioes.DATA_GEOJSON_DIR = out_dir
     stats = load_json(os.path.join(out_dir, "stats.json")) or {}
     adjacency = load_json(os.path.join(REPO, "data", "adjacency.json")) or {}
-    gerado = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    gerado = iso_utc(datetime.now(timezone.utc))
 
     # "disputada" no índice = evento de troca real (ultrapassagem / novo
     # líder), igual ao historico.html e ao regiao.js. O events.json já está

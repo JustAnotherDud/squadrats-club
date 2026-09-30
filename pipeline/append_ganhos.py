@@ -13,6 +13,7 @@ from datetime import datetime, timezone
 
 import eventos
 import ganhos
+from util import iso_utc
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
@@ -29,19 +30,19 @@ def main(out_dir):
     # histórico publicado + o snapshot desta corrida (ainda não commitado),
     # mesmo princípio do "hoje" no append_events.py
     snaps, _ = eventos.snapshots_commits(REPO, "origin/data", "data/squadrats.json")
-    hoje_ts = datetime.fromisoformat(hoje["atualizado"].replace("Z", "+00:00"))
+    hoje_ts = datetime.fromisoformat(hoje["atualizado"])
     snaps.append((hoje_ts, hoje))
     snaps.sort(key=lambda p: p[0])
 
     janelas = ganhos.deltas_squadratinhos(snaps)
     resultado = [
-        {"atleta": j["atleta"], "inicio": j["inicio"].strftime("%Y-%m-%dT%H:%M:%SZ"),
-         "fim": j["fim"].strftime("%Y-%m-%dT%H:%M:%SZ"), "ganho": j["ganho"]}
+        {"atleta": j["atleta"], "inicio": iso_utc(j["inicio"]),
+         "fim": iso_utc(j["fim"]), "ganho": j["ganho"]}
         for j in janelas
     ]
 
     out = {
-        "gerado": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "gerado": iso_utc(datetime.now(timezone.utc)),
         "janelas": resultado,
     }
     caminho = os.path.join(out_dir, "ganhos.json")

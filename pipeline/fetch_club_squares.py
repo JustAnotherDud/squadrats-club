@@ -11,6 +11,7 @@ import os
 from atletas import ATLETAS, known_squadratinhos
 from slugs import slugify
 from tiles_fetch import scan_athlete, squares_validados
+from util import iso_utc
 
 
 CAMADA = "squadratinhos"
@@ -70,7 +71,7 @@ def main(out_dir):
         por_mask[m] = por_mask.get(m, 0) + 1
 
     resultado = {
-        "atualizado": datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
+        "atualizado": iso_utc(datetime.datetime.now(datetime.timezone.utc)),
         "zoom": ZOOM,
         "atletas": atletas_out,
         "por_mask": {str(k): v for k, v in sorted(por_mask.items())},

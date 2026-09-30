@@ -20,6 +20,7 @@ inteiro apareceria como um pico só por ter sido acrescentado ao ATHLETES.
 import json
 import os
 from datetime import datetime, timezone
+from util import iso_utc
 
 CAMPOS = ["squadrats", "squadratinhos", "yard", "yardinho",
           "ubersquadrat", "ubersquadratinho"]
@@ -84,7 +85,7 @@ def actualizar(data_dir, atletas_agora, hoje_iso=None):
         actual["dias"] = [{"data": d, "atletas": dias[d]} for d in sorted(dias)]
 
     actual["ultimo_total"] = atletas_agora
-    actual["gerado"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    actual["gerado"] = iso_utc(datetime.now(timezone.utc))
 
     with open(path, "w", encoding="utf-8") as f:
         json.dump(actual, f, ensure_ascii=False, separators=(",", ":"))
