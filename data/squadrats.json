@@ -1,13 +1,13 @@
 {
-  "atualizado": "2026-10-03T14:17:25Z",
+  "atualizado": "2026-10-03T19:48:54Z",
   "atletas": {
     "Zé": {
       "yard": 102,
       "yardinho": 483,
       "ubersquadrat": 8,
       "ubersquadratinho": 13,
-      "squadrats": 482,
-      "squadratinhos": 5855
+      "squadrats": 484,
+      "squadratinhos": 5870
     },
     "Xeira": {
       "yard": 116,
@@ -23,7 +23,7 @@
       "ubersquadrat": 2,
       "ubersquadratinho": 8,
       "squadrats": 113,
-      "squadratinhos": 1108
+      "squadratinhos": 1119
     },
     "Inês S.": {
       "yardinho": 11,
@@ -37,8 +37,8 @@
       "yardinho": 24,
       "ubersquadrat": 3,
       "ubersquadratinho": 4,
-      "squadrats": 230,
-      "squadratinhos": 1845
+      "squadrats": 232,
+      "squadratinhos": 1860
     }
   }
 }
