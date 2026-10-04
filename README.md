@@ -49,7 +49,9 @@ Static files (border geojsons, `adjacency.json`, `membros_cores.json`) live in
   `data/regioes_index.json`. `regioes/index.html` only redirects there.
 - `historico.html`: event feed (overtakes, new leaders, first presence,
   milestones) from `data/events.json`.
-- `ganhos.html`: every squadratinho gain window from `data/ganhos.json`.
+- `diario.html`: squadratinhos gained per day, by athlete and municipality,
+  from `data/daily_gains.json` and `data/gains_regioes.json` (`ganhos.html`
+  only redirects there; `data/ganhos.json` is still generated, no page reads it).
 - `analise.html`: the map owner's detailed personal map (first athlete in
   `ATHLETES_JSON`). Left out of the navigation on purpose.
 - Shared code: `shared.js` (vocabulary, XYZ grid, data URLs, formatting,

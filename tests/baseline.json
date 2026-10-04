@@ -2422,12 +2422,12 @@
     "canvas": 0,
     "links": {
      "n": 13,
-     "sha": "f7f6eee7ee6d9038"
+     "sha": "030cfb11e05dbe1b"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "f0d6eac929af34fd"
+     "sha": "6551e6e5b3cbdbc3"
     },
     "titulo": "Ana · Squadrats Club"
    }
@@ -2438,12 +2438,12 @@
     "canvas": 0,
     "links": {
      "n": 13,
-     "sha": "c064bc7c4b245050"
+     "sha": "0c546d6524ce9724"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "9015e8b8df151c12"
+     "sha": "97fe5b47928e2dd2"
     },
     "titulo": "Célia · Squadrats Club"
    }
@@ -2458,7 +2458,7 @@
      "../atletas/",
      "../lugares/",
      "../historico.html",
-     "../ganhos.html",
+     "../diario.html",
      "ana.html",
      "bruno.html",
      "celia.html",
@@ -2467,7 +2467,7 @@
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "4f44c1110203a2ac"
+     "sha": "feda0b52139d765c"
     },
     "titulo": "Perfis · Squadrats Club"
    }
@@ -2478,15 +2478,31 @@
     "canvas": 12,
     "links": {
      "n": 15,
-     "sha": "9b2160823efa7d77"
+     "sha": "bf229884998a3432"
     },
     "svg": 0,
-    "texto": "Squadrats Club Mapa Perfis Lugares Histórico Ganhos + − Mapa do clube Ana Bruno Célia 391 squadratinhos visíveis ▲",
+    "texto": "Squadrats Club Mapa Perfis Lugares Histórico Diário + − Mapa do clube Ana Bruno Célia 391 squadratinhos visíveis ▲",
     "titulo": "Mapa do clube · Squadrats Club"
    },
    "painel aberto": {
     "n": 1,
-    "sha": "ccc3a75d988f2bab"
+    "sha": "80aec065f6608817"
+   }
+  },
+  "diario.html": {
+   "erros": [],
+   "inicial": {
+    "canvas": 0,
+    "links": {
+     "n": 12,
+     "sha": "998724fdd4d928c1"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "b120770a06c55683"
+    },
+    "titulo": "Diário · Squadrats Club"
    }
   },
   "ganhos.html": {
@@ -2494,15 +2510,15 @@
    "inicial": {
     "canvas": 0,
     "links": {
-     "n": 10,
-     "sha": "44ed3bd4415624bb"
+     "n": 12,
+     "sha": "998724fdd4d928c1"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "ade007f416afe6a8"
+     "sha": "b120770a06c55683"
     },
-    "titulo": "Ganhos · Squadrats Club"
+    "titulo": "Diário · Squadrats Club"
    }
   },
   "historico.html": {
@@ -2511,12 +2527,12 @@
     "canvas": 0,
     "links": {
      "n": 15,
-     "sha": "9686ceb24c9e5625"
+     "sha": "c931afced9dd8401"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "0f4da8299f6fe508"
+     "sha": "bfd2a8031deb4af0"
     },
     "titulo": "Histórico · Squadrats Club"
    }
@@ -2527,12 +2543,12 @@
     "canvas": 0,
     "links": {
      "n": 15,
-     "sha": "37fa0414910ef3de"
+     "sha": "57f223c6fd3df527"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "1dde88066d25610f"
+     "sha": "7cfb2cbd5d346141"
     },
     "titulo": "Squadrats Club"
    }
@@ -2543,12 +2559,12 @@
     "canvas": 0,
     "links": {
      "n": 14,
-     "sha": "582374e12911e132"
+     "sha": "97f4f9b92e18b92e"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "aa639ed34d0693d4"
+     "sha": "a7a2e60540c76d32"
     },
     "titulo": "Almada · Squadrats Club"
    }
@@ -2559,12 +2575,12 @@
     "canvas": 0,
     "links": {
      "n": 18,
-     "sha": "15c176fcffe99e51"
+     "sha": "9f48547be3f929eb"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "18d45b80725d8adb"
+     "sha": "d19c60f03c75287a"
     },
     "titulo": "Lisboa · Squadrats Club"
    }
@@ -2575,12 +2591,12 @@
     "canvas": 0,
     "links": {
      "n": 13,
-     "sha": "a1b14ef9cb32d0b7"
+     "sha": "9ddcd1ca793749c4"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "0d5c864eb0c69612"
+     "sha": "3af85b2d1ac40f71"
     },
     "titulo": "Sevilla · Squadrats Club"
    }
@@ -2591,12 +2607,12 @@
     "canvas": 0,
     "links": {
      "n": 13,
-     "sha": "ed5f15252fc1e7c3"
+     "sha": "46136033c7ce3050"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "593b92897f741c90"
+     "sha": "89c7186d24b25a73"
     },
     "titulo": "Sevilla · Squadrats Club"
    }
@@ -2607,12 +2623,12 @@
     "canvas": 0,
     "links": {
      "n": 10,
-     "sha": "595dec28839e1ba2"
+     "sha": "7b4cb16b4461951d"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "02c8c0852669a493"
+     "sha": "32fb99822943eb3e"
     },
     "titulo": "Lugares · Squadrats Club"
    }
@@ -2623,12 +2639,12 @@
     "canvas": 0,
     "links": {
      "n": 13,
-     "sha": "c436f989d123105f"
+     "sha": "6c907640ae8b56cd"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "f0dd5ba9e866d945"
+     "sha": "c82cde59765e9a49"
     },
     "titulo": "Espanha · Squadrats Club"
    }
@@ -2639,12 +2655,12 @@
     "canvas": 0,
     "links": {
      "n": 15,
-     "sha": "49f1453322b1783c"
+     "sha": "eb1fcbceb4ca9da0"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "2e499fec220485e9"
+     "sha": "fa795c50dec2af4c"
     },
     "titulo": "Portugal · Squadrats Club"
    }

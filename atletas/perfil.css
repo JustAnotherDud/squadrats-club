@@ -84,10 +84,6 @@
 }
 .perfil-tabela td.n.fraco { color: var(--tinta-3); }
 .perfil-tabela td.gan-dia { white-space: nowrap; font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
-.gan-dia .d-num { display: inline-block; width: 1.5em; text-align: right; }
-.gan-dia .d-mes { display: inline-block; width: 2.9em; text-align: left; padding-left: .5em; }
-.gan-dia .d-ano { display: inline-block; text-align: left; }
-
 /* drill-down do "+N" de Squadratinhos */
 .perfil-tabela td.gan-z { padding: 0; }
 .gan-btn {
@@ -99,21 +95,6 @@
 .gan-caret { font-size: 9px; color: var(--tinta-3); transition: transform .12s; }
 .gan-z.aberto .gan-caret { transform: rotate(90deg); }
 .gan-det td { background: var(--ch-1); padding: 5px 8px 10px; }
-.gan-linha { display: flex; flex-wrap: wrap; gap: 5px; align-items: baseline; padding: 4px 0; }
-.gan-chip {
-  font-size: 11.5px; border: 1px solid var(--rule); border-radius: 3px;
-  padding: 2px 8px; color: var(--tinta); text-decoration: none; white-space: nowrap;
-}
-.gan-chip b { color: var(--tinta); font-family: var(--f-mono); font-weight: 500; }
-.gan-chip:hover { border-color: var(--marca); }
-.gan-pais {
-  font-size: 11.5px; border: 1px dashed var(--rule); border-radius: 3px;
-  padding: 2px 8px; color: var(--tinta-3); white-space: nowrap;
-}
-.gan-pais b { color: var(--tinta-2); font-family: var(--f-mono); font-weight: 500; }
-.gan-sub { font-size: 11px; color: var(--tinta-3); gap: 4px; }
-.gan-sub .gan-chip { font-size: 10.5px; padding: 1px 7px; }
-.gan-resid { font-size: 11px; color: var(--tinta-3); font-style: italic; }
 .perfil-tabela .nome { display: flex; align-items: center; gap: 6px; }
 .perfil-tabela .bandeira { flex-shrink: 0; border-radius: 1px; }
 .perfil-tabela.geo .nome a { color: inherit; text-decoration: none; }

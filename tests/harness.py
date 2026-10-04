@@ -257,7 +257,7 @@ def casos_site(copia):
     amostra = []
     for pref in ("c-", "d-", "pais-pt", "es-r-", "es-z-", "pais-es"):
         amostra += [n for n in lugares if n.startswith(pref)][:1]
-    paginas = ["index.html", "club.html", "analise.html", "historico.html", "ganhos.html",
+    paginas = ["index.html", "club.html", "analise.html", "historico.html", "diario.html", "ganhos.html",
                "lugares/index.html", "atletas/index.html", "atletas/ana.html", "atletas/celia.html"]
     paginas += [f"lugares/{n}" for n in amostra]
     png = bytes.fromhex("89504e470d0a1a0a0000000d4948445200000001000000010806000000"

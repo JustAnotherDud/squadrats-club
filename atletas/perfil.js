@@ -188,27 +188,6 @@
     </svg>`;
   }
 
-  // Detalhe de um "+N" de Squadratinhos: onde caíram. Distrito primeiro (chips
-  // ligados à página da região), concelhos na linha muda por baixo. O
-  // estrangeiro não tem página, aparece por nome de país (span tracejado).
-  // Só z17, o club.json é z17, por isso é a única coluna com "onde".
-  function ganhoDetalhe(reg, total) {
-    const ord = o => Object.entries(o || {}).sort((a, b) => b[1] - a[1]);
-    const conc = ord(reg.concelho), dist = ord(reg.distrito), pais = ord(reg.pais);
-    const soma = a => a.reduce((s, [, n]) => s + n, 0);
-    const resid = total - soma(dist) - soma(pais);
-    const chip = (nivel, nome, n) =>
-      `<a class="gan-chip" href="../${regiaoHref(nivel, nome)}">${esc(nome)} <b>+${n}</b></a>`;
-    let h = `<div class="gan-linha">${dist.map(([nome, n]) => chip('distrito', nome, n)).join('')}`;
-    h += pais.map(([cc, n]) => `<span class="gan-pais">${esc(paisNome(cc))} <b>+${n}</b></span>`).join('');
-    if (resid > 0) h += `<span class="gan-resid">+${resid} sem classificação</span>`;
-    h += '</div>';
-    if (conc.length) {
-      h += `<div class="gan-linha gan-sub">concelhos: ${conc.map(([nome, n]) => chip('concelho', nome, n)).join('')}</div>`;
-    }
-    return h;
-  }
-
   function blocoGanhos(dias, estado) {
     if (!dias || !dias.length) {
       return '<p class="perfil-vazio">Sem ganhos registados desde que o registo diário começou.</p>';

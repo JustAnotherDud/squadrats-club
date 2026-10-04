@@ -133,6 +133,38 @@ const tile = n => `<span class="tile" style="background:${cor(n)}"></span>`;
 // repo no GitHub Pages).
 const atl = n => `<a class="atl" href="${/\/(atletas|lugares)\//.test(location.pathname) ? '../' : ''}atletas/${slugify(n)}.html">${esc(n)}</a>`;
 
+// --- ganhos por região (perfil e diário) ---
+// Etiquetas de crescimento: yardinho e übersquadratinho só aparecem no dia em
+// que crescem. As chaves são também os únicos campos de daily_gains.json, além
+// de squadratinhos, que a UI lê (os antigos, ex. backyards, ficam de fora).
+const ETIQUETA_GANHO = { yardinho: 'yardinho', ubersquadratinho: 'übersquadratinho' };
+
+const _UP = /\/(atletas|lugares)\//.test(location.pathname) ? '../' : '';
+
+// {nome: n} -> chips, maior primeiro. Distrito e concelho ligam à página do
+// lugar; o país (estrangeiro, sem página) fica num span tracejado.
+function chipsRegioes(o, nivel) {
+  return Object.entries(o || {}).sort((a, b) => b[1] - a[1]).map(([nome, n]) => nivel === 'pais'
+    ? `<span class="gan-pais">${esc(PAIS_NOME[nome] || nome)} <b>+${n}</b></span>`
+    : `<a class="gan-chip" href="${_UP}${regiaoHref(nivel, nome)}">${esc(nome)} <b>+${n}</b></a>`).join('');
+}
+
+// Onde caiu um "+N" de squadratinhos (`reg` = {concelho, distrito, pais}).
+// Completo: distrito primeiro, concelhos na linha muda por baixo. `curto`
+// (diário): só concelhos. Em ambos o país e o resíduo sem classificação.
+function ganhoDetalhe(reg, total, curto) {
+  const soma = o => Object.values(o || {}).reduce((s, n) => s + n, 0);
+  const resid = total - soma(reg.distrito) - soma(reg.pais);
+  const fim = chipsRegioes(reg.pais, 'pais')
+    + (resid > 0 ? `<span class="gan-resid">+${resid} sem classificação</span>` : '');
+  if (curto) return `<div class="gan-linha">${chipsRegioes(reg.concelho, 'concelho')}${fim}</div>`;
+  let h = `<div class="gan-linha">${chipsRegioes(reg.distrito, 'distrito')}${fim}</div>`;
+  if (soma(reg.concelho)) {
+    h += `<div class="gan-linha gan-sub">concelhos: ${chipsRegioes(reg.concelho, 'concelho')}</div>`;
+  }
+  return h;
+}
+
 // tira de quota: `frac` (0..1) -> N células na cor `corHex`, comparáveis em
 // comprimento dentro do mesmo grupo. NÃO é magnitude (o número mono leva
 // isso). `n` = máximo de células.

@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+<meta charset="UTF-8">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="favicon.ico" sizes="32x32">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="theme-color" content="#14131b">
+<title>Diário · Squadrats Club</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/bricolage-grotesque.woff2">
+<link rel="preload" as="font" type="font/woff2" crossorigin href="fonts/ibm-plex-sans-400.woff2">
+<link rel="stylesheet" href="site.css">
+<style>
+  .wrap { max-width: 760px; margin: 0 auto; padding: 22px 18px 72px; }
+
+  /* filtros por atleta, mesmo padrão do historico.html */
+  .filtros { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0 18px; }
+  .chip {
+    background: var(--ch-1); color: var(--tinta-2); border: 1px solid var(--rule);
+    border-radius: 3px; padding: 4px 10px; font-size: 12px; cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px; font-family: inherit;
+  }
+  .chip.on { color: var(--tinta); border-color: var(--marca); }
+
+  /* um dia = data à esquerda + uma linha por atleta (ou por grupo de atividade
+     partilhada): quem, delta, onde. */
+  .dia { display: grid; grid-template-columns: 6.8em 1fr; gap: 0 10px;
+    padding: 10px 0; border-bottom: 1px solid var(--hair); }
+  .dia .gan-dia { font-family: var(--f-mono); font-variant-numeric: tabular-nums;
+    white-space: nowrap; color: var(--tinta-2); font-size: 12.5px; padding-top: 4px; }
+  .linha { display: grid; grid-template-columns: minmax(7.5em, 11em) 3.4em 1fr;
+    gap: 0 8px; align-items: baseline; padding: 3px 0; }
+  .quem { white-space: nowrap; }
+  /* partilha: os tiles ficam colados, duas células vizinhas da grelha */
+  .quem .tile { margin-right: 1px; }
+  .quem .tile:last-of-type { margin-right: 6px; }
+  .quem a.atl { color: inherit; text-decoration: none; }
+  .quem a.atl:hover { text-decoration: underline; text-decoration-color: var(--marca); }
+  .delta { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums;
+    color: var(--ganho); }
+  .onde { display: flex; flex-wrap: wrap; gap: 5px; align-items: baseline; }
+  .onde .gan-linha { padding: 0; display: contents; }
+
+  .gn-mais { margin: 14px 0 0; }
+  .gn-estado { color: var(--tinta-2); padding: 44px 0; text-align: center; }
+  .gn-nota { font-size: 11.5px; color: var(--tinta-3); margin: 22px 0 0; max-width: 70ch; line-height: 1.7; }
+
+  @media (max-width: 480px) {
+    .dia { grid-template-columns: 1fr; gap: 2px; padding: 12px 0; }
+    .dia .gan-dia { padding-top: 0; }
+    .dia .gan-dia .d-num { width: auto; }
+    .dia .gan-dia .d-mes { width: auto; padding-left: .45em; }
+    .dia .gan-dia .d-ano { padding-left: .45em; }
+    .linha { grid-template-columns: 1fr auto; row-gap: 3px; padding: 5px 0; }
+    .onde { grid-column: 1 / -1; }
+  }
+</style>
+</head>
+<body>
+<main class="wrap">
+  <h1>Diário</h1>
+  <dl class="meta" id="meta"></dl>
+
+  <div class="filtros" id="filtros"></div>
+
+  <div id="lista"><p class="gn-estado">A carregar…</p></div>
+
+  <p class="gn-nota">Squadratinhos ganhos por dia (UTC): quem, quanto e em que
+    concelhos. Se dois atletas têm o mesmo dia, o mesmo delta e a mesma repartição
+    por concelhos (atividade partilhada), aparecem numa linha só. É só
+    apresentação: nada se suprime. Dados da branch <code>data</code>
+    (<code>daily_gains.json</code> e <code>gains_regioes.json</code>), actualizados 6×/dia.</p>
+</main>
+<script src="nav.js"></script>
+<script src="shared.js"></script>
+<script>
+(function () {
+  'use strict';
+  // cor / esc / tile / atl / carregarCores / carregarJson / mostrarErroDados /
+  // avisoDadosVelhos / fmtData / fmtDataHora / COR_FALLBACK / ETIQUETA_GANHO /
+  // ganhoDetalhe: shared.js
+
+  const ROSTER = Object.keys(COR_FALLBACK);
+  const DIAS_INICIAIS = 14;
+  const estado = { atleta: null, todos: false };
+  let DIAS = [];
+
+  // [{data, grupos: [{nomes, n, reg, tags}]}], recente primeiro. `n` é o delta
+  // líquido de daily_gains.json; as regiões vêm de gains_regioes.json (só ganhos
+  // positivos), como estão. Em 9 set o Pedro dá +102 no cabeçalho contra 106 nos
+  // chips: de propósito (o líquido leva o -4 de um re-scan em Vila Velha de
+  // Ródão, que não é um ganho de região). Só se lêem squadratinhos e os campos de
+  // ETIQUETA_GANHO, por isso backyards/backyardinhos (antigos) não entram.
+  function montar(dg, gr) {
+    const regPorDia = {};
+    (gr.dias || []).forEach(d => { regPorDia[d.data] = d.atletas || {}; });
+    // chaves ordenadas, para que a mesma repartição dê sempre a mesma string
+    const ord = (_, v) => v && typeof v === 'object' && !Array.isArray(v)
+      ? Object.fromEntries(Object.entries(v).sort()) : v;
+    return (dg.dias || []).map(d => {
+      const grupos = new Map();
+      Object.entries(d.atletas || {}).forEach(([nome, g]) => {
+        const n = g.squadratinhos || 0;
+        if (n <= 0) return;
+        const reg = (regPorDia[d.data] || {})[nome] || {};
+        // atividade partilhada: mesmo dia, mesmo delta, mesmas regiões
+        const k = n + JSON.stringify(reg, ord);
+        if (!grupos.has(k)) grupos.set(k, { nomes: [], n, reg, tags: {} });
+        const grupo = grupos.get(k);
+        grupo.nomes.push(nome);
+        grupo.tags[nome] = Object.keys(ETIQUETA_GANHO)
+          .filter(c => (g[c] || 0) > 0).map(c => `${ETIQUETA_GANHO[c]} +${g[c]}`);
+      });
+      return { data: d.data, grupos: [...grupos.values()] };
+    }).filter(d => d.grupos.length).sort((a, b) => b.data.localeCompare(a.data));
+  }
+
+  function linha(g) {
+    const junto = g.nomes.length > 1;
+    const tags = g.nomes.map(nome => g.tags[nome].map(t =>
+      `<span class="gan-tag">${junto ? tile(nome) : ''}${esc(t)}</span>`).join('')).join('');
+    return `<div class="linha">
+      <span class="quem">${g.nomes.map(tile).join('')}${g.nomes.map(atl).join(', ')}</span>
+      <span class="delta">+${g.n}</span>
+      <span class="onde">${ganhoDetalhe(g.reg, g.n, true)}${tags}</span>
+    </div>`;
+  }
+
+  function bloco(d) {
+    const [dnum, dmes, dano] = fmtData(d.data).split(' ');
+    return `<section class="dia"><div class="gan-dia"><span class="d-num">${esc(dnum)}</span>`
+      + `<span class="d-mes">${esc(dmes)}</span><span class="d-ano">${esc(dano)}</span></div>`
+      + `<div>${d.grupos.map(linha).join('')}</div></section>`;
+  }
+
+  function pintar() {
+    // agrupa primeiro, filtra depois: "Zé, Pedro +15" continua a aparecer ao filtrar o Pedro
+    const dias = DIAS.map(d => ({ data: d.data,
+      grupos: estado.atleta ? d.grupos.filter(g => g.nomes.includes(estado.atleta)) : d.grupos }))
+      .filter(d => d.grupos.length);
+    const lista = document.getElementById('lista');
+    if (!dias.length) {
+      lista.innerHTML = '<p class="gn-estado">Sem ganhos com este filtro.</p>';
+      return;
+    }
+    const visiveis = estado.todos ? dias : dias.slice(0, DIAS_INICIAIS);
+    const resto = dias.length - DIAS_INICIAIS;
+    const mais = resto > 0
+      ? `<button class="chip gn-mais" data-mais>${estado.todos ? 'Mostrar menos' : `Mostrar os outros ${resto} dias`}</button>`
+      : '';
+    lista.innerHTML = visiveis.map(bloco).join('') + mais;
+    const btn = lista.querySelector('[data-mais]');
+    if (btn) btn.onclick = () => { estado.todos = !estado.todos; pintar(); };
+  }
+
+  function renderFiltros() {
+    const box = document.getElementById('filtros');
+    box.innerHTML = ROSTER.map(n => `<button class="chip ${estado.atleta === n ? 'on' : ''}"
+      data-atleta="${esc(n)}">${tile(n)}${esc(n)}</button>`).join('');
+    box.querySelectorAll('[data-atleta]').forEach(b => b.onclick = () => {
+      estado.atleta = estado.atleta === b.dataset.atleta ? null : b.dataset.atleta;
+      renderFiltros();
+      pintar();
+    });
+  }
+
+  (async function () {
+    await carregarCores(mainUrl('membros_cores.json'), NC);
+
+    let dg, gr;
+    try {
+      [dg, gr] = await Promise.all([
+        carregarJson(dadosUrl('daily_gains.json')),
+        carregarJson(dadosUrl('gains_regioes.json')),
+      ]);
+    } catch (e) {
+      mostrarErroDados(document.querySelector('.wrap'), e);
+      return;
+    }
+
+    DIAS = montar(dg, gr);
+
+    document.getElementById('meta').innerHTML =
+      `<dt>dias com ganhos</dt><dd>${DIAS.length}</dd>`
+      + `<dt>actualizado</dt><dd>${fmtDataHora(dg.gerado)}</dd>`;
+    avisoDadosVelhos(dg.gerado);  // shared.js
+
+    renderFiltros();
+    pintar();
+  })();
+})();
+</script>
+</body>
+</html>
