@@ -123,7 +123,7 @@ def snapshots_commits(repo, branch, path, desde=None, com_anterior=False, correc
     from datetime import datetime
 
     def git(*args):
-        return subprocess.run(["git", "-C", repo, *args], capture_output=True,
+        return subprocess.run(["git", "-C", repo, *args], capture_output=True, stdin=subprocess.DEVNULL,
                               text=True, encoding="utf-8")
 
     def log(*args):

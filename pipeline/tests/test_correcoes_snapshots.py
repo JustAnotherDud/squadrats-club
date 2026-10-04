@@ -21,7 +21,7 @@ from ganhos import deltas_squadratinhos
 def _git(repo, *args):
     return subprocess.run(["git", "-C", str(repo), "-c", "user.name=t", "-c", "user.email=t@t",
                            *args], capture_output=True, text=True, encoding="utf-8",
-                          check=True).stdout.strip()
+                          check=True, stdin=subprocess.DEVNULL).stdout.strip()
 
 
 def _commit(repo, ficheiros, data):

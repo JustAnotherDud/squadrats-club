@@ -29,7 +29,7 @@ def _n_commits_club_regioes(branch="origin/data"):
     (checkout shallow, anomalia)."""
     r = subprocess.run(
         ["git", "-C", REPO, "log", branch, "--format=%H", "--", "data/club_regioes.json"],
-        capture_output=True, text=True, encoding="utf-8",
+        capture_output=True, stdin=subprocess.DEVNULL, text=True, encoding="utf-8",
     )
     return len(r.stdout.split()) if r.returncode == 0 else 0
 
@@ -90,7 +90,7 @@ def main(out_dir):
         try:
             raw = subprocess.run(
                 ["git", "-C", REPO, "show", "origin/data:data/club_regioes.json"],
-                capture_output=True, text=True, encoding="utf-8", check=True,
+                capture_output=True, stdin=subprocess.DEVNULL, text=True, encoding="utf-8", check=True,
             ).stdout
             por_dia = {"_prev": json.loads(raw), hoje: novo}
             dias = ["_prev", hoje]
@@ -123,7 +123,7 @@ def main(out_dir):
         try:
             sq_por_dia["_prev"] = json.loads(subprocess.run(
                 ["git", "-C", REPO, "show", "origin/data:data/squadrats.json"],
-                capture_output=True, text=True, encoding="utf-8", check=True).stdout)
+                capture_output=True, stdin=subprocess.DEVNULL, text=True, encoding="utf-8", check=True).stdout)
         except Exception:
             pass
 

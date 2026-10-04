@@ -23,17 +23,17 @@ def _publicar(repo, quando, ficheiros):
         with open(os.path.join(repo, "data", nome), "w", encoding="utf-8") as f:
             json.dump(conteudo, f)
     env = {**os.environ, "GIT_AUTHOR_DATE": quando, "GIT_COMMITTER_DATE": quando}
-    subprocess.run(["git", "-C", repo, "add", "-f", "data"], check=True)
-    subprocess.run(["git", "-C", repo, "commit", "-qm", quando], check=True, env=env)
-    subprocess.run(["git", "-C", repo, "update-ref", "refs/remotes/origin/data", "HEAD"], check=True)
+    subprocess.run(["git", "-C", repo, "add", "-f", "data"], check=True, stdin=subprocess.DEVNULL, capture_output=True)
+    subprocess.run(["git", "-C", repo, "commit", "-qm", quando], check=True, env=env, stdin=subprocess.DEVNULL, capture_output=True)
+    subprocess.run(["git", "-C", repo, "update-ref", "refs/remotes/origin/data", "HEAD"], check=True, stdin=subprocess.DEVNULL, capture_output=True)
 
 
 @pytest.fixture
 def repo(tmp_path, monkeypatch):
     r = str(tmp_path)
-    subprocess.run(["git", "init", "-q", r], check=True)
-    subprocess.run(["git", "-C", r, "config", "user.email", "t@t"], check=True)
-    subprocess.run(["git", "-C", r, "config", "user.name", "t"], check=True)
+    subprocess.run(["git", "init", "-q", r], check=True, stdin=subprocess.DEVNULL, capture_output=True)
+    subprocess.run(["git", "-C", r, "config", "user.email", "t@t"], check=True, stdin=subprocess.DEVNULL, capture_output=True)
+    subprocess.run(["git", "-C", r, "config", "user.name", "t"], check=True, stdin=subprocess.DEVNULL, capture_output=True)
     os.makedirs(os.path.join(r, "data"))
     monkeypatch.setattr(append_events, "REPO", r)
     return r

@@ -57,7 +57,7 @@ def main(out_dir):
     if len(dias) < 2 and hoje not in por_data:
         raw = subprocess.run(
             ["git", "-C", REPO, "show", "origin/data:data/club_regioes.json"],
-            capture_output=True, text=True, encoding="utf-8",
+            capture_output=True, stdin=subprocess.DEVNULL, text=True, encoding="utf-8",
         )
         if raw.returncode == 0:
             try:
