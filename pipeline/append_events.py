@@ -130,9 +130,10 @@ def main(out_dir):
     novos = []
     if len(dias) >= 2:
         ja = {eventos.chave(e) for e in atual["eventos"]}
+        partilhadas = eventos.carregar_partilhadas()
         for ontem, dia in zip(dias, dias[1:]):
             data_ev = dia if dia != "_prev" else hoje
-            for ev in eventos.detectar(por_dia[ontem], por_dia[dia], data_ev):
+            for ev in eventos.detectar(por_dia[ontem], por_dia[dia], data_ev, partilhadas):
                 k = eventos.chave(ev)
                 if k not in ja:
                     ja.add(k)

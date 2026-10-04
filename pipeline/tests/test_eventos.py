@@ -232,3 +232,52 @@ def test_ordenar_feed_movimento_antes_do_marco():
     baralhado = [ev("marco"), ev("primeira_presenca"), ev("novo_lider"), ev("ultrapassagem")]
     ordem = [e["tipo"] for e in eventos.ordenar_feed(baralhado)]
     assert ordem == ["novo_lider", "ultrapassagem", "primeira_presenca", "marco"]
+
+
+# --- ultrapassagem: só por contagem estritamente maior -----------------------
+
+def _c(**n):
+    return _snap({k: {"concelho": {"Alcanena": v}} for k, v in n.items()})
+
+
+def test_empate_nao_gera_passou():
+    # Zé sobe para empatar com o Pedro (que desempata melhor? não: Zé vem antes na ordem)
+    evs = eventos.detectar(_c(Zé=1, Pedro=2), _c(Zé=2, Pedro=2), "2026-10-03")
+    assert _tipos(evs) == []
+    # quem estava à frente e passa a empatar também não
+    evs = eventos.detectar(_c(Zé=2, Pedro=3), _c(Zé=2, Pedro=2), "2026-10-03")
+    assert _tipos(evs) == []
+
+
+def test_saida_de_empate_para_a_frente_nao_gera_passou():
+    assert _tipos(eventos.detectar(_c(Zé=5, Pedro=5), _c(Zé=6, Pedro=5), "2026-10-03")) == []
+
+
+def test_ultrapassagem_estrita_gera():
+    ant, novo = _c(Xeira=9, Zé=5, Pedro=3), _c(Xeira=9, Zé=5, Pedro=6)
+    evs = eventos.detectar(ant, novo, "2026-10-03")
+    assert [(e["tipo"], e["quem"], e["sobre"]) for e in evs] == [("ultrapassagem", "Pedro", "Zé")]
+
+
+def test_atividade_partilhada_nao_gera():
+    ant, novo = _c(Xeira=9, Pedro=7, Zé=5), _c(Xeira=9, Pedro=7, Zé=8)
+    assert _tipos(eventos.detectar(ant, novo, "2026-10-03")) == ["ultrapassagem"]
+    p = [{"data": "2026-10-03", "atletas": ["Zé", "Pedro"], "regioes": ["Alcanena"]}]
+    assert eventos.detectar(ant, novo, "2026-10-03", p) == []
+    # outro dia, outra região ou outro atleta: não suprime
+    assert eventos.detectar(ant, novo, "2026-10-04", p)
+    assert eventos.detectar(ant, novo, "2026-10-03", [{**p[0], "regioes": ["Porto de Mós"]}])
+    assert eventos.detectar(ant, novo, "2026-10-03", [{**p[0], "atletas": ["Zé", "Xeira"]}])
+
+
+def test_caso_real_03_out_zero_eventos():
+    """Zé e Pedro entram juntos (0 -> 2 e 0 -> 13) com Inês S. já em 12 em Alcanena."""
+    ant = _snap({"Inês S.": {"concelho": {"Alcanena": 12}}, "Zé": {}, "Pedro": {}})
+    novo = _snap({"Inês S.": {"concelho": {"Alcanena": 12}},
+                  "Zé": {"concelho": {"Alcanena": 2, "Porto de Mós": 13}},
+                  "Pedro": {"concelho": {"Alcanena": 2, "Porto de Mós": 13}}})
+    partilhadas = [{"data": "2026-10-03", "atletas": ["Zé", "Pedro"],
+                    "regioes": ["Alcanena", "Porto de Mós"]}]
+    for p in ((), partilhadas):  # a correção 1 chega; a lista também não estraga
+        evs = eventos.detectar(ant, novo, "2026-10-03", p)
+        assert not [e for e in evs if e["tipo"] in ("ultrapassagem", "novo_lider")]

@@ -7,7 +7,11 @@ A CHAVE de cada evento (`chave`) é por DIA, não por timestamp: os 6 runs/dia
 re-detectam o mesmo flip e o append é idempotente.
 
 Tipos:
-  - ultrapassagem      X passou Y (X agora acima de Y; antes Y acima, ou X ausente)
+  - ultrapassagem      X passou Y: antes X tinha ESTRITAMENTE menos que Y (Y presente,
+                       X pode estar ausente), agora tem estritamente mais. Empate nunca
+                       é ultrapassagem, nem à entrada (empate -> à frente) nem à saída
+                       (à frente -> empate). Quem sai de um empate para a frente não
+                       gera evento: o desempate por ordem canónica é só de apresentação.
   - novo_lider         mudou o 1º da região (e havia 1º antes), absorve o par
                        (novo_lider, ex_lider), esse não sai também como ultrapassagem
   - primeira_presenca  X capturou o 1º squadratinho numa região que JÁ tinha
@@ -33,6 +37,10 @@ MARCOS_CLUBE = [5000, 10000, 25000, 50000, 100000, 250000]
 ATLETAS_ORDEM = ["Zé", "Xeira", "Carolina", "Inês S.", "Pedro"]
 
 DESDE = "2026-07-26"  # 1.º dia com club.json
+
+# atividades partilhadas (um grava, o outro recebe a mesma atividade): ver
+# carregar_partilhadas
+PARTILHADAS = os.path.join(os.path.dirname(os.path.abspath(__file__)), "atividades_partilhadas.json")
 
 # correcções de snapshots publicados (histórico da branch data não se reescreve)
 CORRECOES = os.path.join(os.path.dirname(os.path.abspath(__file__)), "correcoes_snapshots.json")
@@ -66,6 +74,29 @@ def carregar_correcoes(path=CORRECOES):
         if subs:
             out[sha] = subs
     return out
+
+
+def carregar_partilhadas(path=PARTILHADAS):
+    """[{data, atletas, regioes?, motivo?}, ...] de atividades_partilhadas.json. Sem ficheiro: [].
+
+    Formato de cada entrada: "data" (YYYY-MM-DD), "atletas" (lista de nomes),
+    "regioes" (opcional, nomes de concelho/distrito), "motivo" (texto livre).
+    Exemplo: {"data": "2026-10-03", "atletas": ["Zé", "Pedro"],
+    "regioes": ["Alcanena"], "motivo": "Zé gravou, Pedro recebeu"}.
+
+    Uma atividade gravada por um atleta e recebida por outro dá as mesmas tiles
+    aos dois, mas os snapshots podem apanhá-los em runs diferentes, e a
+    diferença parece uma ultrapassagem. Cada entrada suprime, nesse `data`, os
+    eventos novo_lider/ultrapassagem entre `atletas` (quem e sobre ambos na
+    lista), em `regioes` (nomes de concelho/distrito) ou em todas se omitido.
+    Mais campos (ex. "motivo") são ignorados."""
+    import json
+
+    try:
+        with open(path, encoding="utf-8") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return []
 
 
 def snapshots_commits(repo, branch, path, desde=None, com_anterior=False, correcoes=None):
@@ -197,12 +228,19 @@ def _cruzado(patamares, antes, agora):
     return max(cruzados) if cruzados else None
 
 
-def detectar(anterior, atual, data):
+def _passou(x, y, ca, cb):
+    """x passou y: antes x tinha estritamente menos que y (y presente), agora estritamente mais."""
+    return ca.get(x, 0) < ca.get(y, 0) and cb.get(x, 0) > cb.get(y, 0)
+
+
+def detectar(anterior, atual, data, partilhadas=()):
     """Eventos ao passar de `anterior` -> `atual` (dois club_regioes.json).
     `data` é a data (YYYY-MM-DD, UTC) a que o evento fica atribuído.
 
     Devolve lista de dicts: {data, nivel, cc, regiao, tipo, quem, sobre, valores}.
     `sobre` = quem foi passado / ex-líder (None quando não se aplica).
+    `partilhadas` = carregar_partilhadas(); suprime passou/novo_lider entre
+    atletas de uma atividade partilhada nesse dia.
     `valores` = [quem, sobre] na ultrapassagem; [patamar, contagem] no marco;
                 [contagem] nos restantes.
     """
@@ -229,28 +267,21 @@ def detectar(anterior, atual, data):
         if ra == rb:
             continue
 
-        pos_a = {n: i for i, n in enumerate(ra)}
-        pos_b = {n: i for i, n in enumerate(rb)}
-
         # --- novo líder (havia líder antes e mudou) ---
         par_lideranca = None
         if ra and rb and ra[0] != rb[0]:
             novo, ex = rb[0], ra[0]
-            par_lideranca = (novo, ex)
-            eventos.append(_ev(data, cc, nivel, reg, "novo_lider", novo, ex,
-                               [cb.get(novo, 0), cb.get(ex, 0)]))
+            if _passou(novo, ex, ca, cb):
+                par_lideranca = (novo, ex)
+                eventos.append(_ev(data, cc, nivel, reg, "novo_lider", novo, ex,
+                                   [cb.get(novo, 0), cb.get(ex, 0)]))
 
         # --- ultrapassagens (pares que trocaram), menos o par da liderança ---
         for x in rb:
             for y in rb:
-                if pos_b[x] >= pos_b[y]:
-                    continue
-                if par_lideranca == (x, y):
-                    continue  # já saiu como novo_lider
-                era_abaixo = (x not in pos_a) or (y in pos_a and pos_a[x] > pos_a[y])
-                if era_abaixo:
+                if (x, y) != par_lideranca and _passou(x, y, ca, cb):
                     eventos.append(_ev(data, cc, nivel, reg, "ultrapassagem", x, y,
-                                       [cb.get(x, 0), cb.get(y, 0)]))
+                                       [cb[x], cb[y]]))
 
         # --- primeira presença (região que já tinha outro atleta) ---
         for n in rb:
@@ -265,9 +296,15 @@ def detectar(anterior, atual, data):
         (e["quem"], e["cc"], e["nivel"], e["regiao"])
         for e in eventos if e["tipo"] in ("novo_lider", "ultrapassagem")
     }
+    def partilhado(e):
+        return any(p["data"] == data and {e["quem"], e["sobre"]} <= set(p["atletas"])
+                   and e["regiao"] in (p.get("regioes") or [e["regiao"]])
+                   for p in partilhadas)
+
     return [
         e for e in eventos
         if e["quem"] not in estreantes
+        and not (e["tipo"] in ("novo_lider", "ultrapassagem") and partilhado(e))
         and not (e["tipo"] == "primeira_presenca"
                  and (e["quem"], e["cc"], e["nivel"], e["regiao"]) in fortes)
     ]
