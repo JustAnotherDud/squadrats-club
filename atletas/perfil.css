@@ -17,8 +17,8 @@
 /* secções: .sec vem do site.css */
 .perfil-seccao { margin: 0; }
 
-/* contagens: painéis planos, número grande em Bricolage */
-.perfil-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+/* contagens: o cartão grande de squadratinhos + dois números secundários */
+.perfil-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 8px; }
 .perfil-num {
   background: var(--ch-1); border: 1px solid var(--rule);
   border-radius: 3px; padding: 11px 13px;
@@ -44,7 +44,8 @@
 }
 .perfil-num .k[data-tip]:hover::after,
 .perfil-num .k[data-tip]:focus-visible::after { opacity: 1; }
-.perfil-num:nth-child(3n) .k[data-tip]::after { left: auto; right: 0; }
+.perfil-num:last-child .k[data-tip]::after { left: auto; right: 0; }
+.perfil-num.grande .v { font-size: 40px; line-height: 1.05; }
 
 /* sobreposição: faixa de proporção */
 .perfil-barra {
@@ -153,4 +154,7 @@
 
 @media (max-width: 480px) {
   .perfil-num .v { font-size: 18px; }
+  .perfil-grid { grid-template-columns: 1fr 1fr; }
+  .perfil-num.grande { grid-column: 1 / -1; }
+  .perfil-num.grande .v { font-size: 32px; }
 }

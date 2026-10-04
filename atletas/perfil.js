@@ -18,15 +18,13 @@
   };
   const NIVEL_ORDEM = ['pais', 'regiao', 'zona'];
 
-  // linha de cima = grelha squadrats (1609 m); linha de baixo = squadratinhos
-  // (201 m). A grelha do CSS é 3 por linha, por isso a ordem aqui é a ordem
-  // visual: os 3 "grandes" primeiro, os 3 "-inhos" a seguir.
+  // O perfil é só de squadratinhos (201 m): o número grande, mais yardinho e
+  // übersquadratinho como números secundários. O build continua a gerar as 6
+  // métricas em totais e ganhos_diarios (contrato com a folha-do-clube), a UI
+  // é que não as mostra.
   const METRICAS = [
-    ['squadrats', 'Squadrats', 'Nº de squares de 1609 m visitados.'],
-    ['yard', 'Yard', 'Nº de squares do maior cluster fechado, cada square com os 4 vizinhos também visitados.'],
-    ['ubersquadrat', 'Übersquadrat', 'Lado do maior quadrado NxN totalmente preenchido, em squadrats.'],
     ['squadratinhos', 'Squadratinhos', 'Nº de squares de 201 m visitados.'],
-    ['yardinho', 'Yardinho', 'Igual ao Yard, na grelha fina dos squadratinhos.'],
+    ['yardinho', 'Yardinho', 'Nº de squares do maior cluster fechado, cada square com os 4 vizinhos também visitados.'],
     ['ubersquadratinho', 'Übersquadratinho', 'Lado do maior quadrado NxN totalmente preenchido, em squadratinhos.'],
   ];
 
@@ -62,8 +60,8 @@
   }
 
   function blocoTotais(totais) {
-    const cards = METRICAS.map(([k, rotulo, tip]) => `
-      <div class="perfil-num">
+    const cards = METRICAS.map(([k, rotulo, tip], i) => `
+      <div class="perfil-num${i ? '' : ' grande'}">
         <div class="v">${nfmt(totais[k])}</div>
         <div class="k" data-tip="${esc(tip)}" tabindex="0">${esc(rotulo)}</div>
       </div>`).join('');
@@ -189,43 +187,41 @@
   }
 
   function blocoGanhos(dias, estado) {
-    if (!dias || !dias.length) {
+    // só os dias em que squadratinhos ou uma etiqueta (yardinho, übersquadratinho,
+    // ETIQUETA_GANHO) mexeram: Squadrats e Yard já não aparecem na UI
+    const campos = Object.keys(ETIQUETA_GANHO);
+    const uteis = (dias || []).filter(d => d.squadratinhos || campos.some(c => d[c]));
+    if (!uteis.length) {
       return '<p class="perfil-vazio">Sem ganhos registados desde que o registo diário começou.</p>';
     }
-    // sempre as 6 métricas, na mesma ordem das Contagens; uma métrica sem
-    // ganho nesse dia fica com a célula vazia (a grelha já diz que existe),
-    // o que acontece quase sempre com Yard/Über
-    const cab = METRICAS.map(m => `<th>${esc(m[1])}</th>`).join('');
-    const campos = METRICAS.map(m => m[0]);
-    const ncols = 1 + METRICAS.length;
     // colapsada por defeito: só os primeiros GANHOS_INICIAIS dias, o resto
     // atrás de um botão. O sparkline por cima mantém o período todo.
-    const todos = [...dias].reverse().slice(0, 30);
+    const todos = [...uteis].reverse().slice(0, 30);
     const limite = estado.ganhosExpandido ? todos.length : GANHOS_INICIAIS;
     const linhas = todos.slice(0, limite).map(d => {
       const aberto = estado.ganhoAberto === d.data;
-      const temDetalhe = d.regioes && (d.squadratinhos || 0) > 0;
-      const celulas = campos.map(c => {
-        const v = d[c] || 0;
-        if (c === 'squadratinhos' && temDetalhe) {
-          // caret à frente do número: assim o "+N" fica na aresta direita, a
-          // alinhar com o cabeçalho e com as outras colunas
-          return `<td class="n gan-z${aberto ? ' aberto' : ''}" data-dia="${esc(d.data)}">
+      const v = d.squadratinhos || 0;
+      const temDetalhe = d.regioes && v > 0;
+      // caret à frente do número: assim o "+N" fica na aresta direita, a
+      // alinhar com o cabeçalho
+      const celula = temDetalhe
+        ? `<td class="n gan-z${aberto ? ' aberto' : ''}" data-dia="${esc(d.data)}">
             <button class="gan-btn" type="button" aria-expanded="${aberto}"
               aria-label="+${v} squadratinhos em ${fmtData(d.data)}, ver onde">
-              <span class="gan-caret" aria-hidden="true">▸</span>+${v}</button></td>`;
-        }
-        return `<td class="n">${v > 0 ? '+' + v : (v < 0 ? v : '')}</td>`;
-      }).join('');
+              <span class="gan-caret" aria-hidden="true">▸</span>+${v}</button></td>`
+        : `<td class="n">${v > 0 ? '+' + v : (v < 0 ? v : '')}</td>`;
       const detalhe = aberto && temDetalhe
-        ? `<tr class="gan-det"><td colspan="${ncols}">${ganhoDetalhe(d.regioes, d.squadratinhos)}</td></tr>`
+        ? `<tr class="gan-det"><td colspan="2">${ganhoDetalhe(d.regioes, v)}</td></tr>`
         : '';
+      // etiquetas no dia em que yardinho/übersquadratinho crescem
+      const tags = campos.filter(c => d[c] > 0)
+        .map(c => ` <span class="gan-tag">${ETIQUETA_GANHO[c]} +${d[c]}</span>`).join('');
       // dia/mês/ano cada um no seu span de largura fixa: dia à direita, mês e
       // ano à esquerda -> "8 set 2026" e "21 ago 2026" alinham em 3 colunas
       const [dnum, dmes, dano] = fmtData(d.data).split(' ');
       return `<tr><td class="gan-dia"><span class="d-num">${esc(dnum)}</span>` +
-        `<span class="d-mes">${esc(dmes)}</span><span class="d-ano">${esc(dano)}</span></td>` +
-        `${celulas}</tr>${detalhe}`;
+        `<span class="d-mes">${esc(dmes)}</span><span class="d-ano">${esc(dano)}</span>${tags}</td>` +
+        `${celula}</tr>${detalhe}`;
     }).join('');
     const escondidos = todos.length - GANHOS_INICIAIS;
     const maisBtn = escondidos > 0
@@ -233,7 +229,7 @@
           ? 'Mostrar menos' : `Mostrar os outros ${escondidos} dias`}</button>`
       : '';
     return blocoSpark(dias) + `<div class="perfil-scroll"><table class="perfil-tabela">
-      <thead><tr><th>Dia</th>${cab}</tr></thead><tbody>${linhas}</tbody></table></div>` + maisBtn;
+      <thead><tr><th>Dia</th><th>Squadratinhos</th></tr></thead><tbody>${linhas}</tbody></table></div>` + maisBtn;
   }
 
   function pintar(d, cor) {
