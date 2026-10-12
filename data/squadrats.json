@@ -1,5 +1,5 @@
 {
-  "atualizado": "2026-10-11T20:56:08Z",
+  "atualizado": "2026-10-12T07:17:30Z",
   "atletas": {
     "Zé": {
       "yard": 102,
@@ -23,14 +23,15 @@
       "ubersquadrat": 2,
       "ubersquadratinho": 8,
       "squadrats": 119,
-      "squadratinhos": 1145
+      "squadratinhos": 1147
     },
     "Inês S.": {
+      "yard": 1,
       "yardinho": 11,
       "ubersquadrat": 2,
       "ubersquadratinho": 3,
-      "squadrats": 67,
-      "squadratinhos": 705
+      "squadrats": 70,
+      "squadratinhos": 727
     },
     "Pedro": {
       "yard": 5,
