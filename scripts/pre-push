@@ -1,0 +1,8 @@
+#!/bin/sh
+# Pre-push: pytest tem de passar, senão o push aborta. Sem pipe: o exit code é o do pytest.
+# Activar uma vez por clone:  git config core.hooksPath scripts
+echo "[pre-push] pytest -q -x -rfE"
+if ! py -m pytest -q -x -rfE; then
+  echo "[pre-push] pytest falhou: push abortado." >&2
+  exit 1
+fi
