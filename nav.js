@@ -59,12 +59,28 @@
     '#site-nav .links a:hover{color:var(--tinta,#eceaf4)}',
     '#site-nav .links a[aria-current]{color:var(--tinta,#eceaf4);border-bottom-color:var(--marca,#663399)}',
     '@media(max-width:480px){#site-nav{gap:8px;padding:0 12px}',
-    '#site-nav .links a{padding:14px 6px 12px;font-size:12px}}',
+    '#site-nav .links a{padding:14px 6px 12px;font-size:12px}#site-nav .dl{display:none}}',
   ].join('');
 
   var links = DEST.map(function (d) {
     return '<a href="' + d.href + '"' + (d.id === atual ? ' aria-current="page"' : '') + '>' + d.label + '</a>';
   }).join('');
+  // Botão "↻ Dados" só no browser do dono: abrir uma vez qualquer página com
+  // ?dono=1 (?dono=0 tira-o). Isto só esconde o link. Quem pode mesmo correr o
+  // workflow decide-o o GitHub: o "Run workflow" só aparece a contas com
+  // escrita no repo, por isso o site não guarda token nenhum.
+  var dono = false;
+  try {
+    var q = new URLSearchParams(location.search).get('dono');
+    if (q === '1') localStorage.setItem('squadrats-dono', '1');
+    if (q === '0') localStorage.removeItem('squadrats-dono');
+    dono = localStorage.getItem('squadrats-dono') === '1';
+  } catch (e) { /* sem storage: sem botão */ }
+  if (dono) {
+    links += '<a href="https://github.com/JustAnotherDud/squadrats-club/actions/workflows/fetch-map-data.yml"' +
+      ' target="_blank" rel="noopener" title="Correr o pipeline de dados agora">↻<span class="dl"> Dados</span></a>';
+  }
+
   var html =
     '<a class="marca" href="' + P + 'index.html"' + (atual === 'hub' ? ' aria-current="page"' : '') +
       '><span class="lf"></span>Squadrats Club</a>' +
