@@ -66,6 +66,53 @@
   .idx-t td.idx-t-lid { text-align: right; white-space: nowrap; color: var(--tinta-2); font-size: 11.5px; }
   .idx-t-lider .tile { width: 8px; height: 8px; margin-right: 5px; }
   .idx-t td.idx-t-vazio { color: var(--tinta-3); text-align: center; padding: 22px 6px; }
+  /* na linha de vazio o texto não pode ficar fora do ecrã: acompanha o scroll */
+  .idx-t td.idx-t-vazio > div {
+    position: sticky; left: 0; white-space: normal; line-height: 1.6;
+    width: min(calc(100vw - 28px), 824px); box-sizing: border-box; padding: 0 8px;
+  }
+  .idx-ir {
+    background: none; border: 0; padding: 0; font: inherit; color: var(--tinta);
+    cursor: pointer; text-decoration: underline; text-decoration-color: var(--marca);
+    text-underline-offset: 3px;
+  }
+
+  /* pesquisa */
+  .idx-pesq { position: relative; margin: 10px 0 8px; max-width: 360px; }
+  .idx-pesq input {
+    width: 100%; box-sizing: border-box; background: var(--ch-1); color: var(--tinta);
+    border: 1px solid var(--rule); border-radius: 3px; padding: 8px 32px 8px 10px;
+    font-family: var(--f-mono); font-size: 16px; /* 16px: o iOS não faz zoom ao focar */
+    -webkit-appearance: none; appearance: none;
+  }
+  .idx-pesq input::placeholder { color: var(--tinta-3); }
+  .idx-pesq input::-webkit-search-cancel-button { -webkit-appearance: none; display: none; }
+  .idx-pesq button {
+    position: absolute; right: 2px; top: 50%; transform: translateY(-50%);
+    width: 32px; height: 32px; background: none; border: 0; color: var(--tinta-2);
+    font-family: var(--f-mono); font-size: 16px; line-height: 1; cursor: pointer;
+  }
+  .idx-pesq button:hover { color: var(--tinta); }
+  .idx-pesq button[hidden] { display: none; }
+
+  /* Lugar fixo à esquerda: ao deslizar na horizontal o nome fica sempre visível */
+  .idx-t th.idx-t-lugar, .idx-t td.idx-t-lugar {
+    position: sticky; left: 0; z-index: 1; background: var(--ch-0);
+    box-shadow: 1px 0 0 var(--hair);
+  }
+  .idx-t thead th.idx-t-lugar { z-index: 2; }
+
+  /* ecrãs estreitos: colunas mais juntas e Lugar a quebrar em duas linhas, para
+     % e "do clube" caberem inteiras junto ao nome sem deslizar */
+  @media (max-width: 520px) {
+    #regioes-idx { padding-left: 14px; padding-right: 14px; }
+    .idx-scroll .idx-t { min-width: 560px; }
+    .idx-t thead th, .idx-t td { padding-left: 4px; padding-right: 4px; }
+    .idx-t th.idx-t-lugar, .idx-t td.idx-t-lugar { width: 104px; max-width: 104px; padding-left: 0; }
+    .idx-t td.idx-t-lugar { overflow-wrap: anywhere; line-height: 1.25; }
+    .idx-t td.idx-t-lugar .bandeira { margin-right: 5px; }
+    .idx-t td.idx-t-n { font-size: 12px; }
+  }
 
   .idx-nota { font-size: 11.5px; color: var(--tinta-3); margin: 22px 0 0; max-width: 66ch; line-height: 1.7; }
 </style>
@@ -76,6 +123,11 @@
   <dl class="meta" id="meta"></dl>
   <div class="seg" id="idx-nivel"></div>
   <button class="idx-toggle" id="idx-disp">Só disputados (2+ membros)</button>
+  <div class="idx-pesq">
+    <input type="search" id="idx-q" inputmode="search" autocomplete="off" spellcheck="false"
+           placeholder="Pesquisar lugar" aria-label="Pesquisar lugar">
+    <button type="button" id="idx-q-x" aria-label="Limpar pesquisa" hidden>×</button>
+  </div>
   <div id="lista"><p class="idx-estado">A carregar…</p></div>
   <p class="idx-nota"><b>do clube</b> = squadratinhos que o clube cobre no lugar
     (união dos membros, sem repetir os partilhados); <b>Total</b> = o tamanho do
@@ -137,13 +189,19 @@
     nivel: nivelDoHash(),
     sort: { k: 'uniao', dir: 'desc' },
     soDisputados: false,
+    q: new URLSearchParams(location.search).get('q') || '',
   };
+  // sem maiúsculas nem acentos, dos dois lados ("alcobaca" acha "Alcobaça")
+  const norm = t => String(t).normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase();
   let IDX = null;
 
   function ordenar(rows) {
+    const dir = estado.sort.dir === 'asc' ? 1 : -1;
+    if (estado.sort.k === 'regiao') {
+      return [...rows].sort((a, b) => dir * a.regiao.localeCompare(b.regiao, 'pt', { sensitivity: 'base' }));
+    }
     const c = COLS.find(cc => cc.k === estado.sort.k);
     if (!c) return rows;
-    const dir = estado.sort.dir === 'asc' ? 1 : -1;
     return [...rows].sort((a, b) => {
       const va = c.val(a), vb = c.val(b);
       if (va == null && vb == null) return a.regiao.localeCompare(b.regiao, 'pt');
@@ -172,10 +230,10 @@
 
   function thead() {
     return `<thead><tr>
-      <th class="idx-t-lugar">Lugar</th>
-      ${COLS.map(c => {
+      ${[{ k: 'regiao', label: 'Lugar', cls: 'idx-t-lugar' }, ...COLS].map(c => {
         const on = estado.sort.k === c.k;
-        return `<th data-sort="${c.k}"${on ? ' class="ord"' : ''}>${c.label}${on ? (estado.sort.dir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`;
+        const cls = [c.cls, on ? 'ord' : ''].filter(Boolean).join(' ');
+        return `<th data-sort="${c.k}" tabindex="0" aria-sort="${on ? (estado.sort.dir === 'asc' ? 'ascending' : 'descending') : 'none'}"${cls ? ` class="${cls}"` : ''}>${c.label}${on ? (estado.sort.dir === 'asc' ? ' ▲' : ' ▼') : ''}</th>`;
       }).join('')}
       <th class="idx-t-lid">Líder</th>
     </tr></thead>`;
@@ -200,35 +258,81 @@
     const box = document.getElementById('idx-nivel');
     box.innerHTML = NIVEIS.map(([k, rot]) =>
       `<button type="button" data-nivel="${k}" class="${estado.nivel === k ? 'on' : ''}">${rot}</button>`).join('');
-    box.querySelectorAll('[data-nivel]').forEach(b => b.onclick = () => {
-      estado.nivel = b.dataset.nivel;
-      history.replaceState(null, '', '#' + estado.nivel);
-      segNivel();
-      pintar();
-    });
+    box.querySelectorAll('[data-nivel]').forEach(b => b.onclick = () => mudaNivel(b.dataset.nivel));
+  }
+
+  function mudaNivel(k) {
+    estado.nivel = k;
+    history.replaceState(null, '', location.pathname + location.search + '#' + k);
+    segNivel();
+    pintar();
+  }
+
+  // linhas de um nível com os filtros "só disputados" e pesquisa aplicados
+  function filtrar(nivel, q) {
+    let rows = (IDX.regioes || []).filter(NIVEL_MATCH[nivel]);
+    if (estado.soDisputados) rows = rows.filter(x => x.n >= 2);
+    if (q) rows = rows.filter(x => norm(x.regiao).includes(q));
+    return rows;
+  }
+
+  // sem resultados no nível atual: aponta para as correspondências dos outros
+  // níveis (cada nome muda o toggle para esse nível, mantendo a pesquisa)
+  function semResultados(q) {
+    const rot = Object.fromEntries(NIVEIS);
+    const outros = NIVEIS.filter(([k]) => k !== estado.nivel)
+      .map(([k, r]) => [k, r, ordenar(filtrar(k, q))]).filter(([, , rs]) => rs.length);
+    if (!outros.length) return 'Nenhum lugar encontrado';
+    const MAX = 6;
+    return `Sem resultados em ${rot[estado.nivel]}. ` + outros.map(([k, r, rs]) =>
+      `Em ${r}: ` + rs.slice(0, MAX).map(x =>
+        `<button type="button" class="idx-ir" data-ir="${k}">${esc(x.regiao)}</button>`).join(', ')
+      + (rs.length > MAX ? ` e mais ${rs.length - MAX}` : '')).join('. ');
   }
 
   function pintar() {
-    let rows = (IDX.regioes || []).filter(NIVEL_MATCH[estado.nivel]);
-    if (estado.soDisputados) rows = rows.filter(x => x.n >= 2);
-    rows = ordenar(rows);
+    const q = norm(estado.q.trim());
+    const rows = ordenar(filtrar(estado.nivel, q));
 
     const corpo = rows.length
       ? rows.map(linha).join('')
-      : `<tr><td colspan="7" class="idx-t-vazio">${estado.soDisputados ? 'nenhum com 2+ membros neste nível' : 'sem lugares neste nível'}</td></tr>`;
+      : `<tr><td colspan="7" class="idx-t-vazio"><div>${q ? semResultados(q) : estado.soDisputados ? 'nenhum com 2+ membros neste nível' : 'sem lugares neste nível'}</div></td></tr>`;
 
     const lista = document.getElementById('lista');
     lista.innerHTML = `<div class="idx-scroll"><table class="idx-t">${thead()}<tbody>${corpo}</tbody></table></div>`;
 
+    lista.querySelectorAll('.idx-ir').forEach(b => b.onclick = () => mudaNivel(b.dataset.ir));
     lista.querySelectorAll('.idx-t th[data-sort]').forEach(th => {
-      th.onclick = () => {
+      const ordena = () => {
         const k = th.dataset.sort;
         if (estado.sort.k === k) estado.sort.dir = estado.sort.dir === 'asc' ? 'desc' : 'asc';
-        else estado.sort = { k, dir: 'desc' };
+        else estado.sort = { k, dir: k === 'regiao' ? 'asc' : 'desc' };  // Lugar: A a Z primeiro
         pintar();
+        const novo = document.querySelector(`.idx-t th[data-sort="${k}"]`);
+        if (novo && document.activeElement === document.body) novo.focus();
       };
+      th.onclick = ordena;
+      th.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); ordena(); } };
     });
   }
+
+  // ?q= acompanha a pesquisa sem tocar no #nível
+  const inq = document.getElementById('idx-q'), inx = document.getElementById('idx-q-x');
+  function pesquisa(v) {
+    estado.q = v;
+    inx.hidden = !v;
+    const u = new URL(location.href);
+    if (v.trim()) u.searchParams.set('q', v); else u.searchParams.delete('q');
+    history.replaceState(null, '', u.pathname + u.search + u.hash);
+    pintar();
+  }
+  inq.value = estado.q;
+  inx.hidden = !estado.q;
+  inq.addEventListener('input', () => pesquisa(inq.value));
+  inq.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && inq.value) { e.preventDefault(); inq.value = ''; pesquisa(''); }
+  });
+  inx.onclick = () => { inq.value = ''; pesquisa(''); inq.focus(); };
 
   document.getElementById('idx-disp').onclick = function () {
     estado.soDisputados = !estado.soDisputados;
