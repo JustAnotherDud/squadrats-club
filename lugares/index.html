@@ -34,6 +34,7 @@
     padding: 5px 10px; cursor: pointer; margin: 0 0 4px;
   }
   .idx-toggle.on { color: var(--tinta); border-color: var(--marca); }
+  .idx-toggle.susp { opacity: .5; }
 
   /* tabela densa e ordenável, modelada no .perfil-tabela da secção 04 dos
      perfis. Lista plana do nível escolhido (sem grupos): o drill-down para
@@ -269,9 +270,10 @@
   }
 
   // linhas de um nível com os filtros "só disputados" e pesquisa aplicados
-  function filtrar(nivel, q, ignorarDisp) {
+  // com texto na pesquisa o "só disputados" fica suspenso (não conta)
+  function filtrar(nivel, q) {
     let rows = (IDX.regioes || []).filter(NIVEL_MATCH[nivel]);
-    if (estado.soDisputados && !ignorarDisp) rows = rows.filter(x => x.n >= 2);
+    if (estado.soDisputados && !q) rows = rows.filter(x => x.n >= 2);
     if (q) rows = rows.filter(x => norm(x.regiao).includes(q));
     return rows;
   }
@@ -282,32 +284,19 @@
     const rot = Object.fromEntries(NIVEIS);
     const outros = NIVEIS.filter(([k]) => k !== estado.nivel)
       .map(([k, r]) => [k, r, ordenar(filtrar(k, q))]).filter(([, , rs]) => rs.length);
-    // correspondências que só o "Só disputados" esconde neste nível
-    const escondidos = estado.soDisputados ? filtrar(estado.nivel, q, true).length : 0;
-    if (!outros.length && !escondidos) return 'Nenhum lugar encontrado';
+    if (!outros.length) return 'Nenhum lugar encontrado';
     const MAX = 6;
-    const linhas = [];
-    if (escondidos) {
-      linhas.push(`${escondidos} ${escondidos === 1 ? 'resultado escondido' : 'resultados escondidos'} por "Só disputados" `
-        + '<button type="button" class="idx-ir" id="idx-mostrar">Mostrar</button>');
-    }
-    if (outros.length) {
-      linhas.push((escondidos ? '' : `Sem resultados em ${rot[estado.nivel]}. `) + outros.map(([k, r, rs]) =>
-        `Em ${r}: ` + rs.slice(0, MAX).map(x =>
-          `<button type="button" class="idx-ir" data-ir="${k}">${esc(x.regiao)}</button>`).join(', ')
-        + (rs.length > MAX ? ` e mais ${rs.length - MAX}` : '')).join('. '));
-    }
-    return linhas.join('<br>');
-  }
-
-  function ligaDisputados(on) {
-    estado.soDisputados = on;
-    document.getElementById('idx-disp').classList.toggle('on', on);
-    pintar();
+    return `Sem resultados em ${rot[estado.nivel]}. ` + outros.map(([k, r, rs]) =>
+      `Em ${r}: ` + rs.slice(0, MAX).map(x =>
+        `<button type="button" class="idx-ir" data-ir="${k}">${esc(x.regiao)}</button>`).join(', ')
+      + (rs.length > MAX ? ` e mais ${rs.length - MAX}` : '')).join('. ');
   }
 
   function pintar() {
     const q = norm(estado.q.trim());
+    const disp = document.getElementById('idx-disp');
+    disp.classList.toggle('susp', !!q);
+    disp.setAttribute('aria-disabled', q ? 'true' : 'false');
     const rows = ordenar(filtrar(estado.nivel, q));
 
     const corpo = rows.length
@@ -318,8 +307,6 @@
     lista.innerHTML = `<div class="idx-scroll"><table class="idx-t">${thead()}<tbody>${corpo}</tbody></table></div>`;
 
     lista.querySelectorAll('.idx-ir[data-ir]').forEach(b => b.onclick = () => mudaNivel(b.dataset.ir));
-    const mostrar = document.getElementById('idx-mostrar');
-    if (mostrar) mostrar.onclick = () => ligaDisputados(false);
     lista.querySelectorAll('.idx-t th[data-sort]').forEach(th => {
       const ordena = () => {
         const k = th.dataset.sort;
@@ -352,7 +339,12 @@
   });
   inx.onclick = () => { inq.value = ''; pesquisa(''); inq.focus(); };
 
-  document.getElementById('idx-disp').onclick = () => ligaDisputados(!estado.soDisputados);
+  // com texto na pesquisa só alterna o estado (vale ao limpar); as linhas não mudam
+  document.getElementById('idx-disp').onclick = function () {
+    estado.soDisputados = !estado.soDisputados;
+    this.classList.toggle('on', estado.soDisputados);
+    pintar();
+  };
 
   (async function () {
     await carregarCores(mainUrl('membros_cores.json'), NC);
