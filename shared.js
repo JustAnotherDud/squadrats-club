@@ -327,7 +327,7 @@ function avisoPorClassificar(avisos) {
 // novo_lider. Usado pelo historico.html e pelas páginas de lugar.
 const ICO_EVENTO = { novo_lider: '👑', ultrapassagem: '⇅', marco: '🚩', primeira_presenca: '📍' };
 const _FORTE = ['novo_lider', 'ultrapassagem', 'marco', 'primeira_presenca'];  // mais forte primeiro
-const ATLETAS_FEM = ['Carolina', 'Inês S.'];  // para o artigo (o/a, ao/à)
+const ATLETAS_FEM = ['Carolina', 'Inês S.'];  // para o artigo (o/a, ao/à); os outros: masculino
 
 // ícone da parte mais forte da entrada
 const icoEvento = e => ICO_EVENTO[_FORTE.find(t => e.partes.some(p => p.tipo === t))] || '';
@@ -348,7 +348,8 @@ function fraseEvento(e, f) {
   const art = (n, m, fem) => (ATLETAS_FEM.includes(n) ? fem : m);
   const reg = f.regiao ? f.regiao(e.nivel, e.regiao) : null;
   const textos = e.partes.map(p => {
-    if (p.tipo === 'primeira_presenca') return `estreou-se ${reg ? 'em ' + reg : 'aqui'}`;
+    if (p.tipo === 'primeira_presenca')
+      return `estreou-se ${reg ? 'em ' + reg : 'aqui'}${e.partes.length === 1 ? ` com <span class="num">${nfmt(e.contagem)}</span>` : ''}`;
     if (p.tipo === 'marco') return `passou os <b>${nfmt(p.valores[0])}</b>`;
     if (p.tipo === 'ultrapassagem')
       return 'superou ' + _juntar(p.sobre.map(n => `${art(n, 'o', 'a')} ${f.atleta(n)}`));
@@ -358,9 +359,12 @@ function fraseEvento(e, f) {
   });
   if (e.partes[0].tipo !== 'primeira_presenca' && reg) textos[0] += ' em ' + reg;
 
-  const sup = e.partes.filter(p => p.sobre).pop();  // o último superado
+  // rival: o ex-líder (novo_lider) ou, nas ultrapassagens, o superado com mais
+  // squadratinhos no fim do dia (o mais próximo)
+  const sup = e.partes.filter(p => p.sobre).pop();
   const fim = sup
-    ? ` <span class="num">(${nfmt(e.contagem)} vs ${nfmt(sup.valores[sup.valores.length - 1])})</span>`
-    : `, <span class="num">agora ${nfmt(e.contagem)}</span>`;
+    ? ` <span class="num">(${nfmt(e.contagem)} vs ${nfmt(Math.max(...sup.valores))})</span>`
+    : (e.partes.length === 1 && e.partes[0].tipo === 'primeira_presenca' ? ''
+      : `, <span class="num">agora ${nfmt(e.contagem)}</span>`);
   return `${f.atleta(e.quem)} ${_juntar(textos)}${fim}`;
 }
