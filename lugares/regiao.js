@@ -29,37 +29,25 @@
     return typeof v === 'string' ? v : (v && v[cc]) || nivel;
   };
 
-  const ICO = { ultrapassagem: '⇅', novo_lider: '👑', primeira_presenca: '📍', marco: '🚩' };
   const LEGENDA_EV = `<details class="legenda">
-    <summary>👑 ⇅ 📍 🚩 <span class="lg-q">o que significam</span></summary>
+    <summary>👑 ⇅ 🚩 📍 <span class="lg-q">o que significam</span></summary>
     <div class="lg-corpo">
+      <span>Uma linha por atleta em cada dia; o ícone é o do movimento mais forte:</span>
       <span>👑 <b>nova liderança</b> desta região</span>
-      <span>⇅ <b>ultrapassagem</b> (troca de posição fora do topo)</span>
-      <span>📍 <b>primeira presença</b> de um atleta aqui</span>
+      <span>⇅ <b>ultrapassagem</b> (superou alguém fora do topo)</span>
       <span>🚩 <b>marco</b> de squadratinhos (25/50/100/…)</span>
+      <span>📍 <b>primeira presença</b> de um atleta aqui</span>
     </div>
   </details>`;
-  function frase(e) {
-    const v = e.valores;
-    if (e.tipo === 'ultrapassagem')
-      return `${tile(e.quem)}${atl(e.quem)} passou ${tile(e.sobre)}${atl(e.sobre)}
-        <span class="num">${nfmt(v[0])} vs ${nfmt(v[1])}</span>`;
-    if (e.tipo === 'novo_lider')
-      return `${tile(e.quem)}${atl(e.quem)} assumiu a liderança, passou ${tile(e.sobre)}${atl(e.sobre)}
-        <span class="num">${nfmt(v[0])} vs ${nfmt(v[1])}</span>`;
-    if (e.tipo === 'primeira_presenca')
-      return `${tile(e.quem)}${atl(e.quem)} estreou-se aqui
-        <span class="num">${nfmt(v[0])} squadratinho${v[0] === 1 ? '' : 's'}</span>`;
-    return `${tile(e.quem)}${atl(e.quem)} passou os <b>${nfmt(v[0])}</b> squadratinhos,
-      <span class="num">agora ${nfmt(v[1])}</span>`;
-  }
+  // fraseEvento / icoEvento vêm do shared.js; sem f.regiao: já estamos na região
+  const frase = e => fraseEvento(e, { atleta: n => tile(n) + atl(n), regiao: null });
 
   // vizinho "disputado" = com evento de troca (ultrapassagem / novo líder),
   // mesma definição da coluna "Lugares contestados" do historico.html. cc
   // separa uma província ES de um distrito PT com o mesmo nome.
   function temEventoTroca(eventos, cc, nivel, regiao) {
     return eventos.some(e =>
-      (e.tipo === 'ultrapassagem' || e.tipo === 'novo_lider') &&
+      e.partes && e.partes.some(p => p.tipo === 'ultrapassagem' || p.tipo === 'novo_lider') &&
       (e.cc || 'PT') === cc && e.nivel === nivel && e.regiao === regiao);
   }
 
@@ -113,12 +101,12 @@
       squadratinhos${uni ? `, o clube cobre <b>${nfmt(uni.z17)}</b>${uni.pct != null ? ` (${pctfmt(uni.pct, pctOpts)})` : ''}` : ''}.${medidor}</p>`;
 
     const evReg = ehPais ? [] : eventos
-      .filter(e => (e.cc || 'PT') === cc && e.nivel === d.nivel && e.regiao === d.regiao)
+      .filter(e => e.partes && (e.cc || 'PT') === cc && e.nivel === d.nivel && e.regiao === d.regiao)
       .sort((a, b) => b.data.localeCompare(a.data));
     const evHtml = evReg.length ? evReg.map(e => `
       <div class="reg-ev">
         <span class="dia">${diaCurto(e.data)}</span>
-        <span class="ico">${ICO[e.tipo] || ''}</span>
+        <span class="ico">${icoEvento(e)}</span>
         <span class="corpo">${frase(e)}</span>
       </div>`).join('') : '<p class="reg-vazio">Nada registado nesta região.</p>';
 

@@ -77,30 +77,6 @@ def test_ultrapassagem_entre_estabelecidos():
     assert e["cc"] == "PT"  # niveis_de só lê buckets PT por agora
 
 
-# --- identidade inclui o país -------------------------------------------------
-
-def test_chave_separa_por_pais():
-    """Dois eventos iguais em tudo menos o cc não colapsam no append."""
-    base = {"data": "2026-09-05", "nivel": "distrito", "regiao": "Madrid",
-            "tipo": "primeira_presenca", "quem": "Zé", "sobre": None, "valores": [3]}
-    pt = {**base, "cc": "PT"}
-    es = {**base, "cc": "ES"}
-    assert eventos.chave(pt) != eventos.chave(es)
-
-
-def test_colapsar_marcos_nao_mistura_paises():
-    """Um marco 50 em Madrid/ES e um marco 25 em Madrid/PT no mesmo dia: cada
-    um sobrevive, não é o 50 a absorver o 25 do outro país."""
-    evs = [
-        {"data": "2026-09-05", "cc": "ES", "nivel": "distrito", "regiao": "Madrid",
-         "tipo": "marco", "quem": "Zé", "sobre": None, "valores": [50, 60]},
-        {"data": "2026-09-05", "cc": "PT", "nivel": "distrito", "regiao": "Madrid",
-         "tipo": "marco", "quem": "Zé", "sobre": None, "valores": [25, 30]},
-    ]
-    out = eventos.colapsar_marcos(evs)
-    assert {(e["cc"], e["valores"][0]) for e in out} == {("ES", 50), ("PT", 25)}
-
-
 # --- marcos de totais (squadratinhos do atleta / união do clube) -----------
 
 def test_marco_total_do_atleta():
@@ -132,19 +108,35 @@ def test_marco_total_estreante_nao_gera():
     assert {e["quem"] for e in evs} == {"Zé"}  # "Novo" não gera nada
 
 
-def test_ordenar_feed_marcos_de_totais_no_topo_do_dia():
-    ev = lambda tipo, **kw: {"data": "2026-09-10", "nivel": kw.get("nivel", "concelho"),
-        "regiao": kw.get("regiao"), "cc": kw.get("cc"), "tipo": tipo,
-        "quem": kw.get("quem", "Zé"), "sobre": kw.get("sobre"), "valores": [1, 2]}
+def _entrada(regiao, nivel="concelho", quem="Zé", cc="PT", data="2026-09-10"):
+    return {"data": data, "nivel": nivel, "cc": cc, "regiao": regiao, "quem": quem,
+            "partes": [{"tipo": "marco", "valores": [25]}], "contagem": 30}
+
+
+def test_ordenar_feed_totais_no_topo_e_distrito_antes_de_concelho():
+    totais = [{"data": "2026-09-10", "cc": None, "nivel": "total", "regiao": None,
+               "tipo": t, "quem": q, "sobre": None, "valores": [1, 2]}
+              for t, q in (("marco_total", "Zé"), ("marco_clube", None))]
     baralhado = [
-        ev("marco", regiao="Arouca", cc="PT"),
-        ev("marco_total", nivel="total"),
-        ev("novo_lider", regiao="Arouca", cc="PT", sobre="Pedro"),
-        ev("marco_clube", nivel="total", quem=None),
+        _entrada("Arouca"), totais[0],
+        _entrada("Porto", nivel="distrito"),
+        _entrada("Espinho", cc="ES"),
+        totais[1],
+        _entrada("Aveiro", nivel="distrito"),
+        _entrada("Arouca", quem="Pedro"),
+        _entrada("Amadora", data="2026-09-09"),
     ]
-    tipos = [e["tipo"] for e in eventos.ordenar_feed(baralhado)]
-    assert tipos[:2] == ["marco_clube", "marco_total"]  # totais primeiro
-    assert tipos[2:] == ["novo_lider", "marco"]         # regionais a seguir, na ordem normal
+    ordem = [(e.get("tipo") or (e["cc"], e["nivel"], e["regiao"], e["quem"]))
+             for e in eventos.ordenar_feed(baralhado)]
+    assert ordem == [
+        ("PT", "concelho", "Amadora", "Zé"),   # dia anterior primeiro (o site inverte)
+        "marco_clube", "marco_total",           # totais no topo do dia
+        ("ES", "concelho", "Espinho", "Zé"),    # por país
+        ("PT", "distrito", "Aveiro", "Zé"),     # distrito antes de concelho
+        ("PT", "distrito", "Porto", "Zé"),
+        ("PT", "concelho", "Arouca", "Zé"),     # mesma região: ordem dos atletas
+        ("PT", "concelho", "Arouca", "Pedro"),
+    ]
 
 
 def test_ultrapassagem_fora_do_topo():
@@ -171,10 +163,9 @@ def test_ordem_igual_nao_gera_ultrapassagem():
     assert "novo_lider" not in _tipos(evs)
 
 
-def test_primeira_presenca_suprimida_quando_ha_movimento_forte():
-    """Quem chega a uma região nova E passa alguém no mesmo dia não sai com
-    duas frases, fica só a ultrapassagem/novo_lider. (Zé já está no roster,
-    com actividade noutra região, não é estreante.)"""
+def test_primeira_presenca_nao_e_suprimida_por_movimento_forte():
+    """Quem chega a uma região nova E assume a liderança no mesmo dia fica com
+    as duas partes (detectar não esconde nada; a combinação trata de juntar)."""
     ant = _snap({
         "Xeira": {"concelho": {"Espinho": 30}},
         "Zé":    {"concelho": {"Porto": 5}},
@@ -185,8 +176,7 @@ def test_primeira_presenca_suprimida_quando_ha_movimento_forte():
     })
     evs = eventos.detectar(ant, novo, "2026-09-04")
     tipos = _tipos(evs, "Zé")
-    assert "novo_lider" in tipos
-    assert "primeira_presenca" not in tipos  # não repete o mesmo movimento
+    assert "novo_lider" in tipos and "primeira_presenca" in tipos
 
 
 # --- marcos: só o patamar mais alto por dia/região/atleta -----------------
@@ -199,39 +189,6 @@ def test_um_sync_cruza_dois_patamares_gera_so_o_mais_alto():
     marcos = [e for e in evs if e["tipo"] == "marco"]
     assert len(marcos) == 1
     assert marcos[0]["valores"] == [50, 55]
-
-
-def test_colapsar_marcos_entre_runs_do_mesmo_dia():
-    """Runs sucessivos acrescentaram marco 25 e depois marco 50 em separado,
-    colapsar_marcos fica só com o 50, sem tocar nos outros tipos."""
-    evs = [
-        {"data": "2026-08-04", "nivel": "concelho", "regiao": "Rio Maior",
-         "tipo": "marco", "quem": "Zé", "sobre": None, "valores": [25, 40]},
-        {"data": "2026-08-04", "nivel": "concelho", "regiao": "Rio Maior",
-         "tipo": "marco", "quem": "Zé", "sobre": None, "valores": [50, 55]},
-        {"data": "2026-08-04", "nivel": "concelho", "regiao": "Peniche",
-         "tipo": "ultrapassagem", "quem": "Zé", "sobre": "Pedro", "valores": [70, 65]},
-        {"data": "2026-08-05", "nivel": "concelho", "regiao": "Rio Maior",
-         "tipo": "marco", "quem": "Zé", "sobre": None, "valores": [25, 30]},
-    ]
-    out = eventos.colapsar_marcos(evs)
-    marcos_rm = [e for e in out if e["tipo"] == "marco" and e["regiao"] == "Rio Maior"
-                 and e["data"] == "2026-08-04"]
-    assert [e["valores"][0] for e in marcos_rm] == [50]
-    assert any(e["tipo"] == "ultrapassagem" for e in out)      # outros tipos intactos
-    assert any(e["data"] == "2026-08-05" for e in out)         # outros dias intactos
-
-
-def test_ordenar_feed_movimento_antes_do_marco():
-    """Dentro de uma região/dia: novo_lider < ultrapassagem < primeira_presenca
-    < marco."""
-    def ev(tipo, regiao="Arouca"):
-        return {"data": "2026-08-04", "nivel": "concelho", "regiao": regiao,
-                "tipo": tipo, "quem": "Zé", "sobre": "Pedro" if "passa" in tipo else None,
-                "valores": [1]}
-    baralhado = [ev("marco"), ev("primeira_presenca"), ev("novo_lider"), ev("ultrapassagem")]
-    ordem = [e["tipo"] for e in eventos.ordenar_feed(baralhado)]
-    assert ordem == ["novo_lider", "ultrapassagem", "primeira_presenca", "marco"]
 
 
 # --- ultrapassagem: só por contagem estritamente maior -----------------------
@@ -281,3 +238,71 @@ def test_caso_real_03_out_zero_eventos():
     for p in ((), partilhadas):  # a correção 1 chega; a lista também não estraga
         evs = eventos.detectar(ant, novo, "2026-10-03", p)
         assert not [e for e in evs if e["tipo"] in ("ultrapassagem", "novo_lider")]
+
+
+# --- combinar: uma entrada por (data, cc, nivel, regiao, quem) ----------------
+
+def _entradas(ant, novo, data="2026-11-04"):
+    return eventos.detectar_dia(ant, novo, data)
+
+
+def _partes(entrada):
+    return [p["tipo"] for p in entrada["partes"]]
+
+
+def test_combina_estreia_marco_e_ultrapassagem():
+    """O caso real de Matosinhos (04 nov): estreia + marco 25 + passa o Pedro."""
+    ant = _snap({"Pedro": {"concelho": {"Matosinhos": 12}}, "Zé": {"concelho": {"Porto": 5}}})
+    novo = _snap({"Pedro": {"concelho": {"Matosinhos": 12}},
+                  "Zé": {"concelho": {"Matosinhos": 26, "Porto": 5}}})
+    (e,) = _entradas(ant, novo)
+    assert (e["quem"], e["regiao"], e["nivel"], e["cc"]) == ("Zé", "Matosinhos", "concelho", "PT")
+    # Zé (26) passa o Pedro (12) e assume o topo: novo_lider em vez de ultrapassagem
+    assert _partes(e) == ["primeira_presenca", "marco", "novo_lider"]
+    assert e["partes"][1]["valores"] == [25]
+    assert e["partes"][2] == {"tipo": "novo_lider", "sobre": "Pedro", "valores": [12]}
+    assert e["contagem"] == 26
+
+
+def test_estreia_que_entra_acima_de_um_patamar_tem_marco():
+    ant = _snap({"Xeira": {"concelho": {"Maia": 60}}, "Zé": {"concelho": {"Porto": 5}}})
+    novo = _snap({"Xeira": {"concelho": {"Maia": 60}}, "Zé": {"concelho": {"Maia": 44, "Porto": 5}}})
+    (e,) = _entradas(ant, novo)
+    assert _partes(e) == ["primeira_presenca", "marco"]
+    assert e["partes"][1]["valores"] == [25] and e["contagem"] == 44
+
+
+def test_varias_ultrapassagens_numa_parte_so():
+    ant = _snap({"Xeira": {"concelho": {"Arouca": 90}}, "Pedro": {"concelho": {"Arouca": 20}},
+                 "Carolina": {"concelho": {"Arouca": 15}}, "Zé": {"concelho": {"Arouca": 10}}})
+    novo = _snap({"Xeira": {"concelho": {"Arouca": 90}}, "Pedro": {"concelho": {"Arouca": 20}},
+                  "Carolina": {"concelho": {"Arouca": 15}}, "Zé": {"concelho": {"Arouca": 22}}})
+    (e,) = _entradas(ant, novo)
+    assert e["partes"] == [{"tipo": "ultrapassagem", "sobre": ["Pedro", "Carolina"],
+                            "valores": [20, 15]}]
+    assert e["contagem"] == 22
+
+
+def test_concelho_e_distrito_ficam_em_entradas_separadas():
+    ant = _snap({"Xeira": {"concelho": {"Gaia": 300}, "distrito": {"Porto": 300}},
+                 "Zé": {"concelho": {"Gaia": 90}, "distrito": {"Porto": 90}}})
+    novo = _snap({"Xeira": {"concelho": {"Gaia": 300}, "distrito": {"Porto": 300}},
+                  "Zé": {"concelho": {"Gaia": 110}, "distrito": {"Porto": 110}}})
+    evs = _entradas(ant, novo)
+    assert [(e["nivel"], e["regiao"], e["contagem"]) for e in evs] == \
+        [("distrito", "Porto", 110), ("concelho", "Gaia", 110)]  # distrito primeiro
+    assert all(_partes(e) == ["marco"] and e["partes"][0]["valores"] == [100] for e in evs)
+
+
+def test_migrar_planos_formato_antigo():
+    """Eventos planos já publicados (antes do 1.º club_regioes.json) passam ao formato novo."""
+    base = {"data": "2026-08-04", "cc": "PT", "nivel": "concelho", "regiao": "Rio Maior"}
+    planos = [
+        {**base, "tipo": "primeira_presenca", "quem": "Zé", "sobre": None, "valores": [16]},
+        {**base, "tipo": "marco", "quem": "Zé", "sobre": None, "valores": [25, 44]},
+        {**base, "tipo": "ultrapassagem", "quem": "Zé", "sobre": "Pedro", "valores": [44, 30]},
+    ]
+    (e,) = eventos.migrar_planos(planos)
+    assert _partes(e) == ["primeira_presenca", "marco", "ultrapassagem"]
+    assert e["contagem"] == 44
+    assert e["partes"][2] == {"tipo": "ultrapassagem", "sobre": ["Pedro"], "valores": [30]}

@@ -3,10 +3,15 @@
 Um "evento" é uma mudança digna de nota no ranking por região (concelho ou
 distrito, só PT), ou um marco de totais. Consumido pelo append_events.py.
 
-A CHAVE de cada evento (`chave`) é por DIA, não por timestamp: os 6 runs/dia
-re-detectam o mesmo flip e o append é idempotente.
+O feed é RECALCULADO por dia (ver append_events): em cada run, os dias que o
+walk cobre são apagados e regenerados do último snapshot do dia anterior vs o
+último do dia. Não há chave de idempotência, nem estado que sobreviva entre runs.
 
-Tipos:
+`detectar` devolve eventos "planos" (um por tipo); `combinar` junta-os por
+(data, cc, nivel, regiao, quem) numa entrada com `partes`, que é o formato de
+events.json (ver `detectar_dia`).
+
+Tipos (partes):
   - ultrapassagem      X passou Y: antes X tinha ESTRITAMENTE menos que Y (Y presente,
                        X pode estar ausente), agora tem estritamente mais. Empate nunca
                        é ultrapassagem, nem à entrada (empate -> à frente) nem à saída
@@ -237,7 +242,8 @@ def detectar(anterior, atual, data, partilhadas=()):
     """Eventos ao passar de `anterior` -> `atual` (dois club_regioes.json).
     `data` é a data (YYYY-MM-DD, UTC) a que o evento fica atribuído.
 
-    Devolve lista de dicts: {data, nivel, cc, regiao, tipo, quem, sobre, valores}.
+    Devolve eventos PLANOS (um por tipo; para o formato de events.json ver
+    detectar_dia): {data, nivel, cc, regiao, tipo, quem, sobre, valores}.
     `sobre` = quem foi passado / ex-líder (None quando não se aplica).
     `partilhadas` = carregar_partilhadas(); suprime passou/novo_lider entre
     atletas de uma atividade partilhada nesse dia.
@@ -289,13 +295,6 @@ def detectar(anterior, atual, data, partilhadas=()):
                 eventos.append(_ev(data, cc, nivel, reg, "primeira_presenca", n, None,
                                    [cb.get(n, 0)]))
 
-    # "capturou o 1º square" é implícito quando o mesmo atleta, na mesma
-    # região e dia, já assumiu a liderança ou passou alguém, tira-se para o
-    # feed não repetir o mesmo movimento com duas frases.
-    fortes = {
-        (e["quem"], e["cc"], e["nivel"], e["regiao"])
-        for e in eventos if e["tipo"] in ("novo_lider", "ultrapassagem")
-    }
     def partilhado(e):
         return any(p["data"] == data and {e["quem"], e["sobre"]} <= set(p["atletas"])
                    and e["regiao"] in (p.get("regioes") or [e["regiao"]])
@@ -305,8 +304,6 @@ def detectar(anterior, atual, data, partilhadas=()):
         e for e in eventos
         if e["quem"] not in estreantes
         and not (e["tipo"] in ("novo_lider", "ultrapassagem") and partilhado(e))
-        and not (e["tipo"] == "primeira_presenca"
-                 and (e["quem"], e["cc"], e["nivel"], e["regiao"]) in fortes)
     ]
 
 
@@ -323,8 +320,7 @@ def _ev(data, cc, nivel, reg, tipo, quem, sobre, valores):
     }
 
 
-# tipos de marco (incluem o patamar na chave e no colapso)
-MARCO_TIPOS = ("marco", "marco_total", "marco_clube")
+TIPOS_TOTAIS = ("marco_total", "marco_clube")
 
 
 def totais_sqi(squadrats):
@@ -368,44 +364,95 @@ def detectar_totais(sq_ant, sq_hoje, uni_ant, uni_hoje, data):
     return out
 
 
-def chave(ev):
-    """Identidade por DIA, o que torna o append idempotente entre os 6 runs
-    do mesmo dia. Um marco (de qualquer tipo) inclui o patamar; os outros o
-    par de atletas."""
-    extra = ev["valores"][0] if ev["tipo"] in MARCO_TIPOS else (ev.get("sobre") or "")
-    return (ev["data"], ev.get("cc") or "", ev["nivel"], ev.get("regiao") or "",
-            ev["tipo"], ev.get("quem") or "", str(extra))
+# ordem das partes dentro de uma entrada regional (a ordem em que se lê a frase:
+# estreia, o marco que fez, quem passou, e por fim a liderança)
+ORDEM_PARTE = ["primeira_presenca", "marco", "ultrapassagem", "novo_lider"]
 
 
-# ordem de leitura DENTRO de uma região/dia: movimentos de ranking, depois a
-# estreia, e o marco regional no fim. Os marcos de totais (marco_clube,
-# marco_total) não usam isto: vão ao topo do dia, ver ordenar_feed.
-ORDEM_TIPO = {"marco_clube": -2, "marco_total": -1,
-              "novo_lider": 0, "ultrapassagem": 1, "primeira_presenca": 2, "marco": 3}
+def combinar(planos, atual):
+    """Junta eventos planos (saída de detectar) por (data, cc, nivel, regiao,
+    quem) numa entrada:
+
+        {data, nivel, cc, regiao, quem, partes: [...], contagem}
+
+    `partes` = [{tipo, sobre?, valores?}] sempre na ordem de ORDEM_PARTE:
+      primeira_presenca  {tipo}
+      marco              {tipo, valores: [patamar]}
+      ultrapassagem      {tipo, sobre: [superados], valores: [contagem de cada um]}
+                         (várias no dia/região juntam-se numa parte; os superados
+                         por ordem de contagem final, o mais próximo primeiro)
+      novo_lider         {tipo, sobre: ex_lider, valores: [contagem do ex-líder]}
+    `contagem` = squadratinhos de `quem` na região no fim do dia (em `atual`,
+    o club_regioes.json do fim do dia). A ordem das entradas é a de ordenar_feed."""
+    fim = niveis_de(atual)
+    grupos = {}
+    for e in planos:
+        k = (e["data"], e["cc"], e["nivel"], e["regiao"], e["quem"])
+        grupos.setdefault(k, []).append(e)
+    out = []
+    for (data, cc, nivel, reg, quem), evs in grupos.items():
+        contagens = fim.get((cc, nivel, reg), {})
+        partes = []
+        if any(e["tipo"] == "primeira_presenca" for e in evs):
+            partes.append({"tipo": "primeira_presenca"})
+        marcos = [e["valores"][0] for e in evs if e["tipo"] == "marco"]
+        if marcos:
+            partes.append({"tipo": "marco", "valores": [max(marcos)]})
+        sobre = {e["sobre"] for e in evs if e["tipo"] == "ultrapassagem"}
+        if sobre:
+            sobre = sorted(sobre, key=lambda n: (-contagens.get(n, 0), _idx(n)))
+            partes.append({"tipo": "ultrapassagem", "sobre": sobre,
+                           "valores": [contagens.get(n, 0) for n in sobre]})
+        for e in evs:
+            if e["tipo"] == "novo_lider":
+                partes.append({"tipo": "novo_lider", "sobre": e["sobre"],
+                               "valores": [contagens.get(e["sobre"], 0)]})
+        out.append({"data": data, "nivel": nivel, "cc": cc, "regiao": reg,
+                    "quem": quem, "partes": partes, "contagem": contagens.get(quem, 0)})
+    return ordenar_feed(out)
+
+
+def detectar_dia(anterior, atual, data, partilhadas=()):
+    """Entradas regionais (formato de events.json) de `anterior` -> `atual`."""
+    return combinar(detectar(anterior, atual, data, partilhadas), atual)
+
+
+def migrar_planos(planos):
+    """Converte eventos planos já publicados (formato antigo do events.json,
+    sem `partes`) no formato novo. Serve para os dias que não dá para recalcular
+    (antes do 1.º club_regioes.json no histórico, reconstruídos do club.json).
+    A contagem final não está guardada: sai do maior valor que os eventos do
+    dia registaram para cada atleta (as contagens só sobem)."""
+    fim = {}  # (data, cc, nivel, regiao) -> {atleta: contagem}
+    for e in planos:
+        c = fim.setdefault((e["data"], e["cc"], e["nivel"], e["regiao"]), {})
+        v = e["valores"]
+        vistos = [(e["quem"], v[1] if e["tipo"] == "marco" else v[0])]
+        if e["tipo"] in ("ultrapassagem", "novo_lider"):
+            vistos.append((e["sobre"], v[1]))
+        for n, x in vistos:
+            c[n] = max(c.get(n, 0), x)
+    out = []
+    for (data, cc, nivel, reg), contagens in fim.items():
+        chave = "by_concelho" if nivel == "concelho" else "by_distrito"
+        atual = {"atletas": {n: {chave: {reg: x}} for n, x in contagens.items()}}
+        dia = [e for e in planos
+               if (e["data"], e["cc"], e["nivel"], e["regiao"]) == (data, cc, nivel, reg)]
+        out.extend(combinar(dia, atual))
+    return ordenar_feed(out)
+
+
+_NIVEL_ORDEM = {"distrito": 0, "concelho": 1}
+_TOTAL_ORDEM = {"marco_clube": 0, "marco_total": 1}
 
 
 def ordenar_feed(evs):
-    """Ordena para o feed: dia asc (o site inverte); dentro do dia os marcos de totais primeiro
-    (notícia), depois os eventos regionais agrupados por país/nível/região."""
-    return sorted(evs, key=lambda e: (
-        e["data"],
-        0 if e["tipo"] in ("marco_total", "marco_clube") else 1,
-        e.get("cc") or "", e["nivel"], e.get("regiao") or "",
-        ORDEM_TIPO.get(e["tipo"], 9), str(e.get("sobre") or ""),
-    ))
-
-
-def colapsar_marcos(evs):
-    """Por (data, cc, nivel, regiao, quem) mantém só o marco de patamar mais
-    alto. Um sync grande pode gerar 25 e 50 de uma vez, ou runs sucessivos do
-    mesmo dia tê-los acrescentado em separado, o 50 já implica o 25. Vale para
-    os três tipos de marco (regional, total do atleta, união do clube)."""
-    melhor = {}
-    for i, e in enumerate(evs):
-        if e["tipo"] not in MARCO_TIPOS:
-            continue
-        k = (e["data"], e.get("cc") or "", e["nivel"], e.get("regiao") or "", e.get("quem") or "")
-        if k not in melhor or e["valores"][0] > evs[melhor[k]]["valores"][0]:
-            melhor[k] = i
-    manter = set(melhor.values())
-    return [e for i, e in enumerate(evs) if e["tipo"] not in MARCO_TIPOS or i in manter]
+    """Ordena para o feed: dia asc (o site inverte); dentro do dia os marcos de
+    totais primeiro (clube antes de atleta), depois as entradas regionais
+    agrupadas por país, nível (distrito antes de concelho) e região."""
+    def k(e):
+        if e.get("tipo") in TIPOS_TOTAIS:
+            return (e["data"], 0, _TOTAL_ORDEM[e["tipo"]], "", "", _idx(e.get("quem")))
+        return (e["data"], 1, e.get("cc") or "", _NIVEL_ORDEM.get(e["nivel"], 9),
+                e.get("regiao") or "", _idx(e.get("quem")))
+    return sorted(evs, key=k)

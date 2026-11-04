@@ -1,5 +1,5 @@
-"""Passo do run_all.py: acrescenta a data/events.json os eventos dos dias
-ainda não cobertos, sem reprocessar o histórico todo.
+"""Passo do run_all.py: actualiza data/events.json com os eventos dos dias
+ainda não fechados, sem reprocessar o histórico todo.
 
 Trabalha por DIA UTC: quando o pipeline esteve parado vários dias, cada dia
 em falta fica com os seus eventos, não colapsa tudo no dia da recuperação.
@@ -7,8 +7,12 @@ em falta fica com os seus eventos, não colapsa tudo no dia da recuperação.
 O snapshot "de hoje" é o club_regioes.json acabado de gerar (ainda não
 commitado); os dias anteriores vêm do histórico de `origin/data`.
 
-Append idempotente: a chave de cada evento é por dia (eventos.chave), por
-isso os 6 runs do mesmo dia não duplicam nada.
+RECALCULA em vez de acrescentar: os dias que o walk cobre (de `ultimo`, o dia do
+último evento, até hoje) são apagados do events.json e regenerados de raiz,
+comparando o último snapshot do dia anterior com o último do dia. Assim os
+6 runs do mesmo dia deixam só o estado do fim do dia (valores e combinação de
+estreia/marco/ultrapassagem incluídos), e não há chave de idempotência. Dias
+anteriores a `ultimo` não se tocam.
 """
 import json
 import os
@@ -32,6 +36,33 @@ def _n_commits_club_regioes(branch="origin/data"):
         capture_output=True, stdin=subprocess.DEVNULL, text=True, encoding="utf-8",
     )
     return len(r.stdout.split()) if r.returncode == 0 else 0
+
+
+def _resumo(ev):
+    """Uma linha por evento, para o log do run."""
+    if "partes" not in ev:
+        return f"{ev['data']} {ev['tipo']} {ev.get('quem')} {ev['valores']}"
+    partes = "+".join(p["tipo"] for p in ev["partes"])
+    return f"{ev['data']} {ev['nivel']} {ev['regiao']}: {ev['quem']} {partes} ({ev['contagem']})"
+
+
+def calcular(dias, por_dia, sq_por_dia, hoje, partilhadas=None):
+    """(eventos, datas) de todos os pares de dias consecutivos em `dias`: o
+    último snapshot do dia anterior vs o último do dia. `datas` = os dias a que
+    os eventos ficam atribuídos (os que o walk regenera). Eventos regionais já
+    combinados (eventos.detectar_dia) e marcos de totais."""
+    if partilhadas is None:
+        partilhadas = eventos.carregar_partilhadas()
+    novos, datas = [], set()
+    for ontem, dia in zip(dias, dias[1:]):
+        data_ev = dia if dia != "_prev" else hoje
+        datas.add(data_ev)
+        novos += eventos.detectar_dia(por_dia[ontem], por_dia[dia], data_ev, partilhadas)
+        if ontem in sq_por_dia and dia in sq_por_dia:
+            novos += eventos.detectar_totais(
+                eventos.totais_sqi(sq_por_dia[ontem]), eventos.totais_sqi(sq_por_dia[dia]),
+                eventos.uniao_clube(por_dia[ontem]), eventos.uniao_clube(por_dia[dia]), data_ev)
+    return novos, datas
 
 
 def main(out_dir):
@@ -127,35 +158,26 @@ def main(out_dir):
         except Exception:
             pass
 
-    novos = []
+    novos, regenerados = [], set()
     if len(dias) >= 2:
-        ja = {eventos.chave(e) for e in atual["eventos"]}
-        partilhadas = eventos.carregar_partilhadas()
-        for ontem, dia in zip(dias, dias[1:]):
-            data_ev = dia if dia != "_prev" else hoje
-            for ev in eventos.detectar(por_dia[ontem], por_dia[dia], data_ev, partilhadas):
-                k = eventos.chave(ev)
-                if k not in ja:
-                    ja.add(k)
-                    novos.append(ev)
-            if ontem in sq_por_dia and dia in sq_por_dia:
-                for ev in eventos.detectar_totais(
-                        eventos.totais_sqi(sq_por_dia[ontem]), eventos.totais_sqi(sq_por_dia[dia]),
-                        eventos.uniao_clube(por_dia[ontem]), eventos.uniao_clube(por_dia[dia]), data_ev):
-                    k = eventos.chave(ev)
-                    if k not in ja:
-                        ja.add(k)
-                        novos.append(ev)
+        novos, regenerados = calcular(dias, por_dia, sq_por_dia, hoje)
 
-    if novos:
-        atual["eventos"].extend(novos)
-        # colapsa marcos redundantes (25 quando já há 50 no mesmo dia/região/
-        # atleta, de um sync grande ou de runs sucessivos) e reordena p/ o feed
-        atual["eventos"] = eventos.ordenar_feed(eventos.colapsar_marcos(atual["eventos"]))
-        print(f"append_events: +{len(novos)} evento(s)")
-        for ev in novos:
-            print(f"  {ev['data']} {ev['nivel']} {ev['regiao']}: {ev['tipo']} "
-                  f"{ev['quem']}" + (f" > {ev['sobre']}" if ev["sobre"] else ""))
+    # só se apagam os dias que acabaram de ser regenerados: sem par (ex. o dia
+    # `ultimo` é o 1.º do histórico, sem base) ficam como estão, nunca se perde
+    # um dia sem o poder refazer
+    velhos = [e for e in atual["eventos"] if e["data"] in regenerados]
+    if ultimo not in regenerados and any(e["data"] == ultimo for e in atual["eventos"]):
+        print(f"append_events: AVISO, o dia {ultimo} não foi recalculado (sem snapshot base); mantido")
+    mantidos = [e for e in atual["eventos"] if e["data"] not in regenerados]
+    if novos or velhos:
+        atual["eventos"] = eventos.ordenar_feed(mantidos + novos)
+        antes = {json.dumps(e, sort_keys=True) for e in velhos}
+        mudou = [e for e in novos if json.dumps(e, sort_keys=True) not in antes]
+        print(f"append_events: {len(regenerados)} dia(s) recalculado(s) "
+              f"({min(regenerados)}..{max(regenerados)}), {len(velhos)} -> {len(novos)} evento(s), "
+              f"{len(mudou)} novo(s)/alterado(s)")
+        for ev in mudou:
+            print("  " + _resumo(ev))
     else:
         print("append_events: sem eventos novos")
 

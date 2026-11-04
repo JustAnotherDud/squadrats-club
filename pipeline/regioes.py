@@ -367,4 +367,4 @@ def escrever_indice(out_dir, linhas, gerado):
 def disputadas_de(eventos):
     """{(cc, nivel, regiao)} das regiões com ultrapassagem ou novo líder."""
     return {(e.get("cc", "PT"), e["nivel"], e["regiao"]) for e in (eventos or [])
-            if e.get("tipo") in ("ultrapassagem", "novo_lider")}
+            if any(p.get("tipo") in ("ultrapassagem", "novo_lider") for p in e.get("partes", []))}

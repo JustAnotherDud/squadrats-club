@@ -320,3 +320,47 @@ function avisoPorClassificar(avisos) {
   _barraTopo(el);
   return true;
 }
+
+// --- eventos regionais (events.json) ---------------------------------------
+// Entrada: {data, nivel, cc, regiao, quem, partes: [{tipo, sobre?, valores?}], contagem}
+// com as partes por esta ordem: primeira_presenca, marco, ultrapassagem,
+// novo_lider. Usado pelo historico.html e pelas páginas de lugar.
+const ICO_EVENTO = { novo_lider: '👑', ultrapassagem: '⇅', marco: '🚩', primeira_presenca: '📍' };
+const _FORTE = ['novo_lider', 'ultrapassagem', 'marco', 'primeira_presenca'];  // mais forte primeiro
+const ATLETAS_FEM = ['Carolina', 'Inês S.'];  // para o artigo (o/a, ao/à)
+
+// ícone da parte mais forte da entrada
+const icoEvento = e => ICO_EVENTO[_FORTE.find(t => e.partes.some(p => p.tipo === t))] || '';
+
+// a entrada envolve o atleta? (é `quem` ou foi superado/destronado)
+const eventoDe = (e, atleta) => e.quem === atleta ||
+  e.partes.some(p => p.sobre && [].concat(p.sobre).includes(atleta));
+
+// "a, b e c"
+const _juntar = xs => xs.length < 2 ? xs.join('')
+  : xs.slice(0, -1).join(', ') + ' e ' + xs[xs.length - 1];
+
+// Frase (HTML) de uma entrada. `f.atleta(nome)` e `f.regiao(nivel, nome)` dão o
+// HTML de cada nome (f.regiao pode ser null: página da própria região, que não
+// repete o nome). A região aparece uma vez, na estreia ou, se esta não existir,
+// logo a seguir à 1.ª parte. A contagem vem no fim, uma só vez.
+function fraseEvento(e, f) {
+  const art = (n, m, fem) => (ATLETAS_FEM.includes(n) ? fem : m);
+  const reg = f.regiao ? f.regiao(e.nivel, e.regiao) : null;
+  const textos = e.partes.map(p => {
+    if (p.tipo === 'primeira_presenca') return `estreou-se ${reg ? 'em ' + reg : 'aqui'}`;
+    if (p.tipo === 'marco') return `passou os <b>${nfmt(p.valores[0])}</b>`;
+    if (p.tipo === 'ultrapassagem')
+      return 'superou ' + _juntar(p.sobre.map(n => `${art(n, 'o', 'a')} ${f.atleta(n)}`));
+    if (p.tipo === 'novo_lider')
+      return `tirou a liderança ${art(p.sobre, 'ao', 'à')} ${f.atleta(p.sobre)}`;
+    return '';
+  });
+  if (e.partes[0].tipo !== 'primeira_presenca' && reg) textos[0] += ' em ' + reg;
+
+  const sup = e.partes.filter(p => p.sobre).pop();  // o último superado
+  const fim = sup
+    ? ` <span class="num">(${nfmt(e.contagem)} vs ${nfmt(sup.valores[sup.valores.length - 1])})</span>`
+    : `, <span class="num">agora ${nfmt(e.contagem)}</span>`;
+  return `${f.atleta(e.quem)} ${_juntar(textos)}${fim}`;
+}
