@@ -4,7 +4,7 @@
 // sério: só serve a casca da cache quando a rede falha.
 //
 // Registado pelo nav.js. Versão na cache: subir CACHE ao mudar a casca.
-const CACHE = 'squadrats-club-v3';
+const CACHE = 'squadrats-club-v4';
 
 // Âmbito do SW (…/squadrats-club/ no GitHub Pages, / em local).
 const BASE = new URL('./', self.registration.scope).pathname;
@@ -37,7 +37,9 @@ self.addEventListener('fetch', e => {
   if (req.mode === 'navigate' || (mesmaOrigem && !url.pathname.startsWith(BASE + 'data/'))) {
     e.respondWith((async () => {
       try {
-        const resp = await fetch(req);
+        // no-cache: revalida com o servidor (304 se igual) em vez de usar a cópia
+        // HTTP de até 10 min do GitHub Pages, para os deploys chegarem logo
+        const resp = await fetch(req, { cache: 'no-cache' });
         if (resp.ok && mesmaOrigem) {
           const c = await caches.open(CACHE);
           c.put(req, resp.clone());
