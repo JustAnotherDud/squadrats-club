@@ -38,6 +38,20 @@ a:hover { text-decoration-color: var(--tinta); }
 .reg-rank td.pct { text-align: right; white-space: nowrap; color: var(--tinta-3); width: 52px; }
 .reg-rank .pos { color: var(--tinta-3); width: 26px; font-family: var(--f-mono); font-size: 12px; }
 .reg-rank .nome { display: flex; align-items: center; gap: 8px; }
+
+/* telemóvel: a quota (16 células x 9px + 150px fixos) fazia a tabela mais larga
+   que o ecrã (min ~370px vs 324px úteis a 360px de viewport) e o #regiao corta
+   (overflow-x: clip) a coluna %. Encolhe só a barra, igual em todas as linhas
+   (continuam comparáveis); os números não mexem. */
+@media (max-width: 440px) {
+  .reg-rank td.tira-td { width: auto; padding-right: 8px; }
+  .reg-rank .tira { gap: 1px; }
+  .reg-rank .tira i { width: 4px; }
+}
+@media (max-width: 340px) {
+  .reg-rank .tira i { width: 3px; }
+  .reg-rank td { padding-left: 3px; padding-right: 3px; }
+}
 .reg-rank .nome a { color: var(--tinta); text-decoration: none; font-weight: 500; }
 .reg-rank .nome a:hover { text-decoration: underline; text-decoration-color: var(--marca); }
 .reg-rank .tira { color: var(--tinta-2); }         /* fallback; style inline manda */
