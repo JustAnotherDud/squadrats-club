@@ -29,16 +29,7 @@
     return typeof v === 'string' ? v : (v && v[cc]) || nivel;
   };
 
-  const LEGENDA_EV = `<details class="legenda">
-    <summary>👑 ⇅ 🚩 📍 <span class="lg-q">o que significam</span></summary>
-    <div class="lg-corpo">
-      <span>Uma linha por atleta em cada dia; o ícone é o do movimento mais forte:</span>
-      <span>👑 <b>nova liderança</b> desta região</span>
-      <span>⇅ <b>ultrapassagem</b> (superou alguém fora do topo)</span>
-      <span>🚩 <b>marco</b> de squadratinhos (25/50/100/…)</span>
-      <span>📍 <b>primeira presença</b> de um atleta aqui</span>
-    </div>
-  </details>`;
+  const LEGENDA_EV = legendaEvento(true);  // shared.js
   // fraseEvento / icoEvento vêm do shared.js; sem f.regiao: já estamos na região
   const frase = e => fraseEvento(e, { atleta: n => tile(n) + atl(n), regiao: null });
 

@@ -83,6 +83,16 @@ def main(out_dir):
     atual.setdefault("eventos", [])
     atual.setdefault("desde", eventos.DESDE)
 
+    # events.json ainda no formato antigo (eventos planos, sem `partes`): converte
+    # já, para o ficheiro nunca ficar misto. Os dias recalculados a seguir
+    # substituem os seus; os restantes ficam com a conversão aproximada.
+    planos = [e for e in atual["eventos"]
+              if "partes" not in e and e["tipo"] not in eventos.TIPOS_TOTAIS]
+    if planos:
+        atual["eventos"] = ([e for e in atual["eventos"] if not any(e is p for p in planos)]
+                            + eventos.migrar_planos(planos))
+        print(f"append_events: {len(planos)} evento(s) plano(s) do formato antigo convertidos")
+
     ultimo = max((e["data"] for e in atual["eventos"]), default=eventos.DESDE)
 
     # walk dia-a-dia sobre o histórico de origin/data, a partir do último

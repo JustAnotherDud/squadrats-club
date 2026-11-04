@@ -21,6 +21,7 @@ vm.runInContext(fs.readFileSync(process.argv[1], 'utf8') + `
   frase: fraseEvento(e, { atleta: n => n, regiao: (nivel, r) => r }),
   fraseLocal: fraseEvento(e, { atleta: n => n, regiao: null }),
   ico: icoEvento(e),
+  legendas: [legendaEvento(false), legendaEvento(true)],
   de: ['Zé', 'Pedro', 'Xeira'].filter(a => eventoDe(e, a)),
 }));`, ctx);
 const entradas = JSON.parse(fs.readFileSync(0, 'utf8'));
@@ -109,3 +110,9 @@ def test_filtro_por_atleta_apanha_quem_e_sobre():
         _e("C", [M(25)], 9, quem="Pedro"),
     ])
     assert [o["de"] for o in out] == [["Zé", "Pedro", "Xeira"], ["Zé", "Pedro"], ["Pedro"]]
+
+
+def test_legenda_unica_na_ordem_de_forca():
+    o = _render([_e("A", [M(25)], 9)])[0]  # as legendas vêm com cada resultado
+    for leg in o["legendas"]:
+        assert "<summary>👑 ⇅ 🚩 📍 " in leg

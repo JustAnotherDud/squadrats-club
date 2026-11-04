@@ -149,3 +149,22 @@ def test_historico_inacessivel_com_eventos_aborta(repo):
         _correr(repo, _snap("2026-09-25T06:07:00Z", 30, 40))
     with open(os.path.join(repo, "data", "events.json"), encoding="utf-8") as f:
         assert json.load(f)["eventos"] == [ANTIGO]
+
+
+def test_events_json_no_formato_antigo_e_convertido(repo):
+    """Eventos planos antigos (e um marco_total) convivem com o dia recalculado:
+    no fim não sobra nenhum evento plano regional."""
+    plano = {"data": "2026-09-20", "nivel": "concelho", "cc": "PT", "regiao": "Lisboa",
+             "tipo": "marco", "quem": "A", "sobre": None, "valores": [25, 30]}
+    total = {"data": "2026-09-21", "cc": None, "nivel": "total", "regiao": None,
+             "tipo": "marco_total", "quem": "A", "sobre": None, "valores": [1000, 1010]}
+    _publicar(repo, "2026-09-24T20:10:00Z", {
+        "club_regioes.json": _snap("2026-09-24T20:07:00Z", 30, 10),
+        "events.json": _events([plano, total])})
+    evs = _correr(repo, _snap("2026-09-25T06:07:00Z", 30, 40))
+    assert all("partes" in e or e["tipo"] == "marco_total" for e in evs)
+    antigo = _dia(evs, "2026-09-20")
+    assert antigo == [{"data": "2026-09-20", "nivel": "concelho", "cc": "PT", "regiao": "Lisboa",
+                       "quem": "A", "partes": [{"tipo": "marco", "valores": [25]}], "contagem": 30}]
+    assert total in evs
+    assert [e["quem"] for e in _dia(evs, "2026-09-25")] == ["B"]

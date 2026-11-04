@@ -329,6 +329,25 @@ const ICO_EVENTO = { novo_lider: '👑', ultrapassagem: '⇅', marco: '🚩', pr
 const _FORTE = ['novo_lider', 'ultrapassagem', 'marco', 'primeira_presenca'];  // mais forte primeiro
 const ATLETAS_FEM = ['Carolina', 'Inês S.'];  // para o artigo (o/a, ao/à); os outros: masculino
 
+// Legenda dos ícones (<details class="legenda">), uma só para o histórico e as
+// páginas de lugar, por ordem de força. `aqui` = página de uma região (frases
+// sem o nome da região); `extra` = linhas a acrescentar (HTML de <span>).
+function legendaEvento(aqui, extra) {
+  const reg = aqui ? 'desta região' : 'da região';
+  return `<details class="legenda">
+    <summary>${_FORTE.map(t => ICO_EVENTO[t]).join(' ')} <span class="lg-q">o que significam</span></summary>
+    <div class="lg-corpo">
+      <span>Uma linha por atleta ${aqui ? '' : 'e região '}em cada dia; o ícone é o do movimento mais forte:</span>
+      <span>${ICO_EVENTO.novo_lider} <b>nova liderança</b> ${reg} (tirou o 1.º lugar a alguém)</span>
+      <span>${ICO_EVENTO.ultrapassagem} <b>ultrapassagem</b> (superou alguém fora do topo)</span>
+      <span>${ICO_EVENTO.marco} <b>marco</b> de squadratinhos ${aqui ? '' : 'na região '}(25/50/100/…)</span>
+      <span>${ICO_EVENTO.primeira_presenca} <b>primeira presença</b> ${aqui ? 'de um atleta aqui' : 'numa região que já tinha outro atleta'}</span>
+      <span><b>(26 vs 12)</b>: squadratinhos do atleta contra os do rival mais próximo que superou; sem ultrapassagem, <b>agora N</b> é o total dele ${aqui ? 'aqui' : 'na região'}</span>
+      ${extra || ''}
+    </div>
+  </details>`;
+}
+
 // ícone da parte mais forte da entrada
 const icoEvento = e => ICO_EVENTO[_FORTE.find(t => e.partes.some(p => p.tipo === t))] || '';
 

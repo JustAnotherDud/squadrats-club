@@ -77,18 +77,7 @@
 
   <div class="filtros" id="filtros"></div>
 
-  <details class="legenda">
-    <summary>👑 ⇅ 📍 🚩 <span class="lg-q">o que significam</span></summary>
-    <div class="lg-corpo">
-      <span>Uma linha por atleta e região em cada dia; o ícone é o do movimento mais forte:</span>
-      <span>👑 <b>nova liderança</b> da região (tirou o 1.º lugar a alguém)</span>
-      <span>⇅ <b>ultrapassagem</b> (superou alguém fora do topo)</span>
-      <span>🚩 <b>marco</b> de squadratinhos na região (25/50/100/…)</span>
-      <span>📍 <b>primeira presença</b> numa região que já tinha outro atleta</span>
-      <span><b>(26 vs 12)</b>: squadratinhos do atleta contra os do último superado; sem ultrapassagem, <b>agora N</b> é o total dele na região</span>
-      <span><b>faixa destacada</b>: marco de squadratinhos totais (do atleta ou do clube)</span>
-    </div>
-  </details>
+  <div id="legenda"></div>
 
   <div id="feed"></div>
 
@@ -203,6 +192,8 @@
   }
 
   (async function () {
+    document.getElementById('legenda').innerHTML = legendaEvento(false,
+      '<span><b>faixa destacada</b>: marco de squadratinhos totais (do atleta ou do clube)</span>');
     await carregarCores(mainUrl('membros_cores.json'), NC);  // funde em CORES
     let ev;
     try {
