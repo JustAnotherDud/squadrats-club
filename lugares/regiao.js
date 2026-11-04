@@ -73,7 +73,7 @@
         <td><span class="nome">${tile(r.nome)}${atl(r.nome)}</span></td>
         <td class="tira-td">${tira(cor(r.nome), lider ? r.captured / lider : 0)}</td>
         <td class="num">${nfmt(r.captured)}</td>
-        ${temExc ? `<td class="uni">${r.exclusivos ? nfmt(r.exclusivos) : ''}</td>` : ''}
+        ${temExc ? `<td class="uni">${r.exclusivos != null ? nfmt(r.exclusivos) : ''}</td>` : ''}
         <td class="pct">${r.pct != null ? r.pct.toFixed(ehPais ? 2 : 1) + '%' : ''}</td>
       </tr>`).join('');
     const rankHead = `<thead><tr>
