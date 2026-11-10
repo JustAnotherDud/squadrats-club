@@ -90,8 +90,8 @@ function regiaoHref(nivel, nome, cc) {
 // derivam os nomes de club.json / club_regioes.json (que os têm por ordem de
 // bit) e só caem aqui quando não há rede.
 const COR_FALLBACK = {
-  'Zé': '#e03131', 'Xeira': '#9c46d8', 'Carolina': '#c99a00',
-  'Inês S.': '#e8710a', 'Pedro': '#2f5fd0',
+  'Zé': '#f0476f', 'Xeira': '#9c46d8', 'Carolina': '#c99a00',
+  'Inês S.': '#b8e04a', 'Pedro': '#2f5fd0',
 };
 let CORES = { ...COR_FALLBACK };
 const cor = n => CORES[n] || '#7d8598';
