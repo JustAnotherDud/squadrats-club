@@ -930,7 +930,7 @@
      "desde": "2026-07-26",
      "eventos": {
       "n": 3,
-      "sha": "42da79a32ffc44ed"
+      "sha": "5bb2b2597ce49b46"
      },
      "gerado": "2026-09-02T13:07:00Z"
     },
@@ -1752,7 +1752,7 @@
      "desde": "2026-07-26",
      "eventos": {
       "n": 3,
-      "sha": "42da79a32ffc44ed"
+      "sha": "5bb2b2597ce49b46"
      },
      "gerado": "2026-09-03T15:07:00Z"
     },
@@ -2389,7 +2389,7 @@
    }
   }
  },
- "pytest": "65 passed",
+ "pytest": "78 passed",
  "site": {
   "analise.html": {
    "erros": [],
@@ -2527,12 +2527,12 @@
     "canvas": 0,
     "links": {
      "n": 15,
-     "sha": "c931afced9dd8401"
+     "sha": "a89d2ba8bb54da82"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "bfd2a8031deb4af0"
+     "sha": "15466514f27e6532"
     },
     "titulo": "Histórico · Squadrats Club"
    }
@@ -2580,7 +2580,7 @@
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "d19c60f03c75287a"
+     "sha": "79d3327561d848a8"
     },
     "titulo": "Lisboa · Squadrats Club"
    }
