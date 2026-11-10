@@ -31,7 +31,8 @@ process.stdout.write(JSON.stringify(ctx.out(entradas)));
 
 def _render(entradas):
     r = subprocess.run(["node", "-e", JS, os.path.join(RAIZ, "shared.js")],
-                       input=json.dumps(entradas), capture_output=True, text=True, check=True)
+                       input=json.dumps(entradas), capture_output=True, text=True,
+                       encoding="utf-8", check=True)   # o Node escreve UTF-8; sem isto o Windows lê em cp1252
     out = json.loads(r.stdout)
     for o in out:  # texto simples: sem etiquetas
         o["frase"] = re.sub(r"<[^>]+>", "", o["frase"])

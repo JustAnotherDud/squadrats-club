@@ -188,7 +188,7 @@ def resumo_ficheiro(p):
 
 def git(copia, *args, env=None):
     return subprocess.run(["git", "-C", str(copia), *args], check=True, capture_output=True,
-                          text=True, env={**os.environ, **(env or {})}).stdout.strip()
+                          text=True, encoding="utf-8", env={**os.environ, **(env or {})}).stdout.strip()
 
 
 def ficheiros_dados():
@@ -332,14 +332,19 @@ def casos_site(copia):
 
 
 def casos_pytest():
+    # UTF-8 no filho: no Windows o pytest escreveria em cp1252 e o encoding="utf-8" daqui rebentava
     r = subprocess.run([sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider"],
-                       cwd=RAIZ, capture_output=True, text=True, encoding="utf-8")
-    return r.stdout.strip().splitlines()[-1].split(" in ")[0]
+                       cwd=RAIZ, capture_output=True, text=True, encoding="utf-8",
+                       env={**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"})
+    linhas = r.stdout.strip().splitlines()
+    if not linhas:
+        raise SystemExit(f"pytest não produziu saída (exit {r.returncode}):\n{r.stderr.strip()[-2000:]}")
+    return linhas[-1].split(" in ")[0]
 
 
 def copiar_repo(destino):
     listados = subprocess.run(["git", "-C", str(RAIZ), "ls-files", "-co", "--exclude-standard"],
-                              check=True, capture_output=True, text=True).stdout.split("\n")
+                              check=True, capture_output=True, text=True, encoding="utf-8").stdout.split("\n")
     for rel in filter(None, listados):
         if rel.startswith(("tests/", ".github/")):
             continue
