@@ -36,7 +36,7 @@ INDICE = cabeca("Perfis", "perfil.css") + """<body>
 {itens}
   </ul>
   <p class="perfil-nota">Um perfil por atleta, com contagens, ganhos diários,
-  sobreposição de squadratinhos e posição por região. Dados actualizados 6×/dia
+  sobreposição de squadratinhos e posição por região. Dados actualizados várias vezes por dia
   pelo mesmo processo que gera o <a href="../club.html">mapa do clube</a>.</p>
 </main>
 <script src="../nav.js"></script>

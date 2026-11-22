@@ -265,7 +265,7 @@
           capturados dentro da divisão. <b class="mg-neg">Subir</b> = squares que
           faltam para passar a posição de cima; <b class="mg-pos">Folga</b> = quanto
           está à frente da posição de baixo. Clica num cabeçalho para ordenar.
-          Dados actualizados 6×/dia.
+          Dados actualizados várias vezes por dia.
         </p>`;
 
       alvo.querySelectorAll('.perfil-tabela.geo th[data-sort]').forEach(th => {

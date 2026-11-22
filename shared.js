@@ -276,7 +276,11 @@ function _barraTopo(el) {
 
 // Se o snapshot tem mais de DADOS_VELHOS_H horas, o cron pode ter falhado e
 // os números estão a mostrar o dia anterior com ar de frescos.
-const DADOS_VELHOS_H = 6;
+// O valor vem da prática: o GitHub salta e atrasa corridas agendadas, e os
+// intervalos reais entre commits na branch `data` chegaram a ~12,5 h (nov 2026).
+// 14 h fica acima disso, por isso o aviso só aparece quando falha uma corrida
+// a mais do que o normal.
+const DADOS_VELHOS_H = 14;
 function avisoDadosVelhos(iso) {
   const antigo = document.getElementById('aviso-stale');
   if (antigo) antigo.remove();

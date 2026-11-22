@@ -162,7 +162,7 @@
         ranking e % são de <b>squadratinhos</b> (zoom 17, ~201 m). <b>únicos</b> =
         sem mais nenhum membro do clube.${medidor ? ' O medidor a seguir à % é uma escada de '
           + 'patamares (0,05% a 18%), não uma barra proporcional: quase toda a gente '
-          + 'cobre menos de 1% de uma região.' : ''} Dados 6×/dia, mesmo processo que o
+          + 'cobre menos de 1% de uma região.' : ''} Dados várias vezes por dia, mesmo processo que o
         <a href="../club.html">mapa do clube</a>. O
         <a href="../historico.html">histórico</a> tem o feed completo.</p>`;
 

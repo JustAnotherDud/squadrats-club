@@ -4,9 +4,11 @@ name: fetch-map-data
 # só quando mudam. O site e o folha-do-clube lêem-nos por raw.githubusercontent,
 # por isso o main só recebe código e stubs.
 # Horário: 6 corridas por dia, ao minuto 7 para fugir ao pico do scheduler. A
-# última é às 20h07 UTC porque o GitHub atrasa as corridas 2 a 3 h e o dia dos
-# ganhos é a data UTC do arranque. Não subir a frequência sem refazer as contas
-# de pedidos ao Squadrats (README, "usage rules").
+# última é às 20h07 UTC porque o GitHub, além de atrasar, salta várias corridas
+# agendadas (na prática correm 2 a 3 por dia), e o dia dos ganhos é a data UTC
+# do arranque. O aviso de dados velhos no shared.js está calibrado para isto.
+# Não subir a frequência sem refazer as contas de pedidos ao Squadrats (README,
+# "usage rules").
 on:
   schedule:
     - cron: "7 1,5,9,13,17,20 * * *"
