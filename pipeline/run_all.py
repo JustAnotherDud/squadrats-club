@@ -12,6 +12,7 @@ import time
 import append_events
 import append_gains_regioes
 import append_ganhos
+import append_ganhos_tiles
 import append_regioes
 import build_analise
 import build_profiles
@@ -46,6 +47,9 @@ def main(out_dir):
         # por concelho/distrito, por dia (data/gains_regioes.json). Sem
         # classificação nova, o breakdown já está no club_regioes.json
         ("ganhos por região", lambda: append_gains_regioes.main(out_dir)),
+        # squadratinhos ganhos por atleta e dia, do histórico do club.json
+        # (data/ganhos_tiles/<dia>.json), para o deep-link club.html#ganhos=
+        ("ganhos (tiles)", lambda: append_ganhos_tiles.main(out_dir)),
         # junta squadrats.json + club.json + club_regioes.json + daily_gains.json
         # + gains_regioes.json + stats.json num perfil por atleta, sem rede
         ("perfis por atleta", lambda: build_profiles.main(out_dir)),

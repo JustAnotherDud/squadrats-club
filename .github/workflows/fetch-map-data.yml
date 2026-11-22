@@ -24,6 +24,8 @@ env:
   # um JSON por atleta (build_profiles.py) e por lugar (append_regioes.py)
   PROFILES_DIR: "data/atletas"
   REGIOES_DIR: "data/regioes"
+  # um JSON por dia com ganhos (append_ganhos_tiles.py)
+  GANHOS_DIR: "data/ganhos_tiles"
 
 jobs:
   fetch:
@@ -50,6 +52,11 @@ jobs:
           # ganhos). Histórico completo: o append_ganhos recalcula tudo desde o início
           git fetch origin data
           git checkout origin/data -- $FILES "$PROFILES_DIR" "$REGIOES_DIR"
+          # a pasta só existe na branch depois da 1.ª corrida com o passo novo
+          # (esse run faz o backfill); sem ela o checkout falharia
+          if git cat-file -e "origin/data:$GANHOS_DIR" 2>/dev/null; then
+            git checkout origin/data -- "$GANHOS_DIR"
+          fi
 
       # um passo só: os consumidores partilham o varrimento de cada atleta
       - name: Varrer e gerar tudo (mapa detalhado + totais do clube + club)
@@ -61,7 +68,11 @@ jobs:
       - name: Publicar na branch 'data' só se houver diferença real
         run: |
           # o passo de carregar deixou o índice no último estado publicado
-          if git diff --quiet -- $FILES "$PROFILES_DIR" "$REGIOES_DIR"; then
+          # ficheiros novos (um dia novo, ou a pasta inteira no backfill) não
+          # estão no índice: sem isto o git diff não os via. `-f`: a pasta está
+          # no .gitignore do main, e sem `-f` o `add` falha e o passo aborta.
+          if [ -d "$GANHOS_DIR" ]; then git add -f -N -- "$GANHOS_DIR"; fi
+          if git diff --quiet -- $FILES "$PROFILES_DIR" "$REGIOES_DIR" "$GANHOS_DIR"; then
             echo "sem alterações reais, nada a publicar."
             exit 0
           fi
@@ -74,7 +85,7 @@ jobs:
           done
           # substitui as pastas inteiras, para um ficheiro apagado aqui
           # desaparecer também na branch
-          for D in "$PROFILES_DIR" "$REGIOES_DIR"; do
+          for D in "$PROFILES_DIR" "$REGIOES_DIR" "$GANHOS_DIR"; do
             rm -rf "/tmp/data-branch/$D"
             if [ -d "$D" ]; then
               mkdir -p "/tmp/data-branch/$D"
@@ -84,7 +95,13 @@ jobs:
 
           cd /tmp/data-branch
           git add $FILES
-          git add -A "$PROFILES_DIR" "$REGIOES_DIR"
+          # `git add` falha num caminho que não existe nem está seguido (a pasta
+          # dos ganhos antes de haver o 1.º dia com ganhos)
+          for D in "$PROFILES_DIR" "$REGIOES_DIR" "$GANHOS_DIR"; do
+            if [ -e "$D" ] || [ -n "$(git ls-files -- "$D")" ]; then
+              git add -A -- "$D"
+            fi
+          done
           git commit -m "chore(data): atualizar squares via vector tiles [skip ci]"
           git push origin data
 

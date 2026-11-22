@@ -965,6 +965,14 @@
       }
      ]
     },
+    "data/ganhos_tiles/2026-09-02.json": {
+     "atletas": {
+      "n": 1,
+      "sha": "7524efdadae50bce"
+     },
+     "data": "2026-09-02",
+     "zoom": 17
+    },
     "data/regioes/c-almada.json": {
      "avo_key": "pais-pt",
      "avo_nome": "Portugal",
@@ -1771,6 +1779,22 @@
       "sha": "bbc3fee37f49506a"
      }
     },
+    "data/ganhos_tiles/2026-09-02.json": {
+     "atletas": {
+      "n": 1,
+      "sha": "7524efdadae50bce"
+     },
+     "data": "2026-09-02",
+     "zoom": 17
+    },
+    "data/ganhos_tiles/2026-09-03.json": {
+     "atletas": {
+      "n": 2,
+      "sha": "3e814c271b11ee9a"
+     },
+     "data": "2026-09-03",
+     "zoom": 17
+    },
     "data/regioes/c-almada.json": {
      "avo_key": "pais-pt",
      "avo_nome": "Portugal",
@@ -2389,7 +2413,7 @@
    }
   }
  },
- "pytest": "78 passed",
+ "pytest": "86 passed",
  "site": {
   "analise.html": {
    "erros": [],
@@ -2489,34 +2513,303 @@
     "sha": "80aec065f6608817"
    }
   },
+  "club.html#ganhos=2026-09-01": {
+   "erros": [
+    "Failed to load resource: the server responded with a status of 404 (Not Found)"
+   ],
+   "ganhos": {
+    "aviso": true,
+    "barra": "Sem ganhos registados em 1 set 2026.",
+    "hash": "#ganhos=2026-09-01",
+    "rects": [],
+    "zoom": 9
+   },
+   "ganhos limpo": {
+    "aviso": true,
+    "barra": null,
+    "hash": "",
+    "rects": [],
+    "zoom": 9
+   },
+   "inicial": {
+    "canvas": 12,
+    "links": {
+     "n": 15,
+     "sha": "bf229884998a3432"
+    },
+    "svg": 0,
+    "texto": "Squadrats Club Mapa Perfis Lugares Histórico Diário + − Mapa do clube Ana Bruno Célia Sem ganhos registados em 1 set 2026. Limpar 391 squadratinhos visíveis ▲",
+    "titulo": "Mapa do clube · Squadrats Club"
+   }
+  },
+  "club.html#ganhos=2026-09-02": {
+   "erros": [],
+   "ganhos": {
+    "aviso": false,
+    "barra": "Ganhos de 2 set 2026: 49 squadratinhos Bruno 49",
+    "hash": "#ganhos=2026-09-02",
+    "rects": [
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598"
+    ],
+    "zoom": 14
+   },
+   "ganhos limpo": {
+    "aviso": false,
+    "barra": null,
+    "hash": "",
+    "rects": [],
+    "zoom": 14
+   },
+   "inicial": {
+    "canvas": 8,
+    "links": {
+     "n": 15,
+     "sha": "bf229884998a3432"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "3d76efda6bc02105"
+    },
+    "titulo": "Mapa do clube · Squadrats Club"
+   }
+  },
+  "club.html#ganhos=2026-09-02&atleta=ana": {
+   "erros": [],
+   "ganhos": {
+    "aviso": true,
+    "barra": "Ana não ganhou squadratinhos em 2 set 2026.",
+    "hash": "#ganhos=2026-09-02&atleta=ana",
+    "rects": [],
+    "zoom": 9
+   },
+   "ganhos limpo": {
+    "aviso": true,
+    "barra": null,
+    "hash": "",
+    "rects": [],
+    "zoom": 9
+   },
+   "inicial": {
+    "canvas": 12,
+    "links": {
+     "n": 15,
+     "sha": "bf229884998a3432"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "39c3e4cb11ae2660"
+    },
+    "titulo": "Mapa do clube · Squadrats Club"
+   }
+  },
+  "club.html#ganhos=2026-09-02&atleta=bruno": {
+   "erros": [],
+   "ganhos": {
+    "aviso": false,
+    "barra": "Ganhos de Bruno em 2 set 2026: 49 squadratinhos",
+    "hash": "#ganhos=2026-09-02&atleta=bruno",
+    "rects": [
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598"
+    ],
+    "zoom": 14
+   },
+   "ganhos limpo": {
+    "aviso": false,
+    "barra": null,
+    "hash": "",
+    "rects": [],
+    "zoom": 14
+   },
+   "inicial": {
+    "canvas": 8,
+    "links": {
+     "n": 15,
+     "sha": "bf229884998a3432"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "c2727d99c55829e2"
+    },
+    "titulo": "Mapa do clube · Squadrats Club"
+   }
+  },
+  "club.html#ganhos=2026-09-03": {
+   "erros": [],
+   "ganhos": {
+    "aviso": false,
+    "barra": "Ganhos de 3 set 2026: 12 squadratinhos Ana 3 Célia 9",
+    "hash": "#ganhos=2026-09-03",
+    "rects": [
+     "#12889c",
+     "#12889c",
+     "#12889c",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598",
+     "#7d8598"
+    ],
+    "zoom": 5
+   },
+   "ganhos limpo": {
+    "aviso": false,
+    "barra": null,
+    "hash": "",
+    "rects": [],
+    "zoom": 5
+   },
+   "inicial": {
+    "canvas": 15,
+    "links": {
+     "n": 15,
+     "sha": "bf229884998a3432"
+    },
+    "svg": 0,
+    "texto": {
+     "n": 1,
+     "sha": "78ccde4bcad5a1de"
+    },
+    "titulo": "Mapa do clube · Squadrats Club"
+   }
+  },
   "diario.html": {
    "erros": [],
    "inicial": {
     "canvas": 0,
     "links": {
-     "n": 12,
-     "sha": "998724fdd4d928c1"
+     "n": 14,
+     "sha": "cee8f19096e834ff"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "6caf5401ea8fe00f"
+     "sha": "b2b88fe28228d22f"
     },
     "titulo": "Diário · Squadrats Club"
-   }
+   },
+   "links ganhos": [
+    "club.html#ganhos=2026-09-03",
+    "club.html#ganhos=2026-09-03&atleta=ana",
+    "club.html#ganhos=2026-09-03&atleta=celia",
+    "club.html#ganhos=2026-09-02",
+    "club.html#ganhos=2026-09-02&atleta=bruno"
+   ]
   },
   "ganhos.html": {
    "erros": [],
    "inicial": {
     "canvas": 0,
     "links": {
-     "n": 12,
-     "sha": "998724fdd4d928c1"
+     "n": 14,
+     "sha": "cee8f19096e834ff"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "6caf5401ea8fe00f"
+     "sha": "b2b88fe28228d22f"
     },
     "titulo": "Diário · Squadrats Club"
    }

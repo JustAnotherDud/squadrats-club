@@ -38,6 +38,12 @@
   .quem .tile:last-of-type { margin-right: 6px; }
   .quem a.atl { color: inherit; text-decoration: none; }
   .quem a.atl:hover { text-decoration: underline; text-decoration-color: var(--marca); }
+  /* data e nome abrem o mapa do clube com os ganhos desse dia. A data é feita
+     de inline-blocks (largura fixa), e o sublinhado não passa para eles: vai
+     directo aos spans. */
+  .gan-dia a.gan-link { color: inherit; text-decoration: none; }
+  .gan-dia a.gan-link:hover { color: var(--tinta); }
+  .gan-dia a.gan-link:hover span { text-decoration: underline; text-decoration-color: var(--marca); }
   .delta { text-align: right; font-family: var(--f-mono); font-variant-numeric: tabular-nums;
     color: var(--ganho); }
   .onde { display: flex; flex-wrap: wrap; gap: 5px; align-items: baseline; }
@@ -70,7 +76,8 @@
   <p class="gn-nota">Squadratinhos ganhos por dia (UTC): quem, quanto e em que
     concelhos. Se dois atletas têm o mesmo dia, o mesmo delta e a mesma repartição
     por concelhos (atividade partilhada), aparecem numa linha só. É só
-    apresentação: nada se suprime. Dados da branch <code>data</code>
+    apresentação: nada se suprime. Clica na data para ver no mapa do clube os
+    squadratinhos ganhos nesse dia, ou no nome para ver só os desse atleta. Dados da branch <code>data</code>
     (<code>daily_gains.json</code> e <code>gains_regioes.json</code>), actualizados várias vezes por dia.</p>
 </main>
 <script src="nav.js"></script>
@@ -78,7 +85,7 @@
 <script>
 (function () {
   'use strict';
-  // cor / esc / tile / atl / carregarCores / carregarJson / mostrarErroDados /
+  // cor / esc / tile / slugify / carregarCores / carregarJson / mostrarErroDados /
   // avisoDadosVelhos / fmtData / fmtDataHora / COR_FALLBACK / ETIQUETA_GANHO /
   // ganhoDetalhe: shared.js
 
@@ -117,12 +124,18 @@
     }).filter(d => d.grupos.length).sort((a, b) => b.data.localeCompare(a.data));
   }
 
-  function linha(g) {
+  // deep-link do club.html: squadratinhos ganhos nesse dia (e só os do atleta)
+  const hrefGanhos = (data, nome) => `club.html#ganhos=${data}`
+    + (nome ? `&atleta=${slugify(nome)}` : '');  // slugify: shared.js, o do club.json
+
+  function linha(g, data) {
     const junto = g.nomes.length > 1;
+    const nome = n => `<a class="atl" href="${hrefGanhos(data, n)}"
+      title="Ver no mapa os squadratinhos que ${esc(n)} ganhou neste dia">${esc(n)}</a>`;
     const tags = g.nomes.map(nome => g.tags[nome].map(t =>
       `<span class="gan-tag">${junto ? tile(nome) : ''}${esc(t)}</span>`).join('')).join('');
     return `<div class="linha">
-      <span class="quem">${g.nomes.map(tile).join('')}${g.nomes.map(atl).join(', ')}</span>
+      <span class="quem">${g.nomes.map(tile).join('')}${g.nomes.map(nome).join(', ')}</span>
       <span class="delta">+${g.n}</span>
       <span class="onde">${ganhoDetalhe(g.reg, g.n, true)}${tags}</span>
     </div>`;
@@ -130,9 +143,11 @@
 
   function bloco(d) {
     const [dnum, dmes, dano] = fmtData(d.data).split(' ');
-    return `<section class="dia"><div class="gan-dia"><span class="d-num">${esc(dnum)}</span>`
-      + `<span class="d-mes">${esc(dmes)}</span><span class="d-ano">${esc(dano)}</span></div>`
-      + `<div>${d.grupos.map(linha).join('')}</div></section>`;
+    return `<section class="dia"><div class="gan-dia">`
+      + `<a class="gan-link" href="${hrefGanhos(d.data)}" title="Ver no mapa os squadratinhos ganhos neste dia">`
+      + `<span class="d-num">${esc(dnum)}</span><span class="d-mes">${esc(dmes)}</span>`
+      + `<span class="d-ano">${esc(dano)}</span></a></div>`
+      + `<div>${d.grupos.map(g => linha(g, d.data)).join('')}</div></section>`;
   }
 
   function pintar() {

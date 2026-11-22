@@ -104,6 +104,24 @@ def carregar_partilhadas(path=PARTILHADAS):
         return []
 
 
+def _corrigir_club(d, ok, atl):
+    """Correcção num club.json: `atletas` é uma lista e o dono de cada square é
+    um bit da máscara. Troca os squares de `atl` em `d` pelos de `ok` (o
+    snapshot correcto). Só `squares`: total/exclusivos/por_mask ficam como
+    publicados, nenhum passo os lê do histórico."""
+    nomes = [a["nome"] for a in d["atletas"]]
+    if atl not in nomes:
+        return
+    bit = 1 << nomes.index(atl)
+    nomes_ok = [a["nome"] for a in ok.get("atletas", [])]
+    bit_ok = 1 << nomes_ok.index(atl) if atl in nomes_ok else 0
+    masks = {(x, y): m & ~bit for x, y, m in d["squares"]}
+    for x, y, m in ok.get("squares", []):
+        if m & bit_ok:
+            masks[(x, y)] = masks.get((x, y), 0) | bit
+    d["squares"] = [[x, y, m] for (x, y), m in sorted(masks.items()) if m]
+
+
 def snapshots_commits(repo, branch, path, desde=None, com_anterior=False, correcoes=None):
     """(snaps, saltados). `snaps` = [(datetime, dict), ...] em ordem
     cronológica, um por commit de `path` na branch (o dict tem de ter
@@ -142,7 +160,7 @@ def snapshots_commits(repo, branch, path, desde=None, com_anterior=False, correc
 
     if correcoes is None:
         correcoes = carregar_correcoes()
-    correctos = {}  # sha_correcto -> "atletas" desse snapshot, lido uma vez
+    correctos = {}  # sha_correcto -> documento desse snapshot, lido uma vez
 
     def corrigir(sha, d):
         for atl, sha_ok in correcoes.get(sha, {}).items():
@@ -151,9 +169,12 @@ def snapshots_commits(repo, branch, path, desde=None, com_anterior=False, correc
                 if r.returncode != 0:
                     raise RuntimeError(
                         f"correcção de {sha[:8]} ({atl}): {path} ilegível em {sha_ok[:8]}")
-                correctos[sha_ok] = json.loads(r.stdout).get("atletas", {})
-            if atl in correctos[sha_ok]:
-                d.setdefault("atletas", {})[atl] = correctos[sha_ok][atl]
+                correctos[sha_ok] = json.loads(r.stdout)
+            ok = correctos[sha_ok]
+            if isinstance(d.get("atletas"), list):  # club.json, ver _corrigir_club
+                _corrigir_club(d, ok, atl)
+            elif atl in ok.get("atletas", {}):
+                d.setdefault("atletas", {})[atl] = ok["atletas"][atl]
             else:
                 d.get("atletas", {}).pop(atl, None)
 

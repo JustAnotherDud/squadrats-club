@@ -71,6 +71,14 @@
   #hover.visivel { display:block; }
   #hover .quem { color:var(--tinta); font-weight:500; }
   #hover .coord { color:var(--tinta-3); font-family:var(--f-mono); font-size:10.5px; margin-top:2px; }
+
+  /* resumo do destaque #ganhos= (ver aplicarGanhos); o #topbar não apanha cliques, a barra sim */
+  #ganhos-barra { align-self:flex-start; max-width:100%; pointer-events:auto; display:flex; align-items:center; gap:10px; background:rgba(27,25,38,.92); color:var(--tinta); border:1px solid var(--marca); border-radius:3px; padding:6px 10px; font-size:12px; backdrop-filter: blur(4px); }
+  #ganhos-barra[hidden] { display:none; }
+  #ganhos-barra .tile { margin:0 4px 0 8px; }
+  #ganhos-barra.aviso { border-color:var(--rule); color:var(--tinta-2); }
+  #ganhos-barra button { background:none; color:var(--tinta-2); border:1px solid var(--rule); border-radius:3px; padding:3px 8px; font-size:11px; font-family:var(--f-mono); cursor:pointer; flex:0 0 auto; }
+  #ganhos-barra button:hover { color:var(--tinta); border-color:var(--marca); }
 </style>
 </head>
 <body data-nav="overlay">
@@ -80,6 +88,7 @@
 <div id="topbar">
   <h1>Mapa do clube</h1>
   <div class="seg" id="seg-atletas"></div>
+  <div id="ganhos-barra" hidden role="status"><span id="ganhos-texto"></span><button type="button" id="ganhos-limpar">Limpar</button></div>
 </div>
 
 <div id="painel">
@@ -501,6 +510,97 @@ function renderLeaderboard() {
   return linhas.join('');
 }
 
+// --- destaque de ganhos: #ganhos=AAAA-MM-DD[&atleta=<slug>] ---
+// data/ganhos_tiles/<dia>.json = {data, zoom, atletas: {nome: [[x, y], ...]}}
+// (pipeline/append_ganhos_tiles.py). Os squares ganhos desenham-se no
+// overlayPane (z 400, por cima da camada de squares, GridLayer z 200), não
+// interactivos, com a cor do atleta, enchimento forte e contorno claro.
+const ZOOM_MAX_GANHOS = 15;  // um ganho de +1 não abre colado ao chão (z17 = ~200 m)
+const barraGanhos = document.getElementById('ganhos-barra');
+let camadaGanhos = null;
+let pedidoGanhos = 0;  // descarta respostas de um hash que entretanto mudou
+
+function limparGanhos(limparHash) {
+  pedidoGanhos++;
+  if (camadaGanhos) { map.removeLayer(camadaGanhos); camadaGanhos = null; }
+  barraGanhos.hidden = true;
+  // replaceState não dispara hashchange
+  if (limparHash && /^#ganhos=/.test(location.hash)) {
+    history.replaceState(null, '', location.pathname + location.search);
+  }
+}
+document.getElementById('ganhos-limpar').onclick = () => limparGanhos(true);
+
+function barra(html, aviso) {
+  document.getElementById('ganhos-texto').innerHTML = html;
+  barraGanhos.classList.toggle('aviso', !!aviso);
+  barraGanhos.hidden = false;
+}
+
+const nSqi = n => `${n.toLocaleString('pt-PT')} squadratinho${n === 1 ? '' : 's'}`;
+
+async function aplicarGanhos() {
+  const m = location.hash.match(/^#ganhos=(\d{4}-\d{2}-\d{2})(?:&atleta=([a-z0-9-]{1,40}))?$/i);
+  limparGanhos(false);
+  if (!m || !dados) return;
+  const [, data, slug] = m;
+  const meu = pedidoGanhos;
+  const quando = fmtData(data);
+
+  let dia;
+  try {
+    dia = await carregarJson(dadosUrl(`ganhos_tiles/${data}.json`));
+  } catch (e) {
+    if (meu !== pedidoGanhos) return;
+    // 404: dia sem ganhos (não há ficheiro) ou ainda não publicado
+    barra(/^404/.test(e.message) ? `Sem ganhos registados em ${esc(quando)}.`
+      : `Não deu para carregar os ganhos de ${esc(quando)} (${esc(e.message)}).`, true);
+    return;
+  }
+  if (meu !== pedidoGanhos) return;
+
+  const alvo = slug ? dados.atletas.findIndex(a => a.slug === slug) : -1;
+  if (slug && alvo < 0) { barra(`Atleta desconhecido: ${esc(slug)}.`, true); return; }
+  // [índice do atleta (ordem do club.json), tiles]
+  const entradas = dados.atletas.map((a, i) => [i, (dia.atletas || {})[a.nome] || []])
+    .filter(([i, t]) => t.length && (alvo < 0 || i === alvo));
+  if (!entradas.length) {
+    barra(slug ? `${esc(dados.atletas[alvo].nome)} não ganhou squadratinhos em ${esc(quando)}.`
+      : `Sem ganhos registados em ${esc(quando)}.`, true);
+    return;
+  }
+
+  const z = dia.zoom || dados.zoom;
+  const camada = L.featureGroup();
+  const vistos = new Map();  // "x,y" -> quantos atletas já o desenharam
+  for (const [i, tiles] of entradas) {
+    for (const [x, y] of tiles) {
+      // o mesmo square ganho por dois atletas (atividade partilhada): o
+      // seguinte desenha-se mais pequeno, para as duas cores se verem
+      const k = x + ',' + y, r = vistos.get(k) || 0;
+      vistos.set(k, r + 1);
+      const d = 0.16 * r;
+      L.rectangle([tileNoroeste(x + d, y + d, z), tileNoroeste(x + 1 - d, y + 1 - d, z)], {
+        interactive: false, color: '#f4f1ff', weight: 1, opacity: 0.9,
+        fillColor: COR_ATLETA[i], fillOpacity: 0.85,
+      }).addTo(camada);
+    }
+  }
+  camada.addTo(map);
+  camadaGanhos = camada;
+  map.fitBounds(camada.getBounds(), {
+    animate: false, maxZoom: ZOOM_MAX_GANHOS,
+    paddingTopLeft: [24, 120], paddingBottomRight: [24, 72],  // topbar e painel recolhido
+  });
+
+  const total = entradas.reduce((s, [, t]) => s + t.length, 0);
+  barra(alvo >= 0
+    ? `Ganhos de ${esc(dados.atletas[alvo].nome)} em ${esc(quando)}: ${nSqi(total)}`
+    : `Ganhos de ${esc(quando)}: ${nSqi(total)}`
+      + entradas.map(([i, t]) => ` <span class="tile" style="background:${COR_ATLETA[i]}"></span>`
+        + `${esc(dados.atletas[i].nome)} ${t.length.toLocaleString('pt-PT')}`).join(''));
+}
+
 const painel = document.getElementById('painel');
 document.getElementById('painel-cabeca').onclick = function () {
   const aberto = painel.classList.toggle('aberto');
@@ -539,11 +639,15 @@ document.getElementById('painel-cabeca').onclick = function () {
   renderAtletas();
   renderPainel();
 
-  // deep-link da página de lugar (regiao.js): #lugar=<key>. Vai buscar o
-  // regioes/<key>.json (o mesmo que a página de lugar já usa), centra o mapa
-  // pelo `centro` e desenha a `fronteira` por cima dos squares. Único
-  // deep-link do club.html; o botão vive no regiao.js porque a página de
-  // lugar não tem mapa.
+  // Dois deep-links no hash:
+  //  - #ganhos=AAAA-MM-DD[&atleta=<slug>], do Diário: destaca os squadratinhos
+  //    ganhos nesse dia (ver aplicarGanhos);
+  //  - #lugar=<key>, da página de lugar (regiao.js): vai buscar o
+  //    regioes/<key>.json (o mesmo que a página de lugar já usa), centra o mapa
+  //    pelo `centro` e desenha a `fronteira` por cima dos squares. O botão vive
+  //    no regiao.js porque a página de lugar não tem mapa.
+  aplicarGanhos();
+  window.addEventListener('hashchange', aplicarGanhos);
   const mLugar = location.hash.match(/^#lugar=([a-z0-9-]{2,60})$/i);
   if (mLugar) {
     carregarJson(dadosUrl(`regioes/${mLugar[1]}.json`)).then(reg => {

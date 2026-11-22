@@ -195,7 +195,7 @@ def ficheiros_dados():
     """FILES/PROFILES_DIR/REGIOES_DIR tal como o workflow os define."""
     wf = (RAIZ / ".github/workflows/fetch-map-data.yml").read_text(encoding="utf-8")
     files = re.search(r'^\s*FILES:\s*"([^"]+)"', wf, re.M).group(1).split()
-    dirs = [re.search(rf'^\s*{k}:\s*"([^"]+)"', wf, re.M).group(1) for k in ("PROFILES_DIR", "REGIOES_DIR")]
+    dirs = [re.search(rf'^\s*{k}:\s*"([^"]+)"', wf, re.M).group(1) for k in ("PROFILES_DIR", "REGIOES_DIR", "GANHOS_DIR")]
     return files, dirs
 
 
@@ -260,6 +260,9 @@ def casos_site(copia):
     paginas = ["index.html", "club.html", "analise.html", "historico.html", "diario.html", "ganhos.html",
                "lugares/index.html", "atletas/index.html", "atletas/ana.html", "atletas/celia.html"]
     paginas += [f"lugares/{n}" for n in amostra]
+    # deep-link #ganhos=: o dia todo, só um atleta, um dia sem ganhos, um atleta sem ganhos nesse dia
+    paginas += ["club.html#ganhos=2026-09-02", "club.html#ganhos=2026-09-02&atleta=bruno",
+                "club.html#ganhos=2026-09-03", "club.html#ganhos=2026-09-01", "club.html#ganhos=2026-09-02&atleta=ana"]
     png = bytes.fromhex("89504e470d0a1a0a0000000d4948445200000001000000010806000000"
                         "1f15c4890000000d49444154789c6360000002000154a24f5d0000000049454e44ae426082")
 
@@ -320,6 +323,24 @@ def casos_site(copia):
                 page.click("#painel-cabeca")
                 page.wait_for_timeout(200)
                 r["painel aberto"] = resumo(estado(page)["texto"])
+            if pag == "diario.html":
+                # data e nome ligam ao mapa com o destaque desse dia
+                r["links ganhos"] = page.evaluate("""() => [...document.querySelectorAll('a[href^="club.html#ganhos="]')]
+                    .map(a => a.getAttribute('href')).filter((h, i, v) => v.indexOf(h) === i)""")
+            if "#ganhos=" in pag:
+                lido = """() => ({
+                    barra: document.getElementById('ganhos-barra').hidden ? null
+                        : document.getElementById('ganhos-texto').innerText.replace(/\\s+/g, ' ').trim(),
+                    aviso: document.getElementById('ganhos-barra').classList.contains('aviso'),
+                    rects: [...document.querySelectorAll('#map .leaflet-overlay-pane path')]
+                        .map(p => p.getAttribute('fill')).sort(),
+                    zoom: map.getZoom(),
+                    hash: location.hash,
+                })"""
+                r["ganhos"] = page.evaluate(lido)
+                if page.is_visible("#ganhos-limpar"):
+                    page.click("#ganhos-limpar")
+                r["ganhos limpo"] = page.evaluate(lido)
             if pag == "analise.html":
                 page.click('#topbar .seg-visao button[data-val="distritos"]')
                 page.wait_for_timeout(200)
