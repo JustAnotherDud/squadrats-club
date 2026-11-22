@@ -2776,26 +2776,87 @@
    }
   },
   "diario.html": {
+   "area do quadrado": {
+    "clique": [
+     "24px",
+     "24px"
+    ],
+    "cursor": "pointer",
+    "desenho": [
+     10,
+     10
+    ]
+   },
    "erros": [],
    "inicial": {
     "canvas": 0,
     "links": {
-     "n": 14,
-     "sha": "cee8f19096e834ff"
+     "n": 17,
+     "sha": "aba3515334fe9f23"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "b2b88fe28228d22f"
+     "sha": "69f2df3f19f14944"
     },
     "titulo": "Diário · Squadrats Club"
    },
    "links ganhos": [
-    "club.html#ganhos=2026-09-03",
-    "club.html#ganhos=2026-09-03&atleta=ana",
-    "club.html#ganhos=2026-09-03&atleta=celia",
-    "club.html#ganhos=2026-09-02",
-    "club.html#ganhos=2026-09-02&atleta=bruno"
+    {
+     "data": "club.html#ganhos=2026-09-03",
+     "linhas": [
+      {
+       "nomes": [
+        [
+         "Ana",
+         "atletas/ana.html"
+        ]
+       ],
+       "quadrados": [
+        [
+         "club.html#ganhos=2026-09-03&atleta=ana",
+         "Ver os ganhos de Ana neste dia no mapa",
+         true
+        ]
+       ]
+      },
+      {
+       "nomes": [
+        [
+         "Célia",
+         "atletas/celia.html"
+        ]
+       ],
+       "quadrados": [
+        [
+         "club.html#ganhos=2026-09-03&atleta=celia",
+         "Ver os ganhos de Célia neste dia no mapa",
+         true
+        ]
+       ]
+      }
+     ]
+    },
+    {
+     "data": "club.html#ganhos=2026-09-02",
+     "linhas": [
+      {
+       "nomes": [
+        [
+         "Bruno",
+         "atletas/bruno.html"
+        ]
+       ],
+       "quadrados": [
+        [
+         "club.html#ganhos=2026-09-02&atleta=bruno",
+         "Ver os ganhos de Bruno neste dia no mapa",
+         true
+        ]
+       ]
+      }
+     ]
+    }
    ]
   },
   "ganhos.html": {
@@ -2803,13 +2864,13 @@
    "inicial": {
     "canvas": 0,
     "links": {
-     "n": 14,
-     "sha": "cee8f19096e834ff"
+     "n": 17,
+     "sha": "aba3515334fe9f23"
     },
     "svg": 0,
     "texto": {
      "n": 1,
-     "sha": "b2b88fe28228d22f"
+     "sha": "69f2df3f19f14944"
     },
     "titulo": "Diário · Squadrats Club"
    }

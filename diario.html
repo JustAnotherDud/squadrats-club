@@ -33,14 +33,27 @@
   .linha { display: grid; grid-template-columns: minmax(7.5em, 11em) 3.4em 1fr;
     gap: 0 8px; align-items: baseline; padding: 3px 0; }
   .quem { white-space: nowrap; }
-  /* partilha: os tiles ficam colados, duas células vizinhas da grelha */
-  .quem .tile { margin-right: 1px; }
-  .quem .tile:last-of-type { margin-right: 6px; }
+  /* partilha: os quadrados ficam colados, duas células vizinhas da grelha */
+  .quem .tiles { margin-right: 6px; }
+  .quem .tiles a { margin-right: 1px; }
+  .quem .tiles a:last-child { margin-right: 0; }
   .quem a.atl { color: inherit; text-decoration: none; }
   .quem a.atl:hover { text-decoration: underline; text-decoration-color: var(--marca); }
-  /* data e nome abrem o mapa do clube com os ganhos desse dia. A data é feita
-     de inline-blocks (largura fixa), e o sublinhado não passa para eles: vai
-     directo aos spans. */
+  /* o quadrado de cor abre o mapa só com os ganhos desse atleta. O desenho
+     continua com 10 px; a área de clique (~24 px) é um pseudo-elemento
+     invisível centrado nele, por isso a linha não muda de altura nem se
+     desalinha. Com vários atletas na linha os quadrados estão a 11 px: aí a
+     área é só mais alta (24 px) e tão larga como o espaçamento, para não se
+     sobreporem. */
+  .tile-link { position: relative; cursor: pointer; }
+  .tile-link::after { content: ''; position: absolute; left: 50%; top: 50%;
+    width: 24px; height: 24px; transform: translate(-50%, -50%); }
+  .tiles.varios .tile-link::after { width: 11px; }
+  .tile-link .tile { transition: box-shadow .12s; }
+  .tile-link:hover .tile, .tile-link:focus-visible .tile {
+    box-shadow: 0 0 0 2px var(--ch-1), 0 0 0 3.5px var(--marca); }
+  /* a data abre o mapa com os ganhos do dia todo. É feita de inline-blocks
+     (largura fixa), e o sublinhado não passa para eles: vai directo aos spans. */
   .gan-dia a.gan-link { color: inherit; text-decoration: none; }
   .gan-dia a.gan-link:hover { color: var(--tinta); }
   .gan-dia a.gan-link:hover span { text-decoration: underline; text-decoration-color: var(--marca); }
@@ -76,8 +89,9 @@
   <p class="gn-nota">Squadratinhos ganhos por dia (UTC): quem, quanto e em que
     concelhos. Se dois atletas têm o mesmo dia, o mesmo delta e a mesma repartição
     por concelhos (atividade partilhada), aparecem numa linha só. É só
-    apresentação: nada se suprime. Clica na data para ver no mapa do clube os
-    squadratinhos ganhos nesse dia, ou no nome para ver só os desse atleta. Dados da branch <code>data</code>
+    apresentação: nada se suprime. A data mostra no mapa do clube os ganhos
+    desse dia, o quadrado de cor mostra só os desse atleta, e o nome abre o
+    perfil. Dados da branch <code>data</code>
     (<code>daily_gains.json</code> e <code>gains_regioes.json</code>), actualizados várias vezes por dia.</p>
 </main>
 <script src="nav.js"></script>
@@ -85,7 +99,7 @@
 <script>
 (function () {
   'use strict';
-  // cor / esc / tile / slugify / carregarCores / carregarJson / mostrarErroDados /
+  // cor / esc / tile / atl / slugify / carregarCores / carregarJson / mostrarErroDados /
   // avisoDadosVelhos / fmtData / fmtDataHora / COR_FALLBACK / ETIQUETA_GANHO /
   // ganhoDetalhe: shared.js
 
@@ -130,12 +144,13 @@
 
   function linha(g, data) {
     const junto = g.nomes.length > 1;
-    const nome = n => `<a class="atl" href="${hrefGanhos(data, n)}"
-      title="Ver no mapa os squadratinhos que ${esc(n)} ganhou neste dia">${esc(n)}</a>`;
+    const quadrado = n => `<a class="tile-link" href="${hrefGanhos(data, n)}"
+      title="Ver os ganhos de ${esc(n)} neste dia no mapa"
+      aria-label="Ver os ganhos de ${esc(n)} neste dia no mapa">${tile(n)}</a>`;
     const tags = g.nomes.map(nome => g.tags[nome].map(t =>
       `<span class="gan-tag">${junto ? tile(nome) : ''}${esc(t)}</span>`).join('')).join('');
     return `<div class="linha">
-      <span class="quem">${g.nomes.map(tile).join('')}${g.nomes.map(nome).join(', ')}</span>
+      <span class="quem"><span class="tiles${junto ? ' varios' : ''}">${g.nomes.map(quadrado).join('')}</span>${g.nomes.map(atl).join(', ')}</span>
       <span class="delta">+${g.n}</span>
       <span class="onde">${ganhoDetalhe(g.reg, g.n, true)}${tags}</span>
     </div>`;

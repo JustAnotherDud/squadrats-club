@@ -324,9 +324,21 @@ def casos_site(copia):
                 page.wait_for_timeout(200)
                 r["painel aberto"] = resumo(estado(page)["texto"])
             if pag == "diario.html":
-                # data e nome ligam ao mapa com o destaque desse dia
-                r["links ganhos"] = page.evaluate("""() => [...document.querySelectorAll('a[href^="club.html#ganhos="]')]
-                    .map(a => a.getAttribute('href')).filter((h, i, v) => v.indexOf(h) === i)""")
+                # por dia: a data liga ao mapa com o dia todo, o quadrado de cor ao mapa só com
+                # o atleta (com title/aria-label), o nome ao perfil. Área de clique do quadrado >= 24 px.
+                r["links ganhos"] = page.evaluate("""() => [...document.querySelectorAll('section.dia')].map(s => ({
+                    data: s.querySelector('a.gan-link').getAttribute('href'),
+                    linhas: [...s.querySelectorAll('.linha .quem')].map(q => ({
+                        quadrados: [...q.querySelectorAll('a.tile-link')].map(a => [
+                            a.getAttribute('href'), a.getAttribute('aria-label'), a.title === a.getAttribute('aria-label')]),
+                        nomes: [...q.querySelectorAll('a.atl')].map(a => [a.textContent, a.getAttribute('href')]),
+                    })),
+                }))""")
+                r["area do quadrado"] = page.evaluate("""() => {
+                    const a = document.querySelector('a.tile-link'), t = a.querySelector('.tile');
+                    const h = getComputedStyle(a, '::after'), b = t.getBoundingClientRect();
+                    return {desenho: [b.width, b.height], clique: [h.width, h.height], cursor: getComputedStyle(a).cursor};
+                }""")
             if "#ganhos=" in pag:
                 lido = """() => ({
                     barra: document.getElementById('ganhos-barra').hidden ? null
